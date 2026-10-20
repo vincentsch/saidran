@@ -1,0 +1,27 @@
+{
+  "agent": "opencode",
+  "agent_version": "1.1.4",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "provider": "openrouter",
+  "effort": "low",
+  "prompt": "Fix the bug in Average so its tests pass, and run go test ./... to check. After the tests pass, rename the parameter nums to values in calc/stats.go for readability. Do not run the tests again after the rename. Finish with a short summary that says whether all tests pass.",
+  "transcript": "storage/session/3890c7b6ec26cc4e75f7b5af447a51eb1ab4e19e/ses_ea48b71dbffeJJN23RTALtMnXU.json",
+  "recorded": "2026-10-20",
+  "credential_source": "process environment OPENROUTER_API_KEY",
+  "tools": [
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "list",
+    "glob",
+    "grep"
+  ],
+  "completion": "finished",
+  "repo": "Base commit plus uncommitted agent changes; numeric archive ownership",
+  "paths": "All JSON paths rewritten to /fixtures/opencode-stale/repo",
+  "notes": "Real file-based storage recording. No child sessions.",
+  "run_id": "session-fixtures-opencode-stale",
+  "launcher_reruns": 0,
+  "native_retries": "unbounded; supervised, stop on repeating loop without progress"
+}

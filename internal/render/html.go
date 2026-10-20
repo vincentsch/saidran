@@ -11,12 +11,13 @@ import (
 	"github.com/vincentsch/gaugestone/internal/commands"
 	"github.com/vincentsch/gaugestone/internal/findings"
 	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/gaugestone/internal/session"
 )
 
 //go:embed report.html
 var htmlSource string
 var htmlTemplate = template.Must(template.New("report").Funcs(template.FuncMap{
-	"label": func(v string) string { return labels[v] }, "clock": clock, "stamp": stamp, "join": strings.Join,
+	"agentLabel": session.AgentLabel, "label": func(v string) string { return labels[v] }, "clock": clock, "stamp": stamp, "join": strings.Join,
 	"preview": func(s string) string { return shorten(s, 200) }, "side": side,
 }).Parse(htmlSource))
 

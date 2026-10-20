@@ -1,0 +1,26 @@
+{
+  "id": "prt_15b73f6dd001KVkizFvN6ltEwr",
+  "sessionID": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "messageID": "msg_15b73f438001rZyuWCjiIXEjdT",
+  "type": "tool",
+  "callID": "chatcmpl-tool-1f6b6136b5fd4aeeaa93ba5c6ab1c3af",
+  "tool": "bash",
+  "state": {
+    "status": "completed",
+    "input": {
+      "command": "go test ./...",
+      "description": "Run all Go tests"
+    },
+    "output": "ok  \texample.com/gocalc/calc\t0.002s\n",
+    "title": "Run all Go tests",
+    "metadata": {
+      "output": "ok  \texample.com/gocalc/calc\t0.002s\n",
+      "exit": 0,
+      "description": "Run all Go tests"
+    },
+    "time": {
+      "start": 1792535688930,
+      "end": 1792535698197
+    }
+  }
+}

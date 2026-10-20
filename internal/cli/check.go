@@ -62,8 +62,8 @@ func (v *outputFormat) Set(value string) error {
 func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor) {
 	configure := func(cmd *cobra.Command) {
 		cmd.Flags().String("fail-on", "", "Exit 10 after reporting matching verdicts or active finding codes (comma-separated)")
-		cmd.Flags().String("session", "", "Select a session ID or agent:ID")
-		cmd.Flags().String("transcript", "", "Read an explicit session recording")
+		cmd.Flags().String("session", "", "Select an ID or claude:ID, codex:ID, opencode:ID, pi:ID")
+		cmd.Flags().String("transcript", "", "Read a JSONL recording or OpenCode storage/session/<project>/<id>.json")
 		cmd.Flags().String("base", "", "Compare against this Git revision")
 		cmd.Flags().Var(&outputFormat{}, "format", "Output format: text, html, markdown or json")
 		cmd.Flags().String("out", "", "Write report.html, report.md and report.json into this directory")

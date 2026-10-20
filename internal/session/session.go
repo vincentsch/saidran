@@ -23,18 +23,19 @@ type Prompt struct {
 	Source Source
 }
 type Command struct {
-	Line         string    `json:"line"`
-	Cwd          string    `json:"cwd"`
-	Argv         []string  `json:"argv"`
-	Shell        bool      `json:"shell"`
-	Start        time.Time `json:"start"`
-	End          time.Time `json:"end"`
-	ExitCode     *int      `json:"exit_code"`
-	ExitReliable bool      `json:"exit_reliable"`
-	ExitNote     string    `json:"exit_note"`
-	Status       string    `json:"status"`
-	Output       string    `json:"output"`
-	RawOutput    string    `json:"-"`
+	Line                   string    `json:"line"`
+	Cwd                    string    `json:"cwd"`
+	Argv                   []string  `json:"argv"`
+	Shell                  bool      `json:"shell"`
+	Start                  time.Time `json:"start"`
+	End                    time.Time `json:"end"`
+	ExitCode               *int      `json:"exit_code"`
+	ExitReliable           bool      `json:"exit_reliable"`
+	ExitNote               string    `json:"exit_note"`
+	Status                 string    `json:"status"`
+	Output                 string    `json:"output"`
+	RawOutput              string    `json:"-"`
+	OutputTruncatedByAgent bool      `json:"output_truncated_by_agent,omitempty"`
 }
 type Edit struct {
 	Path string `json:"path"`

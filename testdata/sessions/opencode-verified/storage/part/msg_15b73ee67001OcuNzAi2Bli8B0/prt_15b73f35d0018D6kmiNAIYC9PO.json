@@ -1,0 +1,35 @@
+{
+  "id": "prt_15b73f35d0018D6kmiNAIYC9PO",
+  "sessionID": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "messageID": "msg_15b73ee67001OcuNzAi2Bli8B0",
+  "type": "tool",
+  "callID": "chatcmpl-tool-9b8dee8dea2341b4817d418a7d0bd260",
+  "tool": "edit",
+  "state": {
+    "status": "completed",
+    "input": {
+      "filePath": "/fixtures/opencode-verified/repo/calc/stats.go",
+      "newString": "\tvar out []float64\n\tfor _, part := range strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == ';' }) {",
+      "oldString": "\tvar out []float64\n\tfor _, part := range strings.Split(s, \",\") {\n\t\t_ = part\n\t}\n\tfor _, part := range strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == ';' }) {"
+    },
+    "output": "",
+    "title": "calc/stats.go",
+    "metadata": {
+      "diagnostics": {
+        "/fixtures/opencode-verified/repo/calc/stats.go": []
+      },
+      "diff": "Index: /fixtures/opencode-verified/repo/calc/stats.go\n===================================================================\n--- /fixtures/opencode-verified/repo/calc/stats.go\n+++ /fixtures/opencode-verified/repo/calc/stats.go\n@@ -20,11 +20,8 @@\n \n // ParseList turns \"1, 2, 3\" into []float64{1, 2, 3}. Blank items are skipped.\n func ParseList(s string) ([]float64, error) {\n \tvar out []float64\n-\tfor _, part := range strings.Split(s, \",\") {\n-\t\t_ = part\n-\t}\n \tfor _, part := range strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == ';' }) {\n \t\tpart = strings.TrimSpace(part)\n \t\tif part == \"\" {\n \t\t\tcontinue\n",
+      "filediff": {
+        "file": "/fixtures/opencode-verified/repo/calc/stats.go",
+        "before": "// Package calc has small helpers for lists of numbers.\npackage calc\n\nimport (\n\t\"strconv\"\n\t\"strings\"\n)\n\n// Average returns the mean of nums. It returns 0 for an empty list.\nfunc Average(nums []float64) float64 {\n\tif len(nums) == 0 {\n\t\treturn 0\n\t}\n\tsum := 0.0\n\tfor _, n := range nums {\n\t\tsum += n\n\t}\n\treturn sum / float64(len(nums))\n}\n\n// ParseList turns \"1, 2, 3\" into []float64{1, 2, 3}. Blank items are skipped.\nfunc ParseList(s string) ([]float64, error) {\n\tvar out []float64\n\tfor _, part := range strings.Split(s, \",\") {\n\t\t_ = part\n\t}\n\tfor _, part := range strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == ';' }) {\n\t\tpart = strings.TrimSpace(part)\n\t\tif part == \"\" {\n\t\t\tcontinue\n\t\t}\n\t\tv, err := strconv.ParseFloat(part, 64)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tout = append(out, v)\n\t}\n\treturn out, nil\n}\n",
+        "after": "// Package calc has small helpers for lists of numbers.\npackage calc\n\nimport (\n\t\"strconv\"\n\t\"strings\"\n)\n\n// Average returns the mean of nums. It returns 0 for an empty list.\nfunc Average(nums []float64) float64 {\n\tif len(nums) == 0 {\n\t\treturn 0\n\t}\n\tsum := 0.0\n\tfor _, n := range nums {\n\t\tsum += n\n\t}\n\treturn sum / float64(len(nums))\n}\n\n// ParseList turns \"1, 2, 3\" into []float64{1, 2, 3}. Blank items are skipped.\nfunc ParseList(s string) ([]float64, error) {\n\tvar out []float64\n\tfor _, part := range strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == ';' }) {\n\t\tpart = strings.TrimSpace(part)\n\t\tif part == \"\" {\n\t\t\tcontinue\n\t\t}\n\t\tv, err := strconv.ParseFloat(part, 64)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tout = append(out, v)\n\t}\n\treturn out, nil\n}\n",
+        "additions": 0,
+        "deletions": 3
+      }
+    },
+    "time": {
+      "start": 1792535688031,
+      "end": 1792535688215
+    }
+  }
+}

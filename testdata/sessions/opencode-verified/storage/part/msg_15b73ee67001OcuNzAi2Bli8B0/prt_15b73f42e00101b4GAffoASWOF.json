@@ -1,0 +1,10 @@
+{
+  "id": "prt_15b73f42e00101b4GAffoASWOF",
+  "sessionID": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "messageID": "msg_15b73ee67001OcuNzAi2Bli8B0",
+  "type": "patch",
+  "hash": "68e484de89e4502970247617e896ecf893b8df80",
+  "files": [
+    "/fixtures/opencode-verified/repo/calc/stats.go"
+  ]
+}

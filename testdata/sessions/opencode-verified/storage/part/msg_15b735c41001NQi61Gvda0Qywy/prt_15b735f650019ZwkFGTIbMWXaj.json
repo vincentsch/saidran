@@ -1,0 +1,23 @@
+{
+  "id": "prt_15b735f650019ZwkFGTIbMWXaj",
+  "sessionID": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "messageID": "msg_15b735c41001NQi61Gvda0Qywy",
+  "type": "tool",
+  "callID": "chatcmpl-tool-b222a5a2d3f54a8a9d4e32d2e3a2c0d5",
+  "tool": "read",
+  "state": {
+    "status": "completed",
+    "input": {
+      "filePath": "/fixtures/opencode-verified/repo/README.md"
+    },
+    "output": "<file>\n00001| # gocalc\n00002| \n00003| Small number helpers.\n00004| \n\n(End of file - total 4 lines)\n</file>",
+    "title": "README.md",
+    "metadata": {
+      "preview": "# gocalc\n\nSmall number helpers.\n"
+    },
+    "time": {
+      "start": 1792535650151,
+      "end": 1792535650163
+    }
+  }
+}

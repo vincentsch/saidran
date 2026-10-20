@@ -2,7 +2,7 @@
 
 See what your coding agent checked, and what changed afterwards.
 
-Gaugestone reads Claude Code and Codex recordings for a Git repository.
+Gaugestone reads Claude Code, Codex, OpenCode and Pi recordings for a Git repository.
 It checks final-response claims about tests, builds, linters, and type checks
 against recorded runs. Reports also show edits, grouped repository changes,
 and review findings in text, HTML, Markdown and JSON reports.
@@ -36,7 +36,10 @@ seven days with at least one command or confirmed edit. When two agents finish
 less than ten minutes apart, interactive selection offers both; other callers
 use the newest. Listing shows that choice without asking a question.
 
-Claude Code tool calls are paired with their results. Codex recordings need
+Claude Code, OpenCode and Pi tool calls are paired with their results.
+OpenCode 1.1.4 uses its session JSON and sibling message/part storage; Pi 0.85.1
+uses version 3 JSONL journals. See [supported agents](docs/agents.md) for log roots,
+environment overrides and session-selection examples. Codex recordings need
 completed-item events, as produced by Codex 0.163. Older formats need an update
 to Codex. Unsupported entries and incomplete recordings produce completeness
 notes. Text output groups notes by kind; `--json` includes individual details.

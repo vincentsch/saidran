@@ -12,6 +12,7 @@ import (
 	"github.com/vincentsch/gaugestone/internal/agents"
 	"github.com/vincentsch/gaugestone/internal/gitstate"
 	"github.com/vincentsch/gaugestone/internal/redact"
+	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
 )
 
@@ -51,10 +52,8 @@ func addDoctor(app *rungrad.App, opts Options, r redact.Redactor) {
 			result.Notes = append(result.Notes[:len(result.Notes)-1], "Fix: Check log folder permissions and record a new session. Update Codex for older formats.")
 		}
 		for i, path := range d.Roots {
-			agent, env := "claude-code", "CLAUDE_CONFIG_DIR"
-			if i == 1 {
-				agent, env = "codex", "CODEX_HOME"
-			}
+			agent := []string{"claude-code", "codex", "opencode", "pi"}[i]
+			env := []string{"CLAUDE_CONFIG_DIR", "CODEX_HOME", "XDG_DATA_HOME", "PI_CODING_AGENT_DIR"}[i]
 			info, statErr := os.Stat(path)
 			h := logHealth{Agent: agent, Root: r.Text(path), Found: statErr == nil && info.IsDir(), NewestVersion: "unknown"}
 			for _, s := range d.Sessions {
@@ -81,11 +80,21 @@ func addDoctor(app *rungrad.App, opts Options, r redact.Redactor) {
 			}
 			switch {
 			case h.UnsupportedFormats > 0:
-				h.Fix = "Update Codex and record a new session; older logs lack completed-item events."
+				h.Fix = "Record a supported session with " + session.AgentLabel(agent) + "; check its version and preserve the complete log layout."
+				if agent == "codex" {
+					h.Fix = "Update Codex and record a new session; older logs lack completed-item events."
+				}
 			case h.UnsupportedEntries > 0:
 				h.Fix = "Update Gaugestone to read newer log entries; check report completeness notes."
 			case !h.Found:
-				h.Fix = "Record a session or set " + env + " to the agent's log folder."
+				location := "the agent's configuration folder"
+				if agent == "opencode" {
+					location = "the data directory containing opencode/storage"
+				}
+				if agent == "pi" {
+					location = "the agent directory containing sessions"
+				}
+				h.Fix = "Record a session or set " + env + " to " + location + "."
 			case h.Sessions == 0:
 				h.Fix = "Record a session inside this repository, or check " + env + "."
 			default:
@@ -96,7 +105,7 @@ func addDoctor(app *rungrad.App, opts Options, r redact.Redactor) {
 		return f.WriteResult(result, func(w io.Writer) {
 			fmt.Fprintf(w, "Git: %s\n  Fix: No change needed.\nRepository: %s\n  Fix: No change needed.\n", result.Git, result.Repository)
 			for _, h := range result.Logs {
-				fmt.Fprintf(w, "%s logs: %s (found: %t)\n  Sessions for this repository: %d\n  Newest observed format version: %s\n  Unsupported formats: %d; unsupported entries: %d\n  Fix: %s\n", h.Agent, h.Root, h.Found, h.Sessions, h.NewestVersion, h.UnsupportedFormats, h.UnsupportedEntries, h.Fix)
+				fmt.Fprintf(w, "%s logs: %s (found: %t)\n  Sessions for this repository: %d\n  Newest observed format version: %s\n  Unsupported formats: %d; unsupported entries: %d\n  Fix: %s\n", session.AgentLabel(h.Agent), h.Root, h.Found, h.Sessions, h.NewestVersion, h.UnsupportedFormats, h.UnsupportedEntries, h.Fix)
 			}
 			for _, note := range result.Notes {
 				fmt.Fprintln(w, note)

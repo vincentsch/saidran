@@ -1,0 +1,23 @@
+{
+  "id": "prt_15b735ea9001Eju9YIeoSCT0Ll",
+  "sessionID": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "messageID": "msg_15b735c41001NQi61Gvda0Qywy",
+  "type": "tool",
+  "callID": "chatcmpl-tool-a850440959f44665a2ae80887a41b8cf",
+  "tool": "read",
+  "state": {
+    "status": "completed",
+    "input": {
+      "filePath": "/fixtures/opencode-verified/repo/calc/stats.go"
+    },
+    "output": "<file>\n00001| // Package calc has small helpers for lists of numbers.\n00002| package calc\n00003| \n00004| import (\n00005| \t\"strconv\"\n00006| \t\"strings\"\n00007| )\n00008| \n00009| // Average returns the mean of nums. It returns 0 for an empty list.\n00010| func Average(nums []float64) float64 {\n00011| \tif len(nums) == 0 {\n00012| \t\treturn 0\n00013| \t}\n00014| \tsum := 0.0\n00015| \tfor _, n := range nums {\n00016| \t\tsum += n\n00017| \t}\n00018| \treturn sum / float64(len(nums)-1)\n00019| }\n00020| \n00021| // ParseList turns \"1, 2, 3\" into []float64{1, 2, 3}. Blank items are skipped.\n00022| func ParseList(s string) ([]float64, error) {\n00023| \tvar out []float64\n00024| \tfor _, part := range strings.Split(s, \",\") {\n00025| \t\tpart = strings.TrimSpace(part)\n00026| \t\tif part == \"\" {\n00027| \t\t\tcontinue\n00028| \t\t}\n00029| \t\tv, err := strconv.ParseFloat(part, 64)\n00030| \t\tif err != nil {\n00031| \t\t\treturn nil, err\n00032| \t\t}\n00033| \t\tout = append(out, v)\n00034| \t}\n00035| \treturn out, nil\n00036| }\n00037| \n\n(End of file - total 37 lines)\n</file>",
+    "title": "calc/stats.go",
+    "metadata": {
+      "preview": "// Package calc has small helpers for lists of numbers.\npackage calc\n\nimport (\n\t\"strconv\"\n\t\"strings\"\n)\n\n// Average returns the mean of nums. It returns 0 for an empty list.\nfunc Average(nums []float64) float64 {\n\tif len(nums) == 0 {\n\t\treturn 0\n\t}\n\tsum := 0.0\n\tfor _, n := range nums {\n\t\tsum += n\n\t}\n\treturn sum / float64(len(nums)-1)\n}\n"
+    },
+    "time": {
+      "start": 1792535649965,
+      "end": 1792535649968
+    }
+  }
+}

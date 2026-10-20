@@ -17,6 +17,8 @@ import (
 
 	"github.com/vincentsch/gaugestone/internal/agents/claude"
 	"github.com/vincentsch/gaugestone/internal/agents/codex"
+	"github.com/vincentsch/gaugestone/internal/agents/opencode"
+	"github.com/vincentsch/gaugestone/internal/agents/pi"
 	"github.com/vincentsch/gaugestone/internal/redact"
 	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
@@ -24,35 +26,37 @@ import (
 )
 
 func Read(file string) (*session.Session, error) {
-	agent := ""
-	s := &session.Session{}
-	err := session.Lines(file, s, func(b []byte, _ session.Source) error {
-		if agent != "" {
-			return nil
-		}
-		var o struct {
-			Type      string `json:"type"`
-			SessionID string `json:"sessionId"`
-		}
-		json.Unmarshal(b, &o)
-		if o.Type == "session_meta" {
-			agent = "codex"
-		} else if o.SessionID != "" || o.Type == "assistant" || o.Type == "user" {
-			agent = "claude-code"
-		}
-		return nil
-	})
+	f, err := os.Open(file)
 	if err != nil {
 		return nil, err
 	}
-	switch agent {
-	case "codex":
-		return codex.Read(file)
-	case "claude-code":
-		return claude.Read(file)
-	default:
-		return nil, fmt.Errorf("%s: session agent not recognized; use a Claude Code or current Codex transcript", file)
+	defer f.Close()
+	decoder := json.NewDecoder(f)
+	for {
+		var o struct {
+			Type      string `json:"type"`
+			SessionID string `json:"sessionId"`
+			ID        string `json:"id"`
+			Directory string `json:"directory"`
+		}
+		if err := decoder.Decode(&o); err != nil {
+			if err != io.EOF {
+				return nil, fmt.Errorf("%s: malformed session JSON: %w", file, err)
+			}
+			break
+		}
+		switch {
+		case o.Type == "session_meta":
+			return codex.Read(file)
+		case o.Type == "session":
+			return pi.Read(file)
+		case o.Directory != "" && o.ID != "":
+			return opencode.Read(file)
+		case o.SessionID != "" || o.Type == "assistant" || o.Type == "user":
+			return claude.Read(file)
+		}
 	}
+	return nil, fmt.Errorf("%s: unsupported session format; use a Claude Code, current Codex, OpenCode 1.1.4 session JSON or Pi 0.85.1 journal", file)
 }
 
 type Observation struct {
@@ -79,7 +83,15 @@ func Roots() []string {
 	if codexRoot == "" {
 		codexRoot = filepath.Join(home, ".codex")
 	}
-	return []string{filepath.Join(claudeRoot, "projects"), filepath.Join(codexRoot, "sessions")}
+	xdg := os.Getenv("XDG_DATA_HOME")
+	if xdg == "" {
+		xdg = filepath.Join(home, ".local", "share")
+	}
+	piRoot := os.Getenv("PI_CODING_AGENT_DIR")
+	if piRoot == "" {
+		piRoot = filepath.Join(home, ".pi", "agent")
+	}
+	return []string{filepath.Join(claudeRoot, "projects"), filepath.Join(codexRoot, "sessions"), filepath.Join(xdg, "opencode", "storage"), filepath.Join(piRoot, "sessions")}
 }
 func Within(repo, path string) bool {
 	if path == "" {
@@ -102,7 +114,14 @@ func Discover(repo string) (Discovery, error) {
 		if err != nil {
 			return d, err
 		}
-		err = filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		walkRoot := root
+		if n == 2 {
+			walkRoot = filepath.Join(root, "session")
+			if _, err := os.Stat(walkRoot); os.IsNotExist(err) {
+				continue
+			}
+		}
+		err = filepath.WalkDir(walkRoot, func(path string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				if os.IsNotExist(err) {
 					return nil
@@ -125,11 +144,21 @@ func Discover(repo string) (Discovery, error) {
 				}
 				return nil
 			}
-			if filepath.Ext(path) != ".jsonl" {
+			if (n == 2 && filepath.Ext(path) != ".json") || (n != 2 && filepath.Ext(path) != ".jsonl") {
 				return nil
 			}
 			if n == 1 {
 				belongs, e := codexCandidate(path, repo)
+				if e != nil {
+					d.Notes = append(d.Notes, e.Error())
+					return nil
+				}
+				if !belongs {
+					return nil
+				}
+			}
+			if n == 2 || n == 3 {
+				belongs, e := metadataCandidate(path, repo)
 				if e != nil {
 					d.Notes = append(d.Notes, e.Error())
 					return nil
@@ -148,7 +177,7 @@ func Discover(repo string) (Discovery, error) {
 				return nil
 			}
 			if Within(repo, s.Cwd) {
-				key := s.Agent + ":" + s.ID
+				key := s.Agent + ":" + s.ID + ":" + s.File
 				if !identities[key] {
 					d.Sessions = append(d.Sessions, s)
 					identities[key] = true
@@ -248,11 +277,11 @@ func Select(all []*session.Session, ref, transcript string, now time.Time, f *ru
 		if len(matches) == 1 {
 			return Selection{Session: matches[0]}, nil
 		}
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Run gaugestone doctor to check agent logs, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Run gaugestone doctor to check Claude Code, Codex, OpenCode or Pi log roots, or use --transcript.")
 	}
 	picks := Automatic(all, now)
 	if len(picks) == 0 {
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Run gaugestone doctor to check agent logs, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Run gaugestone doctor to check Claude Code, Codex, OpenCode or Pi log roots, or use --transcript.")
 	}
 	if len(picks) == 2 {
 		if f != nil && f.CanPrompt() {
@@ -312,4 +341,26 @@ func codexCandidate(path, repo string) (bool, error) {
 			return false, err
 		}
 	}
+}
+
+// OpenCode and Pi put repository membership in the first JSON object. Avoid
+// loading unrelated repositories' message trees or potentially large journals.
+func metadataCandidate(path, repo string) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+	var header struct {
+		Cwd       string `json:"cwd"`
+		Directory string `json:"directory"`
+	}
+	if err = json.NewDecoder(f).Decode(&header); err != nil {
+		return false, fmt.Errorf("%s: malformed JSON record", path)
+	}
+	cwd := header.Cwd
+	if header.Directory != "" {
+		cwd = header.Directory
+	}
+	return Within(repo, cwd), nil
 }

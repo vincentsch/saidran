@@ -1,0 +1,11 @@
+{
+  "id": "prt_15b7542e8001j6ltDzc4WBBi1S",
+  "sessionID": "ses_ea48b71dbffeJJN23RTALtMnXU",
+  "messageID": "msg_15b7540be0017lvoldCvnSOQ79",
+  "type": "text",
+  "text": "All tests pass (`go test ./...` returned `ok`). The bug was dividing by `len(nums)-1` instead of `len(nums)`; fixed it, then renamed the parameter `nums` \u2192 `values` in `calc/stats.go`.",
+  "time": {
+    "start": 1792535774296,
+    "end": 1792535774296
+  }
+}

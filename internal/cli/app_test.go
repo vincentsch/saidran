@@ -19,6 +19,8 @@ func isolated(t *testing.T) string {
 	t.Setenv("HOME", filepath.Join(base, "home"))
 	t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(base, "claude"))
 	t.Setenv("CODEX_HOME", filepath.Join(base, "codex"))
+	t.Setenv("XDG_DATA_HOME", filepath.Join(base, "xdg"))
+	t.Setenv("PI_CODING_AGENT_DIR", filepath.Join(base, "pi"))
 	return base
 }
 func TestEmptyAndNonRepository(t *testing.T) {

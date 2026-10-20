@@ -1,0 +1,16 @@
+{
+  "id": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "version": "1.1.4",
+  "projectID": "23a88a3309a614fc4e016894b587be3bb5b04225",
+  "directory": "/fixtures/opencode-verified/repo",
+  "title": "Fixing Go bug failing tests",
+  "time": {
+    "created": 1792535648077,
+    "updated": 1792535698235
+  },
+  "summary": {
+    "additions": 2,
+    "deletions": 2,
+    "files": 1
+  }
+}

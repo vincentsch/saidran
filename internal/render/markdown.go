@@ -9,6 +9,7 @@ import (
 
 	"github.com/vincentsch/gaugestone/internal/commands"
 	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/gaugestone/internal/session"
 )
 
 const markdownLimit = 60000
@@ -186,7 +187,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 	omitted(len(r.Findings)-min(lists, len(r.Findings)), "findings")
 	fmt.Fprintf(&b, "\nGaugestone %s · generated %s", text(r.Version), stamp(r.Generated))
 	if r.Session != nil {
-		fmt.Fprintf(&b, " · %s session %s", text(r.Session.Agent), code(r.Session.ID))
+		fmt.Fprintf(&b, " · %s session %s", text(session.AgentLabel(r.Session.Agent)), code(r.Session.ID))
 	}
 	fmt.Fprintf(&b, " · compared with %s\n\n%s\n\nHTML/JSON contain the complete evidence within privacy limits.\n", code(r.Repo.Baseline.Ref), disclaimer)
 	return b.String()

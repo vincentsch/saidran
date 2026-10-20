@@ -1,0 +1,23 @@
+{
+  "id": "prt_15b735fbf001viB98NjE1YfSbK",
+  "sessionID": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "messageID": "msg_15b735c41001NQi61Gvda0Qywy",
+  "type": "tool",
+  "callID": "chatcmpl-tool-5023a3bf76e44157b2b15d1fda79cc2d",
+  "tool": "read",
+  "state": {
+    "status": "completed",
+    "input": {
+      "filePath": "/fixtures/opencode-verified/repo/go.mod"
+    },
+    "output": "<file>\n00001| module example.com/gocalc\n00002| \n00003| go 1.22\n00004| \n\n(End of file - total 4 lines)\n</file>",
+    "title": "go.mod",
+    "metadata": {
+      "preview": "module example.com/gocalc\n\ngo 1.22\n"
+    },
+    "time": {
+      "start": 1792535650241,
+      "end": 1792535650245
+    }
+  }
+}

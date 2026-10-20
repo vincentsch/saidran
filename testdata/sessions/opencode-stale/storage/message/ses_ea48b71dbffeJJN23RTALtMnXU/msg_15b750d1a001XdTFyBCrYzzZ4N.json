@@ -1,0 +1,29 @@
+{
+  "id": "msg_15b750d1a001XdTFyBCrYzzZ4N",
+  "sessionID": "ses_ea48b71dbffeJJN23RTALtMnXU",
+  "role": "assistant",
+  "time": {
+    "created": 1792535760154,
+    "completed": 1792535772061
+  },
+  "parentID": "msg_15b748e39001aWT58HKuEp6gy3",
+  "modelID": "deepseek/deepseek-v4-flash-0731",
+  "providerID": "openrouter",
+  "mode": "build",
+  "agent": "build",
+  "path": {
+    "cwd": "/fixtures/opencode-stale/repo",
+    "root": "/fixtures/opencode-stale/repo"
+  },
+  "cost": 0,
+  "tokens": {
+    "input": 8394,
+    "output": 65,
+    "reasoning": 0,
+    "cache": {
+      "read": 0,
+      "write": 0
+    }
+  },
+  "finish": "tool-calls"
+}

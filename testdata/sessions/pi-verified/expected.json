@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "type": "tests",
+      "verdict": "VERIFIED",
+      "quote_contains": "All tests pass now"
+    },
+    {
+      "type": "tests",
+      "verdict": "VERIFIED",
+      "quote_contains": "reports all tests passing"
+    }
+  ],
+  "findings": []
+}

@@ -20,7 +20,7 @@ func TestDoctorLogRootsAndFormats(t *testing.T) {
 	}
 	result := testutil.Run(New("test", Options{Dir: repo}), "doctor", "--json")
 	var empty health
-	if result.Exit != 0 || result.JSON(&empty) != nil || len(empty.Logs) != 2 || empty.Logs[0].Found || empty.Logs[1].Sessions != 0 {
+	if result.Exit != 0 || result.JSON(&empty) != nil || len(empty.Logs) != 4 || empty.Logs[0].Found || empty.Logs[1].Sessions != 0 {
 		t.Fatalf("empty: %+v", result)
 	}
 	claude := filepath.Join(os.Getenv("CLAUDE_CONFIG_DIR"), "projects", regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(repo, "-"))

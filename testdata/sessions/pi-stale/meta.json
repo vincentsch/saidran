@@ -1,0 +1,24 @@
+{
+  "agent": "pi",
+  "agent_version": "0.85.1",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "provider": "openrouter",
+  "effort": "low",
+  "prompt": "Fix the bug in Average so its tests pass, and run go test ./... to check. After the tests pass, rename the parameter nums to values in calc/stats.go for readability. Do not run the tests again after the rename. Finish with a short summary that says whether all tests pass.",
+  "transcript": "session.jsonl",
+  "recorded": "2026-10-20",
+  "credential_source": "process environment OPENROUTER_API_KEY",
+  "tools": [
+    "read",
+    "write",
+    "edit",
+    "bash"
+  ],
+  "completion": "finished",
+  "repo": "Base commit plus uncommitted agent changes; numeric archive ownership",
+  "paths": "All JSON paths rewritten to /fixtures/pi-stale/repo",
+  "notes": "Real recording. Pi journal version 3 does not record the CLI version.",
+  "run_id": "session-fixtures-pi-stale",
+  "launcher_reruns": 0,
+  "native_retries": 0
+}

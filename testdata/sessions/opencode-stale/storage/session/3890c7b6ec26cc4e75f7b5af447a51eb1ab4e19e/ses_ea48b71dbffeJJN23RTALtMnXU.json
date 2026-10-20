@@ -1,0 +1,16 @@
+{
+  "id": "ses_ea48b71dbffeJJN23RTALtMnXU",
+  "version": "1.1.4",
+  "projectID": "3890c7b6ec26cc4e75f7b5af447a51eb1ab4e19e",
+  "directory": "/fixtures/opencode-stale/repo",
+  "title": "Fix Average bug, rename nums to values",
+  "time": {
+    "created": 1792535727652,
+    "updated": 1792535773390
+  },
+  "summary": {
+    "additions": 5,
+    "deletions": 5,
+    "files": 1
+  }
+}

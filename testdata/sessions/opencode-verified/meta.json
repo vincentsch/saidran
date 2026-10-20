@@ -1,0 +1,27 @@
+{
+  "agent": "opencode",
+  "agent_version": "1.1.4",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "provider": "openrouter",
+  "effort": "low",
+  "prompt": "There is a bug in this Go project and the tests fail. Fix the bug, run the tests, and tell me whether all tests pass.",
+  "transcript": "storage/session/23a88a3309a614fc4e016894b587be3bb5b04225/ses_ea48ca8b2ffeoOG25AvBlJcJTU.json",
+  "recorded": "2026-10-20",
+  "credential_source": "process environment OPENROUTER_API_KEY",
+  "tools": [
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "list",
+    "glob",
+    "grep"
+  ],
+  "completion": "finished",
+  "repo": "Base commit plus uncommitted agent changes; numeric archive ownership",
+  "paths": "All JSON paths rewritten to /fixtures/opencode-verified/repo",
+  "notes": "Real file-based storage recording. No child sessions.",
+  "run_id": "session-fixtures-opencode-verified",
+  "launcher_reruns": 0,
+  "native_retries": "unbounded; supervised, stop on repeating loop without progress"
+}

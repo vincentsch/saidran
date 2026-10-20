@@ -1,0 +1,10 @@
+{
+  "id": "prt_15b750d12001XZ3eodFdzk24K7",
+  "sessionID": "ses_ea48b71dbffeJJN23RTALtMnXU",
+  "messageID": "msg_15b749758001qv93FNGezeclaf",
+  "type": "patch",
+  "hash": "cf2198b608f5ac4e3084fd8b10226d8385fcefc6",
+  "files": [
+    "/fixtures/opencode-stale/repo/calc/stats.go"
+  ]
+}

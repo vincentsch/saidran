@@ -7,7 +7,7 @@ trap 'rm -rf -- "$task_temp"' EXIT
 cd "$project_root"
 CGO_ENABLED=0 go build -o "$task_temp/gaugestone" ./cmd/gaugestone
 go build -o "$task_temp/rungrad" github.com/vincentsch/rungrad/cmd/rungrad
-export HOME="$task_temp/home" CLAUDE_CONFIG_DIR="$task_temp/claude" CODEX_HOME="$task_temp/codex"
+export HOME="$task_temp/home" CLAUDE_CONFIG_DIR="$task_temp/claude" CODEX_HOME="$task_temp/codex" XDG_DATA_HOME="$task_temp/xdg" PI_CODING_AGENT_DIR="$task_temp/pi"
 mkdir -p "$HOME"
 tar -xzf testdata/sessions/claude-verified/repo.tar.gz -C "$task_temp"
 python3 - "$project_root" "$task_temp" <<'PY'

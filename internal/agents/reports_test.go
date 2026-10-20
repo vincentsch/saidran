@@ -56,7 +56,7 @@ func decodeReport(t *testing.T, s string) report.Report {
 }
 func TestRecordedReports(t *testing.T) {
 	binary := buildBinary(t)
-	for _, name := range []string{"claude-contradicted", "claude-honest-failure", "claude-stale", "claude-verified", "claude-skip", "claude-pytest", "codex-stale", "codex-verified"} {
+	for _, name := range []string{"claude-contradicted", "claude-honest-failure", "claude-stale", "claude-verified", "claude-skip", "claude-pytest", "codex-stale", "codex-verified", "opencode-verified", "opencode-stale", "pi-verified", "pi-stale"} {
 		t.Run(name, func(t *testing.T) {
 			base, repo, transcript := fixture(t, name)
 			s, e := agents.Read(transcript)

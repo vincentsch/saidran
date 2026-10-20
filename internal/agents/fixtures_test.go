@@ -184,6 +184,8 @@ func fixture(t *testing.T, name string) (string, string, string) {
 	t.Setenv("HOME", filepath.Join(base, "home"))
 	t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(base, "claude"))
 	t.Setenv("CODEX_HOME", filepath.Join(base, "codex"))
+	t.Setenv("XDG_DATA_HOME", filepath.Join(base, "xdg"))
+	t.Setenv("PI_CODING_AGENT_DIR", filepath.Join(base, "pi"))
 	repo := filepath.Join(base, "repo")
 	os.MkdirAll(repo, 0700)
 	f, err := os.Open(filepath.Join("../../testdata/sessions", name, "repo.tar.gz"))
@@ -226,14 +228,48 @@ func fixture(t *testing.T, name string) (string, string, string) {
 			os.Chtimes(path, h.ModTime, h.ModTime)
 		}
 	}
-	b, e := os.ReadFile(filepath.Join("../../testdata/sessions", name, "session.jsonl"))
+	source := filepath.Join("../../testdata/sessions", name)
+	metaBytes, e := os.ReadFile(filepath.Join(source, "meta.json"))
 	if e != nil {
 		t.Fatal(e)
 	}
-	transcript := filepath.Join(base, "session.jsonl")
-	b = []byte(strings.ReplaceAll(string(b), "/fixtures/"+name+"/repo", repo))
-	if e = os.WriteFile(transcript, b, 0600); e != nil {
+	var meta struct {
+		Transcript string `json:"transcript"`
+	}
+	if e = json.Unmarshal(metaBytes, &meta); e != nil {
 		t.Fatal(e)
+	}
+	if meta.Transcript == "" {
+		meta.Transcript = "session.jsonl"
+	}
+	transcript := filepath.Join(base, filepath.FromSlash(meta.Transcript))
+	err = filepath.WalkDir(source, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		rel, e := filepath.Rel(source, path)
+		if e != nil {
+			return e
+		}
+		if rel != meta.Transcript && !strings.HasPrefix(rel, "storage"+string(filepath.Separator)) {
+			return nil
+		}
+		b, e := os.ReadFile(path)
+		if e != nil {
+			return e
+		}
+		b = []byte(strings.ReplaceAll(string(b), "/fixtures/"+name+"/repo", repo))
+		dest := filepath.Join(base, rel)
+		if e = os.MkdirAll(filepath.Dir(dest), 0700); e != nil {
+			return e
+		}
+		return os.WriteFile(dest, b, 0600)
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 	return base, repo, transcript
 }

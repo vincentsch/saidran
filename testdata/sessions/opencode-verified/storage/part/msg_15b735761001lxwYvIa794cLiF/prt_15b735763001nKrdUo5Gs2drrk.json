@@ -1,0 +1,7 @@
+{
+  "id": "prt_15b735763001nKrdUo5Gs2drrk",
+  "sessionID": "ses_ea48ca8b2ffeoOG25AvBlJcJTU",
+  "messageID": "msg_15b735761001lxwYvIa794cLiF",
+  "type": "text",
+  "text": "\"There is a bug in this Go project and the tests fail. Fix the bug, run the tests, and tell me whether all tests pass.\"\n"
+}

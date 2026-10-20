@@ -1,0 +1,20 @@
+{
+  "claims": [
+    {
+      "type": "tests",
+      "verdict": "STALE",
+      "quote_contains": "Summary: All tests pass"
+    },
+    {
+      "type": "tests",
+      "verdict": "STALE",
+      "quote_contains": "All tests passed via"
+    },
+    {
+      "type": "tests",
+      "verdict": "STALE",
+      "quote_contains": "**Final status:**"
+    }
+  ],
+  "findings": []
+}

@@ -48,7 +48,7 @@ func New(version string, opts Options) *rungrad.App {
 	}
 	home, _ := os.UserHomeDir()
 	r := redact.Redactor{Home: home}
-	app := rungrad.New(rungrad.AppConfig{Name: "gaugestone", Short: "See what your coding agent checked", Long: "Review Claude Code and Codex evidence and repository changes.\nRun check (the default) for a report, or sessions to list recordings.", Version: version, ErrorPolicy: &rungrad.ErrorPolicy{Render: func(c rungrad.ErrorContext) error {
+	app := rungrad.New(rungrad.AppConfig{Name: "gaugestone", Short: "See what your coding agent checked", Long: "Review Claude Code, Codex, OpenCode and Pi evidence and repository changes.\nRun check (the default) for a report, or sessions to list recordings.", Version: version, ErrorPolicy: &rungrad.ErrorPolicy{Render: func(c rungrad.ErrorContext) error {
 		msg := r.Text(c.Err.Error())
 		if c.ExitCode == 10 {
 			_, e := fmt.Fprintln(c.Stderr, msg)
@@ -60,7 +60,7 @@ func New(version string, opts Options) *rungrad.App {
 		_, e := fmt.Fprintln(c.Stderr, "Error: "+msg)
 		return e
 	}}})
-	app.AddCommand(&rungrad.Command{Use: "sessions", Short: "List agent sessions for this repository", Long: "Show prompts, times, command counts and confirmed edit counts.\nAutomatic selection uses active sessions from the last seven days.\nSet CLAUDE_CONFIG_DIR or CODEX_HOME to read another log folder.", Examples: []string{"gaugestone sessions", "gaugestone sessions --json"}, Related: []string{"gaugestone --help"}, Args: cobra.NoArgs, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	app.AddCommand(&rungrad.Command{Use: "sessions", Short: "List agent sessions for this repository", Long: "Show prompts, times, command counts and confirmed edit counts.\nAutomatic selection uses active sessions from the last seven days.\nSet CLAUDE_CONFIG_DIR, CODEX_HOME, XDG_DATA_HOME or PI_CODING_AGENT_DIR to read another log root.", Examples: []string{"gaugestone sessions", "gaugestone sessions --json"}, Related: []string{"gaugestone --help"}, Args: cobra.NoArgs, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		root, err := gitstate.Root(opts.Dir)
 		if err != nil {
 			return err
@@ -102,7 +102,7 @@ func New(version string, opts Options) *rungrad.App {
 					if row.AutomaticPick {
 						pick = "*"
 					}
-					fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\n", row.Agent, row.ID, row.Started.Format(time.RFC3339), row.Ended.Format(time.RFC3339), row.Duration, strings.Join(strings.Fields(row.Prompt), " "), row.Commands, row.Edits, pick)
+					fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\n", session.AgentLabel(row.Agent), row.ID, row.Started.Format(time.RFC3339), row.Ended.Format(time.RFC3339), row.Duration, strings.Join(strings.Fields(row.Prompt), " "), row.Commands, row.Edits, pick)
 				}
 				tw.Flush()
 			}

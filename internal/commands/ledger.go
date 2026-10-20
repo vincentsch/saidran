@@ -155,7 +155,7 @@ func Analyze(c *session.Command) Command {
 		raw = c.Output
 	}
 	result.Output = r.Tail(raw)
-	result.OutputTruncatedByAgent = outputCut.MatchString(raw)
+	result.OutputTruncatedByAgent = c.OutputTruncatedByAgent || outputCut.MatchString(raw)
 	var roots []*node
 	var flatten func(*syntax.Stmt) *node
 	flatten = func(s *syntax.Stmt) *node {

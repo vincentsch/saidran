@@ -18,9 +18,11 @@ func TestSymlinkedLogRootsAndProjectNames(t *testing.T) {
 			t.Setenv("HOME", filepath.Join(base, "home"))
 			t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(base, "profile"))
 			t.Setenv("CODEX_HOME", filepath.Join(base, "codex-profile"))
+			t.Setenv("XDG_DATA_HOME", filepath.Join(base, "xdg"))
+			t.Setenv("PI_CODING_AGENT_DIR", filepath.Join(base, "pi"))
 			roots := agents.Roots()
 			for i, root := range roots {
-				target := filepath.Join(base, []string{"claude-logs", "codex-logs"}[i])
+				target := filepath.Join(base, []string{"claude-logs", "codex-logs", "opencode-logs", "pi-logs"}[i])
 				if err := os.MkdirAll(target, 0700); err != nil {
 					t.Fatal(err)
 				}

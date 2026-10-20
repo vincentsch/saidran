@@ -1,0 +1,23 @@
+{
+  "id": "prt_15b74973c001P231syMsu9CaDQ",
+  "sessionID": "ses_ea48b71dbffeJJN23RTALtMnXU",
+  "messageID": "msg_15b749480001fs5fagCsO7lyJw",
+  "type": "tool",
+  "callID": "chatcmpl-tool-c659046f779542468f97fb971df85709",
+  "tool": "read",
+  "state": {
+    "status": "completed",
+    "input": {
+      "filePath": "/fixtures/opencode-stale/repo/calc/stats_test.go"
+    },
+    "output": "<file>\n00001| package calc\n00002| \n00003| import \"testing\"\n00004| \n00005| func TestAverage(t *testing.T) {\n00006| \tgot := Average([]float64{2, 4, 6})\n00007| \tif got != 4 {\n00008| \t\tt.Fatalf(\"Average = %v, want 4\", got)\n00009| \t}\n00010| }\n00011| \n00012| func TestAverageEmpty(t *testing.T) {\n00013| \tif got := Average(nil); got != 0 {\n00014| \t\tt.Fatalf(\"Average(nil) = %v, want 0\", got)\n00015| \t}\n00016| }\n00017| \n00018| func TestParseList(t *testing.T) {\n00019| \tgot, err := ParseList(\"1, 2,3\")\n00020| \tif err != nil || len(got) != 3 || got[2] != 3 {\n00021| \t\tt.Fatalf(\"ParseList = %v, %v\", got, err)\n00022| \t}\n00023| }\n00024| \n\n(End of file - total 24 lines)\n</file>",
+    "title": "calc/stats_test.go",
+    "metadata": {
+      "preview": "package calc\n\nimport \"testing\"\n\nfunc TestAverage(t *testing.T) {\n\tgot := Average([]float64{2, 4, 6})\n\tif got != 4 {\n\t\tt.Fatalf(\"Average = %v, want 4\", got)\n\t}\n}\n\nfunc TestAverageEmpty(t *testing.T) {\n\tif got := Average(nil); got != 0 {\n\t\tt.Fatalf(\"Average(nil) = %v, want 0\", got)\n\t}\n}\n\nfunc TestParseList(t *testing.T) {\n\tgot, err := ParseList(\"1, 2,3\")\n\tif err != nil || len(got) != 3 || got[2] != 3 {"
+    },
+    "time": {
+      "start": 1792535729981,
+      "end": 1792535729984
+    }
+  }
+}
