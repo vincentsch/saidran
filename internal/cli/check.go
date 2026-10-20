@@ -43,13 +43,29 @@ func Run(version string, opts Options, args []string, stdout, stderr io.Writer) 
 	}
 	return New(version, opts).Run(normalized, stdout, stderr)
 }
+
+type outputFormat struct {
+	value string
+}
+
+func (v *outputFormat) String() string { return v.value }
+func (v *outputFormat) Type() string   { return "string" }
+func (v *outputFormat) Set(value string) error {
+	// The empty default also resets the value when rungrad reuses a command.
+	if v.value != "" && value != "" && value != v.value {
+		return fmt.Errorf("Conflicting output formats: choose one format.")
+	}
+	v.value = value
+	return nil
+}
+
 func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor) {
 	configure := func(cmd *cobra.Command) {
 		cmd.Flags().String("fail-on", "", "Exit 10 after reporting matching verdicts or active finding codes (comma-separated)")
 		cmd.Flags().String("session", "", "Select a session ID or agent:ID")
 		cmd.Flags().String("transcript", "", "Read an explicit session recording")
 		cmd.Flags().String("base", "", "Compare against this Git revision")
-		cmd.Flags().String("format", "", "Output format: text, html, markdown or json")
+		cmd.Flags().Var(&outputFormat{}, "format", "Output format: text, html, markdown or json")
 		cmd.Flags().String("out", "", "Write report.html, report.md and report.json into this directory")
 		cmd.Flags().Bool("no-write", false, "Print evidence without writing a report")
 		cmd.Flags().Bool("open", false, "Open the written HTML report in your browser")

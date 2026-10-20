@@ -183,6 +183,8 @@ func TestJSONErrorStreams(t *testing.T) {
 			{[]string{"check", "--unknown"}, 1},
 			{[]string{"check", "extra"}, 1},
 			{[]string{"check", "--format", "text"}, 1},
+			{[]string{"check", "--format", "html", "--format", "markdown"}, 1},
+			{[]string{"--format=markdown", "--format=text"}, 1},
 			{[]string{"check", "--transcript", transcript, "--base", "missing-ref", "--no-write"}, 2},
 			{[]string{"check", "--transcript", filepath.Join(t.TempDir(), "absent")}, 5},
 			{[]string{"check", "--session", "absent"}, 5},

@@ -30,6 +30,9 @@ func TestDocumentOutputsAndOpen(t *testing.T) {
 		{"preview-suppressed", []string{"--dry-run", "--no-write", "--open", "--format", "markdown"}, false, 0, 0},
 		{"conflict", []string{"--format", "html", "--json", "--open"}, false, 0, 1},
 		{"markdown-conflict", []string{"--format", "markdown", "--format=json"}, false, 0, 1},
+		{"repeated-conflict", []string{"--format", "html", "--format", "markdown", "--open"}, false, 0, 1},
+		{"repeated-equals-conflict", []string{"--format=markdown", "--format=text"}, false, 0, 1},
+		{"repeated-same", []string{"--format", "markdown", "--format", "markdown"}, true, 0, 0},
 		{"invalid", []string{"--format", "pdf"}, false, 0, 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
