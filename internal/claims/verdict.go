@@ -384,7 +384,7 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 	if len(c.Edits) > 0 {
 		c.Verdict = "stale"
 		e := c.Edits[0]
-		c.Explanation = fmt.Sprintf("%s passed at %s, then %s changed at %s.", run.run.Command, clock(run.run.End), e.Path, clock(e.Time))
+		c.Explanation = fmt.Sprintf("%s passed at %s, then %s changed at %s.", run.run.Command, editClock(run.run.End, e.Time), e.Path, editClock(e.Time, run.run.End))
 		return
 	}
 	wanted := desired
@@ -479,4 +479,11 @@ func invocationTargets(st commands.Statement) []string {
 		targets = append(targets, arg)
 	}
 	return targets
+}
+
+func editClock(t, other time.Time) string {
+	if t.Truncate(time.Minute).Equal(other.Truncate(time.Minute)) {
+		return t.Local().Format("15:04:05")
+	}
+	return clock(t)
 }

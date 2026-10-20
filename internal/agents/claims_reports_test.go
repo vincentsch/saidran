@@ -169,7 +169,7 @@ func TestBuiltReportUsesLocalTime(t *testing.T) {
 	_, repo, transcript := fixture(t, "claude-stale")
 	t.Setenv("TZ", "Europe/Berlin")
 	code, out, errout := runBinary(t, binary, repo, "--transcript", transcript, "--no-write")
-	if code != 0 || errout != "" || !strings.Contains(out, "2026-10-20 17:50–17:50") || !strings.Contains(out, "passed at 17:50") {
+	if code != 0 || errout != "" || !strings.Contains(out, "2026-10-20 17:50:35–17:50:53") || !strings.Contains(out, "passed at 17:50:46") {
 		t.Fatalf("%d %s %s", code, out, errout)
 	}
 }

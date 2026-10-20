@@ -62,3 +62,7 @@ formats produce an error, with instructions to record a supported session. They
 cannot supply Verified evidence. Unknown entries and incomplete recordings are
 reported through completeness notes. All reports apply the same redaction and
 verdict rules regardless of agent.
+
+Claude Stop and Codex notify integrations select the payload's exact transcript
+or full thread ID. See [hooks](hooks.md) for installation and final-message
+overrides. OpenCode and Pi use manual reports or the self-check snippet.

@@ -88,3 +88,15 @@ func TestHeaderDisplayIDAndLocalTime(t *testing.T) {
 		}
 	}
 }
+
+func TestSameMinuteTimesAndBaseline(t *testing.T) {
+	start := time.Date(2026, 10, 20, 17, 50, 2, 0, time.Local)
+	r := report.Report{Session: &report.Session{Started: start, Ended: start.Add(39 * time.Second)}, Repo: gitstate.State{Baseline: gitstate.Baseline{Ref: "HEAD", Commit: "3890c7b123456789", Reason: "uncommitted changes only"}}}
+	var b bytes.Buffer
+	Text(&b, r, "id", 100, output.TerminalMode{})
+	for _, want := range []string{"17:50:02–17:50:41", "Baseline  3890c7b (HEAD, uncommitted changes only)"} {
+		if !strings.Contains(b.String(), want) {
+			t.Fatalf("%q missing: %s", want, &b)
+		}
+	}
+}

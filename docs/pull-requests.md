@@ -83,3 +83,8 @@ and try again. Gaugestone exits 2 without editing the PR.
 
 Missing or unauthenticated `gh` exits 3 with a fix. No current PR exits 5.
 Usage and confirmation errors exit 1; other runtime failures exit 2.
+
+## GitHub Action
+
+A GitHub Action integration is planned. Use the local CLI described above
+until the Action and its examples have been tested.

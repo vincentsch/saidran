@@ -4,7 +4,7 @@
 
 | Claim | Verdict | Evidence |
 | --- | --- | --- |
-| `` `go test ./...` passed after that fix. `` | Stale | go test ./... passed at 15:50, then calc/stats.go changed at 15:50. · ` go test ./... ` at 15:50:46 (passed) · ` calc/stats.go ` changed 15:50:50 · Run go test ./... again. |
+| `` `go test ./...` passed after that fix. `` | Stale | go test ./... passed at 15:50:46, then calc/stats.go changed at 15:50:50. · ` go test ./... ` at 15:50:46 (passed) · ` calc/stats.go ` changed 15:50:50 · Run go test ./... again. |
 
 Admitted gap: As you asked, I did not run the tests again after the rename, so the renamed code is untested.
 

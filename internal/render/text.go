@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/vincentsch/gaugestone/internal/report"
@@ -25,8 +26,12 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 	}
 	line := func(prefix, text string) { wrap(w, prefix, text, width) }
 	agent := session.AgentLabel(r.Session.Agent)
-	line("Gaugestone  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format("2006-01-02 15:04"), r.Session.Ended.Local().Format("15:04"), r.Repo.Branch, r.Repo.Baseline.Ref))
-	line("Baseline  ", r.Repo.Baseline.Commit+" ("+r.Repo.Baseline.Reason+")")
+	startLayout, endLayout := "2006-01-02 15:04", "15:04"
+	if r.Session.Started.Truncate(time.Minute).Equal(r.Session.Ended.Truncate(time.Minute)) {
+		startLayout, endLayout = "2006-01-02 15:04:05", "15:04:05"
+	}
+	line("Gaugestone  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format(startLayout), r.Session.Ended.Local().Format(endLayout), r.Repo.Branch, r.Repo.Baseline.Ref))
+	line("Baseline  ", shortCommit(r.Repo.Baseline.Commit)+" ("+r.Repo.Baseline.Ref+", "+r.Repo.Baseline.Reason+")")
 	fmt.Fprintln(w)
 	if len(r.Claims) == 0 {
 		line("Claims  ", "none found in the agent's final message")
@@ -171,4 +176,11 @@ func wrapPrefix(w io.Writer, prefix, continuation, text string, width int) {
 	if current != "" {
 		flush()
 	}
+}
+
+func shortCommit(commit string) string {
+	if len(commit) > 7 {
+		return commit[:7]
+	}
+	return commit
 }

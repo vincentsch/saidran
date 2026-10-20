@@ -115,6 +115,8 @@ func New(version string, opts Options) *rungrad.App {
 	addPR(app, version, opts, r)
 	addDismissals(app, opts, r)
 	addDoctor(app, opts, r)
+	addHooks(app, version, opts, r)
+	addInstall(app, opts, r)
 	return app
 }
 func row(s *session.Session, all []*session.Session, r redact.Redactor) Row {

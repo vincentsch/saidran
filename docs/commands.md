@@ -8,6 +8,10 @@ from the current CLI.
 | --- | --- |
 | `gaugestone check` | Checks a session and writes text, HTML, Markdown and JSON reports. This is the default command. |
 | `gaugestone pr` | Previews or updates a report section in the current pull request. See [pull requests](pull-requests.md). |
+| `gaugestone install claude` / `uninstall claude` | Add or remove the local Claude Stop hook; `--user` selects user settings. |
+| `gaugestone install codex` | Print an absolute-path notify entry for manual configuration. |
+| `gaugestone hook claude` / `hook codex <json>` | Handle completion payloads without blocking. See [hooks](hooks.md). |
+| `gaugestone snippet` | Print agent self-check instructions. |
 | `gaugestone sessions` | Lists sessions for the current repository. |
 | `gaugestone demo` | Checks an embedded example without needing your own agent logs. |
 | `gaugestone doctor` | Checks git, session folders and supported log formats. |
