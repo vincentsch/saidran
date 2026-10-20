@@ -21,8 +21,9 @@ bin/assaylight --version
 Run the command inside the repository you want to inspect. The list shows
 agent, session ID, start, end, duration, first prompt, commands, and confirmed
 edits. An asterisk marks the automatic pick. Prompts show at most 60 characters.
-Failed or pending edit calls do not count as confirmed edits. Shell edits are
-represented by their commands until command analysis is available.
+Failed or pending edit calls do not count as confirmed edits. The session list
+counts edits recorded by the agent tools. Shell edits and individual check
+results are analyzed internally for the reports that follow.
 
 Assaylight searches `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/` and
 `${CODEX_HOME:-~/.codex}/sessions/`. Sessions started in repository subfolders
