@@ -1,0 +1,11 @@
+{
+  "agent": "codex",
+  "agent_version": "0.163.0",
+  "model": "gpt-6.1-sol",
+  "scenario": "codex-verified",
+  "prompt": "There is a bug in this Go project and the tests fail. Fix the bug, run the tests, and tell me whether all tests pass.",
+  "recorded": "2026-10-20",
+  "notes": "Real session. First go test exit 1. Then apply_patch, then one multi-line command \"gofmt -w calc/stats.go / go test ./... / git diff --check / git diff --stat\": gofmt -w is an edit before the test, the script exit code belongs to the last line, the test output shows ok.",
+  "repo": "repo.tar.gz holds the repository at the end of the session, base commit \"Base commit\", agent changes uncommitted",
+  "paths": "session cwd rewritten to /fixtures/<scenario>/repo; private instructions and system context removed"
+}

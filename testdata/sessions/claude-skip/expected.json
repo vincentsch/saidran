@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "type": "tests",
+      "verdict": "VERIFIED",
+      "quote_contains": "passes"
+    }
+  ],
+  "findings": [
+    {
+      "code": "test_skipped",
+      "path": "calc/stats_test.go"
+    }
+  ]
+}

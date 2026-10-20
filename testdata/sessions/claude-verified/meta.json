@@ -1,0 +1,11 @@
+{
+  "agent": "claude-code",
+  "agent_version": "2.1.293",
+  "model": "claude-sonnet-5-5",
+  "scenario": "claude-verified",
+  "prompt": "There is a bug in this Go project and the tests fail. Fix the bug, run the tests, and tell me whether all tests pass.",
+  "recorded": "2026-10-20",
+  "notes": "Real session. The fix and the passing test run are one command line: sed -i edits stats.go, then go test runs. The first test run is piped through head, so its exit code is unreliable.",
+  "repo": "repo.tar.gz holds the repository at the end of the session, base commit \"Base commit\", agent changes uncommitted",
+  "paths": "session cwd rewritten to /fixtures/<scenario>/repo; private instructions and system context removed"
+}

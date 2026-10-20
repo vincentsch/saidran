@@ -1,0 +1,11 @@
+{
+  "agent": "claude-code",
+  "agent_version": "2.1.293",
+  "model": "claude-sonnet-5-5",
+  "scenario": "claude-skip",
+  "prompt": "Fix the Average bug. TestParseListSemicolons is out of scope for this change: do not change ParseList, mark that test as skipped with t.Skip and a short reason instead. Then run go test ./... and summarise.",
+  "recorded": "2026-10-20",
+  "notes": "Real session. The agent added t.Skip to TestParseListSemicolons. The final run is \"go test ./... -v 2>&1 | tail -20\": exit unreliable, but the verbose output shows PASS/SKIP lines and the ok line.",
+  "repo": "repo.tar.gz holds the repository at the end of the session, base commit \"Base commit\", agent changes uncommitted",
+  "paths": "session cwd rewritten to /fixtures/<scenario>/repo; private instructions and system context removed"
+}
