@@ -91,7 +91,7 @@ func TestReportOutputGoldens(t *testing.T) {
 	for _, name := range []string{"claude-stale", "codex-verified"} {
 		t.Run(name, func(t *testing.T) {
 			base, repo, transcript := fixture(t, name)
-			for _, format := range []string{"text", "json"} {
+			for _, format := range []string{"text", "json", "markdown"} {
 				t.Run(format, func(t *testing.T) {
 					var stdout, stderr bytes.Buffer
 					args := []string{"--transcript", transcript, "--no-write", "--format", format}

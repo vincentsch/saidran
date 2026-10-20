@@ -38,6 +38,8 @@ func (h Hunk) Normalized() string {
 }
 
 type File struct {
+	Additions           int    `json:"additions"`
+	Deletions           int    `json:"deletions"`
 	Path                string `json:"path"`
 	OldPath             string `json:"old_path,omitempty"`
 	Status              string `json:"status"`

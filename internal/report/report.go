@@ -30,6 +30,11 @@ type Completeness struct {
 	MissingExits int      `json:"missing_exit_codes"`
 	Notes        []string `json:"notes"`
 }
+type Dismissal struct {
+	ID     string `json:"id"`
+	Reason string `json:"reason"`
+}
+
 type Report struct {
 	Type         string                     `json:"type"`
 	Version      string                     `json:"tool_version"`
@@ -44,16 +49,26 @@ type Report struct {
 	Findings     []findings.Finding         `json:"findings"`
 	Claims       []claims.Claim             `json:"claims"`
 	AdmittedGaps []claims.Gap               `json:"admitted_gaps"`
-	Dismissals   []any                      `json:"dismissals"`
+	Dismissals   []Dismissal                `json:"dismissals"`
 }
 
 func Build(version string, now time.Time, state gitstate.State, s *session.Session, notes []string) Report {
-	r := Report{Type: "assaylight.report/v1", Version: version, Generated: now, Repo: state, Groups: map[string][]gitstate.File{}, Findings: findings.Detect(state.Files), Commands: []commands.Command{}, Ledger: []commands.Entry{}, Edits: []commands.Entry{}, Claims: []claims.Claim{}, AdmittedGaps: []claims.Gap{}, Dismissals: []any{}}
+	r := Report{Type: "assaylight.report/v1", Version: version, Generated: now, Repo: state, Groups: map[string][]gitstate.File{}, Findings: findings.Detect(state.Files), Commands: []commands.Command{}, Ledger: []commands.Entry{}, Edits: []commands.Entry{}, Claims: []claims.Claim{}, AdmittedGaps: []claims.Gap{}, Dismissals: []Dismissal{}}
 	r.Completeness.Notes = append([]string{}, notes...)
 	for _, group := range []string{"tests", "ci", "lockfiles", "config", "docs", "source", "other"} {
 		r.Groups[group] = []gitstate.File{}
 	}
 	for _, file := range state.Files {
+		for _, h := range file.Hunks {
+			for _, line := range h.Lines {
+				if line.Kind == '+' {
+					file.Additions++
+				}
+				if line.Kind == '-' {
+					file.Deletions++
+				}
+			}
+		}
 		r.Groups[file.Group] = append(r.Groups[file.Group], file)
 	}
 	if s == nil {
@@ -122,10 +137,15 @@ func Write(dir string, value any) error {
 		return err
 	}
 	b = append(b, '\n')
-	if err = os.MkdirAll(dir, 0700); err != nil {
+	return WriteDocument(dir, "report.json", b)
+}
+
+// WriteDocument replaces one complete report without exposing a partial file.
+func WriteDocument(dir, document string, b []byte) error {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return err
 	}
-	f, err := os.CreateTemp(dir, ".report-*.json")
+	f, err := os.CreateTemp(dir, ".report-*")
 	if err != nil {
 		return err
 	}
@@ -138,5 +158,5 @@ func Write(dir string, value any) error {
 	if err = f.Close(); err != nil {
 		return err
 	}
-	return os.Rename(name, filepath.Join(dir, "report.json"))
+	return os.Rename(name, filepath.Join(dir, document))
 }

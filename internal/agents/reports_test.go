@@ -153,7 +153,7 @@ func TestRecordedReports(t *testing.T) {
 			}
 			decodeReport(t, string(saved))
 			entries, e := os.ReadDir(outDir)
-			if e != nil || len(entries) != 1 {
+			if e != nil || len(entries) != 3 {
 				t.Fatal("out is not direct", entries, e)
 			}
 			dryDir := filepath.Join(base, "preview")

@@ -5,7 +5,7 @@ See what your coding agent checked, and what changed afterwards.
 Assaylight reads Claude Code and Codex recordings for a Git repository.
 It checks final-response claims about tests, builds, linters, and type checks
 against recorded runs. Reports also show edits, grouped repository changes,
-and review findings. HTML and Markdown reports come later.
+and review findings in text, HTML, Markdown and JSON reports.
 
 ## Build and run
 
@@ -124,12 +124,31 @@ ID prefix long enough to distinguish the discovered recordings.
 When no claims are found, the summary says so and keeps the other evidence.
 Verdicts check recorded evidence, not whether a bug is fixed.
 
-By default, `report.json` is saved in the worktree's Git directory under
+By default, `report.html`, `report.md` and `report.json` are saved in the
+worktree's Git directory under
 `assaylight/<agent>-<full-session-id>/`. `--out <dir>` writes directly into that
 directory. `--no-write` creates no report files or directories. `--dry-run`
 previews the report write. `--json`, `--format json`, and `--format=json` print
 one redacted JSON document, with no progress or report-path lines; errors use
 one JSON document on stderr. `--format text` selects the text summary.
+
+Use `--format html` or `--format markdown` to print only that document.
+`--open` opens the HTML report after all three files were saved. Suppressed
+writes never open a browser. The text summary prints the HTML path only after
+a successful write. Reports work from disk and make no external requests.
+
+The HTML report has light and dark themes, command filters, redacted output
+tails, and finding IDs with a button to copy a dismissal command. Print views
+expand the evidence. Markdown includes check statements and failed command
+lines, up to 30, even when the same line also formats files. It stays below
+60,000 characters by shortening command details first, then long values and
+lists. Omitted items have counts. HTML and JSON keep the complete evidence
+within the existing privacy limits.
+
+Both views include admitted gaps, completeness notes, and files changed after
+the session ended. Local session logs can be edited. A report is not a
+certificate.
+
 Conflicting formats exit 1. No matching session or no repository exits 5;
 runtime failures exit 2. Findings do not change the exit code.
 

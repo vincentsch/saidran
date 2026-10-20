@@ -195,7 +195,9 @@
     "other": [],
     "source": [
       {
+        "additions": 5,
         "changed_after_session": false,
+        "deletions": 5,
         "group": "source",
         "path": "calc/stats.go",
         "status": "M"

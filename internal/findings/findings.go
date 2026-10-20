@@ -25,6 +25,24 @@ type Finding struct {
 	Values bool `json:"-"`
 }
 
+// UnmarshalJSON preserves explicit absent command sides across the redacted model.
+func (f *Finding) UnmarshalJSON(b []byte) error {
+	type plain Finding
+	var v plain
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(b, &fields); err != nil {
+		return err
+	}
+	*f = Finding(v)
+	_, old := fields["old"]
+	_, new := fields["new"]
+	f.Values = old || new
+	return nil
+}
+
 // MarshalJSON keeps absent test entries explicit while other findings omit values.
 func (f Finding) MarshalJSON() ([]byte, error) {
 	type plain Finding

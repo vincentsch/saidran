@@ -47,18 +47,19 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		cmd.Flags().String("session", "", "Select a session ID or agent:ID")
 		cmd.Flags().String("transcript", "", "Read an explicit session recording")
 		cmd.Flags().String("base", "", "Compare against this Git revision")
-		cmd.Flags().String("format", "", "Output format: text or json")
-		cmd.Flags().String("out", "", "Write report.json directly into this directory")
+		cmd.Flags().String("format", "", "Output format: text, html, markdown or json")
+		cmd.Flags().String("out", "", "Write report.html, report.md and report.json into this directory")
 		cmd.Flags().Bool("no-write", false, "Print evidence without writing a report")
+		cmd.Flags().Bool("open", false, "Open the written HTML report in your browser")
 	}
 	run := func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		get := func(name string) string { v, _ := cmd.Flags().GetString(name); return v }
 		format := get("format")
-		if format != "" && format != "text" {
-			return rungrad.NewError(rungrad.ExitUsage, "Choose --format text or --format json.")
+		if format != "" && format != "text" && format != "html" && format != "markdown" {
+			return rungrad.NewError(rungrad.ExitUsage, "Choose --format text, html, markdown or json.")
 		}
-		if format == "text" && f.Flags.JSON {
-			return rungrad.NewError(rungrad.ExitUsage, "Conflicting output formats: choose text or JSON.")
+		if format != "" && f.Flags.JSON {
+			return rungrad.NewError(rungrad.ExitUsage, "Conflicting output formats: choose one format.")
 		}
 		if get("session") != "" && get("transcript") != "" {
 			return rungrad.NewError(rungrad.ExitUsage, "Choose either --session or --transcript.")
@@ -110,15 +111,7 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		} else if !filepath.IsAbs(dir) {
 			dir = filepath.Join(opts.Dir, dir)
 		}
-		if !noWrite {
-			if f.DryRun() {
-				return f.WritePreview(output.DryRunPreview{Method: "write", Path: r.Text(filepath.Join(dir, "report.json"))})
-			}
-			if err = report.Write(dir, safe); err != nil {
-				return fmt.Errorf("Could not write report.json: %w", err)
-			}
-		}
-		// Human and machine outputs consume the same redacted model.
+		// Every renderer consumes the same redacted model.
 		b, err := json.Marshal(safe)
 		if err != nil {
 			return err
@@ -127,6 +120,31 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		if err = json.Unmarshal(b, &display); err != nil {
 			return err
 		}
+		if !noWrite {
+			if f.DryRun() {
+				return f.WritePreview(output.DryRunPreview{Method: "write", Path: r.Text(filepath.Join(dir, "report.html"))})
+			}
+			if err = render.Write(dir, display); err != nil {
+				return fmt.Errorf("Could not write reports: %w", err)
+			}
+			open, _ := cmd.Flags().GetBool("open")
+			if open {
+				opener := opts.Open
+				if opener == nil {
+					opener = openReport
+				}
+				if err = opener(filepath.Join(dir, "report.html")); err != nil {
+					return fmt.Errorf("Reports saved, but the browser could not open report.html: %w", err)
+				}
+			}
+		}
+		if format == "html" {
+			return render.HTML(f.Stdout, display)
+		}
+		if format == "markdown" {
+			return render.Markdown(f.Stdout, display)
+		}
+
 		return f.WriteResult(safe, func(w io.Writer) {
 			width := 100
 			if file, ok := f.Stdout.(*os.File); ok {
@@ -140,11 +158,11 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 			}
 			render.Text(w, display, r.Text(agents.DisplayID(s, d.Sessions)), width, mode)
 			if !noWrite {
-				fmt.Fprintf(w, "Report: %s\n", r.Text(filepath.Join(dir, "report.json")))
+				fmt.Fprintf(w, "Report: %s\n", r.Text(filepath.Join(dir, "report.html")))
 			}
 		})
 	}
-	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites a local JSON evidence report; --no-write only prints it.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"assaylight check", "assaylight check --transcript session.jsonl --json", "assaylight check --base origin/main --no-write"}, Related: []string{"assaylight sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
+	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites local HTML, Markdown and JSON reports; --no-write only prints evidence.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"assaylight check", "assaylight check --transcript session.jsonl --json", "assaylight check --base origin/main --no-write"}, Related: []string{"assaylight sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
 	root := app.Root()
 	configure(root)
 	root.Args = func(cmd *cobra.Command, args []string) error {

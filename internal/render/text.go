@@ -66,22 +66,7 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 	}
 	failed, unreliable := 0, 0
 	for _, c := range r.Commands {
-		bad, unknown := false, false
-		if o := c.Original; o.ExitReliable && o.ExitCode != nil && *o.ExitCode != 0 {
-			bad = true
-		}
-		for _, st := range c.Statements {
-			if st.Execution == "skipped" {
-				continue
-			}
-			if st.Result() == "failed" {
-				bad = true
-			}
-			check := st.Class == "test" || st.Class == "build" || st.Class == "lint" || st.Class == "typecheck"
-			if check && st.Result() == "unknown" {
-				unknown = true
-			}
-		}
+		bad, unknown := commandResult(c)
 		if bad {
 			failed++
 		}

@@ -18,8 +18,9 @@ import (
 )
 
 type Options struct {
-	Now func() time.Time
-	Dir string
+	Now  func() time.Time
+	Dir  string
+	Open func(string) error
 }
 type Row struct {
 	Agent         string    `json:"agent"`
