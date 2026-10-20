@@ -47,7 +47,7 @@ func New(version string, opts Options) *rungrad.App {
 	}
 	home, _ := os.UserHomeDir()
 	r := redact.Redactor{Home: home}
-	app := rungrad.New(rungrad.AppConfig{Name: "assaylight", Short: "See what your coding agent checked", Long: "Read Claude Code and Codex sessions for this Git repository.\nUse sessions to see the available recordings.", Version: version, ErrorPolicy: &rungrad.ErrorPolicy{Render: func(c rungrad.ErrorContext) error {
+	app := rungrad.New(rungrad.AppConfig{Name: "assaylight", Short: "See what your coding agent checked", Long: "Review Claude Code and Codex evidence and repository changes.\nRun check (the default) for a report, or sessions to list recordings.", Version: version, ErrorPolicy: &rungrad.ErrorPolicy{Render: func(c rungrad.ErrorContext) error {
 		msg := r.Text(c.Err.Error())
 		if c.MachineOutput {
 			return json.NewEncoder(c.Stderr).Encode(map[string]any{"error": msg, "exit_code": c.ExitCode})
@@ -106,6 +106,7 @@ func New(version string, opts Options) *rungrad.App {
 			}
 		})
 	}})
+	addCheck(app, version, opts, r)
 	return app
 }
 func row(s *session.Session, all []*session.Session, r redact.Redactor) Row {

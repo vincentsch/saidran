@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Authentication, update and mutations are absent from this read-only command surface.
+# Authentication, update and destructive operations are absent.
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 task_temp="$(mktemp -d)"
 trap 'rm -rf -- "$task_temp"' EXIT
@@ -18,7 +18,12 @@ encoded = re.sub(r'[^a-zA-Z0-9]', '-', str(repo))
 logs = root / 'claude' / 'projects' / encoded
 logs.mkdir(parents=True)
 transcript = (project / 'testdata/sessions/claude-verified/session.jsonl').read_text()
-(logs / 'session.jsonl').write_text(transcript.replace('/fixtures/claude-verified/repo', str(repo)))
+remapped = transcript.replace('/fixtures/claude-verified/repo', str(repo))
+(logs / 'session.jsonl').write_text(remapped)
+(root / 'session.jsonl').write_text(remapped)
 PY
 cd "$task_temp/repo"
-"$task_temp/rungrad" score "$task_temp/assaylight" --manifest auto --strict --read sessions
+"$task_temp/rungrad" score "$task_temp/assaylight" --manifest auto --strict --read sessions \
+  --mutate "check --transcript $task_temp/session.jsonl" \
+  --not-found "check --session absent" \
+  --api-error "check --transcript $task_temp/session.jsonl --base missing-revision"

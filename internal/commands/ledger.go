@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/vincentsch/assaylight/internal/redact"
 	"github.com/vincentsch/assaylight/internal/session"
@@ -14,35 +15,43 @@ import (
 
 type TestSummary struct {
 	// Outcome is independent of counts: Go reports package results, not test counts.
-	Outcome                           string
-	Passed, Failed, Skipped, Packages *int
-	Filtered, NoTests, ListOnly       bool
+	Outcome  string `json:"outcome"`
+	Passed   *int   `json:"passed"`
+	Failed   *int   `json:"failed"`
+	Skipped  *int   `json:"skipped"`
+	Packages *int   `json:"packages"`
+	Filtered bool   `json:"filtered"`
+	NoTests  bool   `json:"no_tests"`
+	ListOnly bool   `json:"list_only"`
 }
 
 type Statement struct {
-	Line, Cwd, Class, Runner string
-	Argv                     []string
+	Line   string   `json:"line"`
+	Cwd    string   `json:"cwd"`
+	Class  string   `json:"class"`
+	Runner string   `json:"runner"`
+	Argv   []string `json:"argv"`
 	// Scope is whole, targeted, or unknown. Targets retain the runner's selectors.
-	Scope        string
-	Targets      []string
-	ExitCode     *int
-	ExitReliable bool
-	ExitNote     string
+	Scope        string   `json:"scope"`
+	Targets      []string `json:"targets"`
+	ExitCode     *int     `json:"exit_code"`
+	ExitReliable bool     `json:"exit_reliable"`
+	ExitNote     string   `json:"exit_note"`
 	// Execution is possible, confirmed, or skipped. Possible edits remain evidence.
-	Execution         string
-	Tests             *TestSummary
-	CurrentDefinition string
-	MayEditFiles      bool
-	Edits             []session.Edit
+	Execution         string         `json:"execution"`
+	Tests             *TestSummary   `json:"tests"`
+	CurrentDefinition string         `json:"current_definition"`
+	MayEditFiles      bool           `json:"may_edit_files"`
+	Edits             []session.Edit `json:"edits"`
 }
 
 type Command struct {
 	// Original retains the recording, including its whole-line exit, unmodified.
-	Original               *session.Command
-	Statements             []Statement
-	CheckClasses           []string
-	Output                 string
-	OutputTruncatedByAgent bool
+	Original               *session.Command `json:"original"`
+	Statements             []Statement      `json:"statements"`
+	CheckClasses           []string         `json:"check_classes"`
+	Output                 string           `json:"output"`
+	OutputTruncatedByAgent bool             `json:"output_truncated_by_agent"`
 }
 
 func (c Command) HasChecks() bool { return len(c.CheckClasses) > 0 }
@@ -50,15 +59,17 @@ func (c Command) HasChecks() bool { return len(c.CheckClasses) > 0 }
 // Entry orders statement and edit evidence. Seq identifies the original event;
 // Statement is its zero-based statement index, or -1 for a native edit event.
 type Entry struct {
-	Seq, Statement int
-	Source         session.Source
-	Command        *Statement
-	Edit           *session.Edit
+	Time      time.Time      `json:"time"`
+	Seq       int            `json:"seq"`
+	Statement int            `json:"statement"`
+	Source    session.Source `json:"source"`
+	Command   *Statement     `json:"command,omitempty"`
+	Edit      *session.Edit  `json:"edit,omitempty"`
 }
 
 type Ledger struct {
-	Commands []Command
-	Entries  []Entry
+	Commands []Command `json:"commands"`
+	Entries  []Entry   `json:"entries"`
 }
 
 // Build keeps the session's native events intact and inserts shell edits before
@@ -68,7 +79,7 @@ func Build(s *session.Session) Ledger {
 	var ledger Ledger
 	for _, e := range s.Events {
 		if e.Edit != nil {
-			ledger.Entries = append(ledger.Entries, Entry{Seq: e.Seq, Statement: -1, Source: e.Source, Edit: e.Edit})
+			ledger.Entries = append(ledger.Entries, Entry{Time: e.Time, Seq: e.Seq, Statement: -1, Source: e.Source, Edit: e.Edit})
 		}
 		if e.Command == nil {
 			continue
@@ -77,9 +88,9 @@ func Build(s *session.Session) Ledger {
 		ledger.Commands = append(ledger.Commands, c)
 		for i := range c.Statements {
 			st := &c.Statements[i]
-			ledger.Entries = append(ledger.Entries, Entry{Seq: e.Seq, Statement: i, Source: e.Source, Command: st})
+			ledger.Entries = append(ledger.Entries, Entry{Time: e.Time, Seq: e.Seq, Statement: i, Source: e.Source, Command: st})
 			for j := range st.Edits {
-				ledger.Entries = append(ledger.Entries, Entry{Seq: e.Seq, Statement: i, Source: e.Source, Edit: &st.Edits[j]})
+				ledger.Entries = append(ledger.Entries, Entry{Time: e.Time, Seq: e.Seq, Statement: i, Source: e.Source, Edit: &st.Edits[j]})
 			}
 		}
 	}

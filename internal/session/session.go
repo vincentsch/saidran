@@ -14,8 +14,8 @@ import (
 )
 
 type Source struct {
-	File string
-	Line int
+	File string `json:"file"`
+	Line int    `json:"line"`
 }
 type Prompt struct {
 	Time   time.Time
@@ -23,17 +23,23 @@ type Prompt struct {
 	Source Source
 }
 type Command struct {
-	Line, Cwd        string
-	Argv             []string
-	Shell            bool
-	Start, End       time.Time
-	ExitCode         *int
-	ExitReliable     bool
-	ExitNote, Status string
-	Output           string
-	RawOutput        string `json:"-"`
+	Line         string    `json:"line"`
+	Cwd          string    `json:"cwd"`
+	Argv         []string  `json:"argv"`
+	Shell        bool      `json:"shell"`
+	Start        time.Time `json:"start"`
+	End          time.Time `json:"end"`
+	ExitCode     *int      `json:"exit_code"`
+	ExitReliable bool      `json:"exit_reliable"`
+	ExitNote     string    `json:"exit_note"`
+	Status       string    `json:"status"`
+	Output       string    `json:"output"`
+	RawOutput    string    `json:"-"`
 }
-type Edit struct{ Path, Op string }
+type Edit struct {
+	Path string `json:"path"`
+	Op   string `json:"op"`
+}
 type Event struct {
 	Seq          int
 	Time         time.Time

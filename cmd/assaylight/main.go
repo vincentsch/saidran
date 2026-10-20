@@ -7,4 +7,4 @@ import (
 
 var version = "dev"
 
-func main() { os.Exit(cli.New(version, cli.Options{}).Run(os.Args[1:], os.Stdout, os.Stderr)) }
+func main() { os.Exit(cli.Run(version, cli.Options{}, os.Args[1:], os.Stdout, os.Stderr)) }

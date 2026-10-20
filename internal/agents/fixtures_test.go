@@ -161,6 +161,20 @@ func TestRecordedSessions(t *testing.T) {
 			if _, e := os.Stat(filepath.Join(base, "repo", "session.jsonl")); !os.IsNotExist(e) {
 				t.Fatal("transcript inside repo")
 			}
+			for _, selection := range [][]string{{"--session", s.ID[:8]}} {
+				args := append([]string{"check", "--no-write", "--json"}, selection...)
+				code, out, errout := runBinary(t, binary, repo, args...)
+				if code != 0 || errout != "" {
+					t.Fatalf("session selection: %d %s %s", code, out, errout)
+				}
+				if decodeReport(t, out).Session.ID != s.ID {
+					t.Fatal("selected another session")
+				}
+			}
+			automatic := testutil.Run(cli.New("test", cli.Options{Dir: repo, Now: func() time.Time { return s.Ended.Add(time.Hour) }}), "check", "--no-write", "--json")
+			if automatic.Exit != 0 || automatic.Stderr != "" || decodeReport(t, automatic.Stdout).Session.ID != s.ID {
+				t.Fatalf("automatic report: %+v", automatic)
+			}
 		})
 	}
 }
