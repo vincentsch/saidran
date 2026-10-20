@@ -2,11 +2,14 @@ package commands
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/vincentsch/assaylight/internal/session"
 	"mvdan.cc/sh/v3/syntax"
 )
+
+var interpreterWrite = regexp.MustCompile(`(?i)(\.write(?:_text|_bytes|File(?:Sync)?)?\s*\(|(?:open|File\.open)\s*\([^\n]*(?:["'](?:w|a|x|r\+)[bt+]*["'])|(?:unlink|rename|remove|mkdir|rmdir|shutil\.copy)\s*\()`)
 
 func edits(s *Statement, stmt *syntax.Stmt) {
 	a := executable(s.Argv)
@@ -59,6 +62,17 @@ func edits(s *Statement, stmt *syntax.Stmt) {
 	recognized := false
 	skipNext := false
 	switch name {
+	case "python", "python3", "node", "ruby", "perl":
+		script := strings.Join(args, " ")
+		if stmt != nil {
+			for _, rd := range stmt.Redirs {
+				if rd.Hdoc != nil {
+					script += "\n" + printed(rd.Hdoc)
+				}
+			}
+		}
+		s.MayEditFiles = s.MayEditFiles || interpreterWrite.MatchString(script)
+		return
 	case "gofmt":
 		recognized = has(args, "-w")
 	case "prettier":

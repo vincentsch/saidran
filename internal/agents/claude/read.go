@@ -38,6 +38,7 @@ func Read(file string) (*session.Session, error) {
 		calls := map[string]*call{}
 		var callOrder []string
 		messageEvents := map[string]int{}
+		messageTimes := map[string]time.Time{}
 		finalID := ""
 		err := session.Lines(path, s, func(b []byte, src session.Source) error {
 			var o j.Object
@@ -92,6 +93,7 @@ func Read(file string) (*session.Session, error) {
 						if mid == "" {
 							mid = fmt.Sprintf("%s:%d", path, src.Line)
 						}
+						messageTimes[mid] = t
 						if idx, ok := messageEvents[mid]; ok {
 							s.Events[idx].Text += "\n" + text
 						} else {
@@ -202,6 +204,7 @@ func Read(file string) (*session.Session, error) {
 		}
 		if parent && finalID != "" {
 			s.Final = s.Events[messageEvents[finalID]].Text
+			s.FinalTime = messageTimes[finalID]
 		}
 		for _, id := range callOrder {
 			c := calls[id]

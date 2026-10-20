@@ -55,6 +55,7 @@ type Session struct {
 	Models                                     []string
 	Prompts                                    []Prompt
 	Events                                     []Event
+	FinalTime                                  time.Time
 	Final                                      string
 	Unsupported                                int
 	Notes                                      []string

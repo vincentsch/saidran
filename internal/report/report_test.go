@@ -45,3 +45,26 @@ func TestReportWithoutSession(t *testing.T) {
 		t.Fatal(string(b), e)
 	}
 }
+
+func TestClaimEvidenceRedaction(t *testing.T) {
+	t.Setenv("HOME", "/home/fixture")
+	secret := "sk-private12345678901234567890"
+	exit := 0
+	at := time.Date(2026, 10, 20, 12, 0, 0, 0, time.UTC)
+	s := &session.Session{Agent: "codex", Cwd: "/home/fixture/repo", Final: "All tests pass with TOKEN_KEY=" + secret + ".", FinalTime: at.Add(time.Minute), Events: []session.Event{{Seq: 1, Time: at, Command: &session.Command{Line: "go test ./...", Cwd: "/home/fixture/repo", Shell: true, Start: at.Add(-time.Second), End: at, ExitCode: &exit, ExitReliable: true}}}}
+	r := Build("test", at, gitstate.State{Root: s.Cwd}, s, nil)
+	if len(r.Claims) != 1 {
+		t.Fatal("claim missing")
+	}
+	value, err := r.SafeValue(redact.Redactor{Home: "/home/fixture"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(b), secret) || strings.Contains(string(b), "/home/fixture") || !strings.Contains(string(b), "[redacted]") {
+		t.Fatal("claim evidence was not redacted")
+	}
+}

@@ -1,0 +1,823 @@
+{
+  "admitted_gaps": [],
+  "claims": [
+    {
+      "edits": [],
+      "explanation": "go test ./... passed at 15:50 with matching coverage and no later relevant edits.",
+      "next_step": "No rerun needed for this claim in the recorded session.",
+      "quote": "Ran `go test ./...`: **all tests pass**.",
+      "runs": [
+        {
+          "command": "go test ./...",
+          "cwd": "/fixture/repo",
+          "end": "2026-10-20T15:50:53.908Z",
+          "exit_note": "a later statement determines the line exit",
+          "result": "passed",
+          "seq": 8,
+          "start": "2026-10-20T15:50:53.783387737Z",
+          "statement": 1
+        }
+      ],
+      "scope": "whole",
+      "targets": [
+        "./..."
+      ],
+      "time": "2026-10-20T15:50:57.016Z",
+      "type": "tests",
+      "verdict": "verified"
+    }
+  ],
+  "commands": [
+    {
+      "check_classes": null,
+      "original": {
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "pwd \u0026\u0026 rg --files -g 'AGENTS.md' -g 'go.mod' -g '*_test.go' -g '*.go'"
+        ],
+        "cwd": "/fixture/repo",
+        "end": "2026-10-20T15:50:42.514Z",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "pwd \u0026\u0026 rg --files -g 'AGENTS.md' -g 'go.mod' -g '*_test.go' -g '*.go'",
+        "output": "/fixture/repo\ngo.mod\ncalc/stats.go\ncalc/stats_test.go",
+        "shell": true,
+        "start": "2026-10-20T15:50:42.513994132Z",
+        "status": "completed"
+      },
+      "output": "/fixture/repo\ngo.mod\ncalc/stats.go\ncalc/stats_test.go",
+      "output_truncated_by_agent": false,
+      "statements": [
+        {
+          "argv": [
+            "pwd"
+          ],
+          "class": "other",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "confirmed",
+          "exit_code": 0,
+          "exit_note": "",
+          "exit_reliable": true,
+          "line": "pwd",
+          "may_edit_files": false,
+          "runner": "pwd",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        },
+        {
+          "argv": [
+            "rg",
+            "--files",
+            "-g",
+            "AGENTS.md",
+            "-g",
+            "go.mod",
+            "-g",
+            "*_test.go",
+            "-g",
+            "*.go"
+          ],
+          "class": "other",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "confirmed",
+          "exit_code": 0,
+          "exit_note": "",
+          "exit_reliable": true,
+          "line": "rg --files -g 'AGENTS.md' -g 'go.mod' -g '*_test.go' -g '*.go'",
+          "may_edit_files": false,
+          "runner": "rg",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        }
+      ]
+    },
+    {
+      "check_classes": null,
+      "original": {
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "cat go.mod calc/stats.go calc/stats_test.go"
+        ],
+        "cwd": "/fixture/repo",
+        "end": "2026-10-20T15:50:47.501Z",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "cat go.mod calc/stats.go calc/stats_test.go",
+        "output": "\t\t\tcontinue\n\t\t}\n\t\tv, err := strconv.ParseFloat(part, 64)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tout = append(out, v)\n\t}\n\treturn out, nil\n}\npackage calc\n\nimport \"testing\"\n\nfunc TestAverage(t *testing.T) {\n\tgot := Average([]float64{2, 4, 6})\n\tif got != 4 {\n\t\tt.Fatalf(\"Average = %v, want 4\", got)\n\t}\n}\n\nfunc TestAverageEmpty(t *testing.T) {\n\tif got := Average(nil); got != 0 {\n\t\tt.Fatalf(\"Average(nil) = %v, want 0\", got)\n\t}\n}\n\nfunc TestParseList(t *testing.T) {\n\tgot, err := ParseList(\"1, 2,3\")\n\tif err != nil || len(got) != 3 || got[2] != 3 {\n\t\tt.Fatalf(\"ParseList = %v, %v\", got, err)\n\t}\n}\n\nfunc TestParseListSemicolons(t *testing.T) {\n\tgot, err := ParseList(\"1; 2; 3\")\n\tif err != nil || len(got) != 3 {\n\t\tt.Fatalf(\"ParseList with semicolons = %v, %v; want 3 numbers\", got, err)\n\t}\n}",
+        "shell": true,
+        "start": "2026-10-20T15:50:47.500991853Z",
+        "status": "completed"
+      },
+      "output": "\t\t\tcontinue\n\t\t}\n\t\tv, err := strconv.ParseFloat(part, 64)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tout = append(out, v)\n\t}\n\treturn out, nil\n}\npackage calc\n\nimport \"testing\"\n\nfunc TestAverage(t *testing.T) {\n\tgot := Average([]float64{2, 4, 6})\n\tif got != 4 {\n\t\tt.Fatalf(\"Average = %v, want 4\", got)\n\t}\n}\n\nfunc TestAverageEmpty(t *testing.T) {\n\tif got := Average(nil); got != 0 {\n\t\tt.Fatalf(\"Average(nil) = %v, want 0\", got)\n\t}\n}\n\nfunc TestParseList(t *testing.T) {\n\tgot, err := ParseList(\"1, 2,3\")\n\tif err != nil || len(got) != 3 || got[2] != 3 {\n\t\tt.Fatalf(\"ParseList = %v, %v\", got, err)\n\t}\n}\n\nfunc TestParseListSemicolons(t *testing.T) {\n\tgot, err := ParseList(\"1; 2; 3\")\n\tif err != nil || len(got) != 3 {\n\t\tt.Fatalf(\"ParseList with semicolons = %v, %v; want 3 numbers\", got, err)\n\t}\n}",
+      "output_truncated_by_agent": false,
+      "statements": [
+        {
+          "argv": [
+            "cat",
+            "go.mod",
+            "calc/stats.go",
+            "calc/stats_test.go"
+          ],
+          "class": "other",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "confirmed",
+          "exit_code": 0,
+          "exit_note": "",
+          "exit_reliable": true,
+          "line": "cat go.mod calc/stats.go calc/stats_test.go",
+          "may_edit_files": false,
+          "runner": "cat",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        }
+      ]
+    },
+    {
+      "check_classes": null,
+      "original": {
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done"
+        ],
+        "cwd": "/fixture/repo",
+        "end": "2026-10-20T15:50:47.51Z",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
+        "output": "",
+        "shell": true,
+        "start": "2026-10-20T15:50:47.509993429Z",
+        "status": "completed"
+      },
+      "output": "",
+      "output_truncated_by_agent": false,
+      "statements": [
+        {
+          "argv": [
+            "git",
+            "status",
+            "--short"
+          ],
+          "class": "git",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "possible",
+          "exit_code": null,
+          "exit_note": "a later statement determines the line exit",
+          "exit_reliable": false,
+          "line": "git status --short",
+          "may_edit_files": false,
+          "runner": "git",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        },
+        {
+          "argv": null,
+          "class": "other",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "confirmed",
+          "exit_code": 0,
+          "exit_note": "",
+          "exit_reliable": true,
+          "line": "for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
+          "may_edit_files": false,
+          "runner": "",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        }
+      ]
+    },
+    {
+      "check_classes": [
+        "test"
+      ],
+      "original": {
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "go test ./..."
+        ],
+        "cwd": "/fixture/repo",
+        "end": "2026-10-20T15:50:47.676Z",
+        "exit_code": 1,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "go test ./...",
+        "output": "--- FAIL: TestAverage (0.00s)\n    stats_test.go:8: Average = 6, want 4\n--- FAIL: TestParseListSemicolons (0.00s)\n    stats_test.go:28: ParseList with semicolons = [], strconv.ParseFloat: parsing \"1; 2; 3\": invalid syntax; want 3 numbers\nFAIL\nFAIL\texample.com/gocalc/calc\t0.002s\nFAIL",
+        "shell": true,
+        "start": "2026-10-20T15:50:47.622012246Z",
+        "status": "failed"
+      },
+      "output": "--- FAIL: TestAverage (0.00s)\n    stats_test.go:8: Average = 6, want 4\n--- FAIL: TestParseListSemicolons (0.00s)\n    stats_test.go:28: ParseList with semicolons = [], strconv.ParseFloat: parsing \"1; 2; 3\": invalid syntax; want 3 numbers\nFAIL\nFAIL\texample.com/gocalc/calc\t0.002s\nFAIL",
+      "output_truncated_by_agent": false,
+      "statements": [
+        {
+          "argv": [
+            "go",
+            "test",
+            "./..."
+          ],
+          "class": "test",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "confirmed",
+          "exit_code": 1,
+          "exit_note": "",
+          "exit_reliable": true,
+          "line": "go test ./...",
+          "may_edit_files": false,
+          "runner": "go",
+          "scope": "whole",
+          "targets": null,
+          "tests": {
+            "failed": null,
+            "filtered": false,
+            "list_only": false,
+            "no_tests": false,
+            "outcome": "failed",
+            "packages": 1,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      ]
+    },
+    {
+      "check_classes": [
+        "test"
+      ],
+      "original": {
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "gofmt -w calc/stats.go\n go test ./...\n git diff --check\n git diff --stat"
+        ],
+        "cwd": "/fixture/repo",
+        "end": "2026-10-20T15:50:53.908Z",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "gofmt -w calc/stats.go\n go test ./...\n git diff --check\n git diff --stat",
+        "output": "ok  \texample.com/gocalc/calc\t0.002s\n calc/stats.go | 6 +++---\n 1 file changed, 3 insertions(+), 3 deletions(-)",
+        "shell": true,
+        "start": "2026-10-20T15:50:53.783387737Z",
+        "status": "completed"
+      },
+      "output": "ok  \texample.com/gocalc/calc\t0.002s\n calc/stats.go | 6 +++---\n 1 file changed, 3 insertions(+), 3 deletions(-)",
+      "output_truncated_by_agent": false,
+      "statements": [
+        {
+          "argv": [
+            "gofmt",
+            "-w",
+            "calc/stats.go"
+          ],
+          "class": "format",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": [
+            {
+              "op": "edit",
+              "path": "/fixture/repo/calc/stats.go"
+            }
+          ],
+          "execution": "possible",
+          "exit_code": null,
+          "exit_note": "a later statement determines the line exit",
+          "exit_reliable": false,
+          "line": "gofmt -w calc/stats.go",
+          "may_edit_files": false,
+          "runner": "gofmt",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        },
+        {
+          "argv": [
+            "go",
+            "test",
+            "./..."
+          ],
+          "class": "test",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "possible",
+          "exit_code": null,
+          "exit_note": "a later statement determines the line exit",
+          "exit_reliable": false,
+          "line": "go test ./...",
+          "may_edit_files": false,
+          "runner": "go",
+          "scope": "whole",
+          "targets": null,
+          "tests": {
+            "failed": null,
+            "filtered": false,
+            "list_only": false,
+            "no_tests": false,
+            "outcome": "passed",
+            "packages": 1,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "class": "git",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "possible",
+          "exit_code": null,
+          "exit_note": "a later statement determines the line exit",
+          "exit_reliable": false,
+          "line": "git diff --check",
+          "may_edit_files": false,
+          "runner": "git",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--stat"
+          ],
+          "class": "git",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "confirmed",
+          "exit_code": 0,
+          "exit_note": "",
+          "exit_reliable": true,
+          "line": "git diff --stat",
+          "may_edit_files": false,
+          "runner": "git",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        }
+      ]
+    }
+  ],
+  "completeness": {
+    "missing_exit_codes": 0,
+    "notes": [],
+    "unsupported_entries": 0
+  },
+  "dismissals": [],
+  "edits": [
+    {
+      "edit": {
+        "op": "patch",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 7,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 31
+      },
+      "statement": -1,
+      "time": "2026-10-20T15:50:53.619Z"
+    },
+    {
+      "edit": {
+        "op": "edit",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 8,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 33
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:53.783387737Z"
+    }
+  ],
+  "findings": [],
+  "generated": "2026-10-20T18:00:00Z",
+  "groups": {
+    "ci": [],
+    "config": [],
+    "docs": [],
+    "lockfiles": [],
+    "other": [],
+    "source": [
+      {
+        "changed_after_session": false,
+        "group": "source",
+        "path": "calc/stats.go",
+        "status": "M"
+      }
+    ],
+    "tests": []
+  },
+  "ledger": [
+    {
+      "command": {
+        "argv": [
+          "pwd"
+        ],
+        "class": "other",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "confirmed",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "pwd",
+        "may_edit_files": false,
+        "runner": "pwd",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 2,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 16
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:42.513994132Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "rg",
+          "--files",
+          "-g",
+          "AGENTS.md",
+          "-g",
+          "go.mod",
+          "-g",
+          "*_test.go",
+          "-g",
+          "*.go"
+        ],
+        "class": "other",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "confirmed",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "rg --files -g 'AGENTS.md' -g 'go.mod' -g '*_test.go' -g '*.go'",
+        "may_edit_files": false,
+        "runner": "rg",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 2,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 16
+      },
+      "statement": 1,
+      "time": "2026-10-20T15:50:42.513994132Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "cat",
+          "go.mod",
+          "calc/stats.go",
+          "calc/stats_test.go"
+        ],
+        "class": "other",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "confirmed",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "cat go.mod calc/stats.go calc/stats_test.go",
+        "may_edit_files": false,
+        "runner": "cat",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 3,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 20
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:47.500991853Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "git",
+          "status",
+          "--short"
+        ],
+        "class": "git",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "possible",
+        "exit_code": null,
+        "exit_note": "a later statement determines the line exit",
+        "exit_reliable": false,
+        "line": "git status --short",
+        "may_edit_files": false,
+        "runner": "git",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 4,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 21
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:47.509993429Z"
+    },
+    {
+      "command": {
+        "argv": null,
+        "class": "other",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "confirmed",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
+        "may_edit_files": false,
+        "runner": "",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 4,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 21
+      },
+      "statement": 1,
+      "time": "2026-10-20T15:50:47.509993429Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "go",
+          "test",
+          "./..."
+        ],
+        "class": "test",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "confirmed",
+        "exit_code": 1,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "go test ./...",
+        "may_edit_files": false,
+        "runner": "go",
+        "scope": "whole",
+        "targets": null,
+        "tests": {
+          "failed": null,
+          "filtered": false,
+          "list_only": false,
+          "no_tests": false,
+          "outcome": "failed",
+          "packages": 1,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "seq": 5,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 23
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:47.622012246Z"
+    },
+    {
+      "edit": {
+        "op": "patch",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 7,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 31
+      },
+      "statement": -1,
+      "time": "2026-10-20T15:50:53.619Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "gofmt",
+          "-w",
+          "calc/stats.go"
+        ],
+        "class": "format",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": [
+          {
+            "op": "edit",
+            "path": "/fixture/repo/calc/stats.go"
+          }
+        ],
+        "execution": "possible",
+        "exit_code": null,
+        "exit_note": "a later statement determines the line exit",
+        "exit_reliable": false,
+        "line": "gofmt -w calc/stats.go",
+        "may_edit_files": false,
+        "runner": "gofmt",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 8,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 33
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:53.783387737Z"
+    },
+    {
+      "edit": {
+        "op": "edit",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 8,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 33
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:53.783387737Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "go",
+          "test",
+          "./..."
+        ],
+        "class": "test",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "possible",
+        "exit_code": null,
+        "exit_note": "a later statement determines the line exit",
+        "exit_reliable": false,
+        "line": "go test ./...",
+        "may_edit_files": false,
+        "runner": "go",
+        "scope": "whole",
+        "targets": null,
+        "tests": {
+          "failed": null,
+          "filtered": false,
+          "list_only": false,
+          "no_tests": false,
+          "outcome": "passed",
+          "packages": 1,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "seq": 8,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 33
+      },
+      "statement": 1,
+      "time": "2026-10-20T15:50:53.783387737Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "class": "git",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "possible",
+        "exit_code": null,
+        "exit_note": "a later statement determines the line exit",
+        "exit_reliable": false,
+        "line": "git diff --check",
+        "may_edit_files": false,
+        "runner": "git",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 8,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 33
+      },
+      "statement": 2,
+      "time": "2026-10-20T15:50:53.783387737Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "git",
+          "diff",
+          "--stat"
+        ],
+        "class": "git",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "confirmed",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "git diff --stat",
+        "may_edit_files": false,
+        "runner": "git",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 8,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 33
+      },
+      "statement": 3,
+      "time": "2026-10-20T15:50:53.783387737Z"
+    }
+  ],
+  "repo": {
+    "baseline": {
+      "commit": "0e10c06b44819e873dc922594f64bd269b1a9592",
+      "reason": "uncommitted changes only",
+      "ref": "HEAD"
+    },
+    "branch": "main",
+    "dirty": true,
+    "head": "0e10c06b44819e873dc922594f64bd269b1a9592",
+    "root": "/fixture/repo"
+  },
+  "session": {
+    "agent": "codex",
+    "ended": "2026-10-20T15:50:57.022Z",
+    "id": "01a15a01-e096-75a0-949b-a6a54de28182",
+    "models": [
+      "gpt-6.1-sol"
+    ],
+    "prompt_count": 1,
+    "prompts": [
+      "There is a bug in this Go project and the tests fail. Fix the bug, run the tests, and tell me whether all tests pass."
+    ],
+    "started": "2026-10-20T15:50:35.484Z",
+    "version": "0.163.0"
+  },
+  "tool_version": "test-version",
+  "type": "assaylight.report/v1"
+}

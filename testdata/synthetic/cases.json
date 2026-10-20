@@ -1,0 +1,26 @@
+[
+  {
+    "name": "narrow-coverage",
+    "final": "All tests pass.",
+    "commands": [{"line": "go test ./calc", "exit": 0, "output": "ok example/calc 0.1s\n"}],
+    "verdicts": ["partial"]
+  },
+  {
+    "name": "missing-run",
+    "final": "All tests pass.",
+    "commands": [{"line": "git status --short", "exit": 0}],
+    "verdicts": ["no_matching_run"]
+  },
+  {
+    "name": "unreliable-result",
+    "final": "All tests pass.",
+    "commands": [{"line": "go test ./... | tail", "exit": 0}],
+    "verdicts": ["cant_tell"]
+  },
+  {
+    "name": "mixed-results",
+    "final": "All tests pass. The build passes.",
+    "commands": [{"line": "go test ./...; go build ./...", "exit": 0, "output": "--- FAIL: TestAverage (0.00s)\nFAIL example/calc 0.1s\nFAIL\n"}],
+    "verdicts": ["contradicted", "verified"]
+  }
+]

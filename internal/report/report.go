@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/vincentsch/assaylight/internal/claims"
 	"github.com/vincentsch/assaylight/internal/commands"
 	"github.com/vincentsch/assaylight/internal/findings"
 	"github.com/vincentsch/assaylight/internal/gitstate"
@@ -41,13 +42,13 @@ type Report struct {
 	Edits        []commands.Entry           `json:"edits"`
 	Groups       map[string][]gitstate.File `json:"groups"`
 	Findings     []findings.Finding         `json:"findings"`
-	Claims       []any                      `json:"claims"`
-	AdmittedGaps []any                      `json:"admitted_gaps"`
+	Claims       []claims.Claim             `json:"claims"`
+	AdmittedGaps []claims.Gap               `json:"admitted_gaps"`
 	Dismissals   []any                      `json:"dismissals"`
 }
 
 func Build(version string, now time.Time, state gitstate.State, s *session.Session, notes []string) Report {
-	r := Report{Type: "assaylight.report/v1", Version: version, Generated: now, Repo: state, Groups: map[string][]gitstate.File{}, Findings: findings.Detect(state.Files), Commands: []commands.Command{}, Ledger: []commands.Entry{}, Edits: []commands.Entry{}, Claims: []any{}, AdmittedGaps: []any{}, Dismissals: []any{}}
+	r := Report{Type: "assaylight.report/v1", Version: version, Generated: now, Repo: state, Groups: map[string][]gitstate.File{}, Findings: findings.Detect(state.Files), Commands: []commands.Command{}, Ledger: []commands.Entry{}, Edits: []commands.Entry{}, Claims: []claims.Claim{}, AdmittedGaps: []claims.Gap{}, Dismissals: []any{}}
 	r.Completeness.Notes = append([]string{}, notes...)
 	for _, group := range []string{"tests", "ci", "lockfiles", "config", "docs", "source", "other"} {
 		r.Groups[group] = []gitstate.File{}
@@ -67,6 +68,7 @@ func Build(version string, now time.Time, state gitstate.State, s *session.Sessi
 	r.Completeness.Unsupported = s.Unsupported
 	r.Completeness.Notes = append(r.Completeness.Notes, s.Notes...)
 	ledger := commands.Build(s)
+	r.Claims, r.AdmittedGaps = claims.Evaluate(state.Root, s, ledger)
 	r.Commands = append(r.Commands, ledger.Commands...)
 	r.Ledger = append(r.Ledger, ledger.Entries...)
 	for i := range r.Commands {

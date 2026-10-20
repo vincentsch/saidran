@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -10,9 +12,11 @@ import (
 	"github.com/vincentsch/assaylight/internal/agents"
 	"github.com/vincentsch/assaylight/internal/gitstate"
 	"github.com/vincentsch/assaylight/internal/redact"
+	"github.com/vincentsch/assaylight/internal/render"
 	"github.com/vincentsch/assaylight/internal/report"
 	"github.com/vincentsch/rungrad"
 	"github.com/vincentsch/rungrad/output"
+	"golang.org/x/term"
 )
 
 // Run resolves output aliases before rungrad sees arguments, including invalid
@@ -114,33 +118,27 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 				return fmt.Errorf("Could not write report.json: %w", err)
 			}
 		}
+		// Human and machine outputs consume the same redacted model.
+		b, err := json.Marshal(safe)
+		if err != nil {
+			return err
+		}
+		var display report.Report
+		if err = json.Unmarshal(b, &display); err != nil {
+			return err
+		}
 		return f.WriteResult(safe, func(w io.Writer) {
-			fmt.Fprintf(w, "Assaylight  %s session %s  %s vs %s\n", r.Text(s.Agent), r.Text(agents.DisplayID(s, d.Sessions)), r.Text(state.Branch), r.Text(state.Baseline.Ref))
-			fmt.Fprintf(w, "Baseline: %s (%s)\n", r.Text(state.Baseline.Commit), state.Baseline.Reason)
-			fmt.Fprintf(w, "Commands  %d run    Changes  %d files    Findings  %d\n", len(model.Commands), len(state.Files), len(model.Findings))
-			for _, finding := range model.Findings {
-				fmt.Fprintf(w, "  %s %s:%d  %s\n", finding.Code, r.Text(finding.Path), finding.Line, finding.Explanation)
-				if finding.Values {
-					side := func(v *string) string {
-						if v == nil {
-							return "(absent)"
-						}
-						return r.Text(*v)
-					}
-					fmt.Fprintf(w, "    %s → %s\n", side(finding.Old), side(finding.New))
+			width := 100
+			if file, ok := f.Stdout.(*os.File); ok {
+				if columns, _, err := term.GetSize(int(file.Fd())); err == nil {
+					width = columns
 				}
 			}
-			for _, file := range state.Files {
-				if file.ChangedAfterSession {
-					fmt.Fprintf(w, "  %s: changed after the session ended\n", r.Text(file.Path))
-				}
+			mode := f.TerminalMode()
+			if _, set := os.LookupEnv("NO_COLOR"); set {
+				mode.Color = false
 			}
-			for _, note := range model.Completeness.Notes {
-				fmt.Fprintln(w, r.Text(note))
-			}
-			if model.Completeness.Unsupported > 0 || model.Completeness.MissingExits > 0 {
-				fmt.Fprintf(w, "Incomplete evidence: %d unsupported entries, %d missing exit codes.\n", model.Completeness.Unsupported, model.Completeness.MissingExits)
-			}
+			render.Text(w, display, r.Text(agents.DisplayID(s, d.Sessions)), width, mode)
 			if !noWrite {
 				fmt.Fprintf(w, "Report: %s\n", r.Text(filepath.Join(dir, "report.json")))
 			}

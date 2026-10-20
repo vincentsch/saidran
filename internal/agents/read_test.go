@@ -42,6 +42,9 @@ func TestClaudeToolEvidence(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	if !s.FinalTime.Equal(session.Time("2026-10-20T10:00:03Z")) {
+		t.Fatalf("split final-response time: %s", s.FinalTime)
+	}
 	if s.Final != "First\nSecond" || s.Unsupported != 0 || len(s.Notes) != 1 {
 		t.Fatalf("final=%q unsupported=%d notes=%v", s.Final, s.Unsupported, s.Notes)
 	}
@@ -103,6 +106,9 @@ func TestCodexDirectCommands(t *testing.T) {
 	s, e := agents.Read(file)
 	if e != nil {
 		t.Fatal(e)
+	}
+	if !s.FinalTime.Equal(session.Time("2026-10-20T10:00:08Z")) {
+		t.Fatalf("final-response time changed by task_complete: %s", s.FinalTime)
 	}
 	if s.Cwd != "/repo/with space" || s.Final != "Done" || len(s.Events) != 4 || s.Unsupported != 1 {
 		t.Fatalf("metadata or dedup: %+v", s)

@@ -70,6 +70,39 @@ func TestRecordedReports(t *testing.T) {
 					t.Fatalf("check: %d %s %s", code, out, errout)
 				}
 				r := decodeReport(t, out)
+				expectedBytes, err := os.ReadFile(filepath.Join("../../testdata/sessions", name, "expected.json"))
+				if err != nil {
+					t.Fatal(err)
+				}
+				var expected struct {
+					Claims []struct {
+						Type, Verdict string
+						QuoteContains string `json:"quote_contains"`
+					}
+					Findings []struct{ Code, Path string }
+				}
+				if err := json.Unmarshal(expectedBytes, &expected); err != nil {
+					t.Fatal(err)
+				}
+				if len(r.Claims) != len(expected.Claims) {
+					t.Fatalf("claims: %+v; expected %+v", r.Claims, expected.Claims)
+				}
+				for i, want := range expected.Claims {
+					got := r.Claims[i]
+					verdict := strings.ReplaceAll(strings.ToUpper(got.Verdict), "_", " ")
+					if got.Type != want.Type || verdict != want.Verdict || !strings.Contains(got.Quote, want.QuoteContains) || !strings.Contains(s.Final, got.Quote) {
+						t.Fatalf("claim: %+v; expected %+v", got, want)
+					}
+				}
+				if len(r.Findings) != len(expected.Findings) {
+					t.Fatalf("findings: %+v", r.Findings)
+				}
+				for i, want := range expected.Findings {
+					if got := r.Findings[i]; got.Code != want.Code || got.Path != want.Path {
+						t.Fatalf("finding: %+v; expected %+v", got, want)
+					}
+				}
+
 				if r.Type != "assaylight.report/v1" || r.Session == nil || r.Session.ID != s.ID || r.Repo.Baseline.Ref != "HEAD" || r.Repo.Baseline.Reason != "uncommitted changes only" || len(r.Commands) == 0 || len(r.Ledger) == 0 {
 					t.Fatalf("report facts: %+v", r)
 				}
@@ -310,7 +343,7 @@ func TestSelectedSessionCompleteness(t *testing.T) {
 			if len(r.Completeness.Notes) != 1 || !strings.Contains(r.Completeness.Notes[0], "incomplete final line skipped") {
 				t.Fatal(r.Completeness)
 			}
-		} else if strings.Count(out, "incomplete final line skipped") != 1 {
+		} else if strings.Count(strings.Join(strings.Fields(out), " "), "incomplete final line skipped") != 1 {
 			t.Fatal("selected session note missing", out)
 		}
 	}

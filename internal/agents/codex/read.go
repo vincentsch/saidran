@@ -55,6 +55,9 @@ func Read(file string) (*session.Session, error) {
 					if s.Final != text {
 						s.Events = append(s.Events, session.Event{Time: t, Kind: "message", Source: src, Text: text})
 					}
+					if s.Final != text || s.FinalTime.IsZero() {
+						s.FinalTime = t
+					}
 					s.Final = text
 				}
 			case "task_started", "thread_settings_applied", "token_count", "token_usage_record", "world_state":
@@ -140,6 +143,7 @@ func Read(file string) (*session.Session, error) {
 					ev.Text = text
 					s.Events = append(s.Events, ev)
 					s.Final = text
+					s.FinalTime = t
 				case "Reasoning":
 				default:
 					s.Unsupported++

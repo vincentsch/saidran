@@ -1,0 +1,12 @@
+Assaylight  Codex session 01a15a01 2026-10-20 15:50–15:50 main vs HEAD
+Baseline  0e10c06b44819e873dc922594f64bd269b1a9592 (uncommitted changes only)
+
+Claims
+  Verified       "Ran `go test ./...`: **all tests pass**."
+                 go test ./... passed at 15:50 with matching coverage and no later relevant edits.
+                 Exit note: a later statement determines the line exit.
+                 No rerun needed for this claim in the recorded session.
+
+Commands  5 run · 1 failed · 0 result unreliable
+Changes   1 file · 1 source
+Findings  0

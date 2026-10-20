@@ -1,0 +1,359 @@
+{
+  "admitted_gaps": [
+    {
+      "quote": "As you asked, I did not run the tests again after the rename, so the renamed code is untested.",
+      "time": "2026-10-20T15:50:53.376Z"
+    }
+  ],
+  "claims": [
+    {
+      "edits": [
+        {
+          "path": "calc/stats.go",
+          "seq": 5,
+          "time": "2026-10-20T15:50:50.397Z"
+        }
+      ],
+      "explanation": "go test ./... passed at 15:50, then calc/stats.go changed at 15:50.",
+      "next_step": "Run go test ./... again.",
+      "quote": "`go test ./...` passed after that fix.",
+      "runner": "go",
+      "runs": [
+        {
+          "command": "go test ./...",
+          "cwd": "/fixture/repo",
+          "end": "2026-10-20T15:50:46.016Z",
+          "result": "passed",
+          "seq": 3,
+          "start": "2026-10-20T15:50:45.803Z",
+          "statement": 0
+        }
+      ],
+      "scope": "whole",
+      "targets": [],
+      "time": "2026-10-20T15:50:53.376Z",
+      "type": "tests",
+      "verdict": "stale"
+    }
+  ],
+  "commands": [
+    {
+      "check_classes": null,
+      "original": {
+        "argv": null,
+        "cwd": "/fixture/repo",
+        "end": "2026-10-20T15:50:38.695Z",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "ls -R . | head -30",
+        "output": ".:\nREADME.md\ncalc\ngo.mod\n\n./calc:\nstats.go\nstats_test.go",
+        "shell": true,
+        "start": "2026-10-20T15:50:38.591Z",
+        "status": "completed"
+      },
+      "output": ".:\nREADME.md\ncalc\ngo.mod\n\n./calc:\nstats.go\nstats_test.go",
+      "output_truncated_by_agent": true,
+      "statements": [
+        {
+          "argv": [
+            "ls",
+            "-R",
+            "."
+          ],
+          "class": "other",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "possible",
+          "exit_code": null,
+          "exit_note": "pipeline exit cannot be attributed to this statement",
+          "exit_reliable": false,
+          "line": "ls -R .",
+          "may_edit_files": false,
+          "runner": "ls",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        },
+        {
+          "argv": [
+            "head",
+            "-30"
+          ],
+          "class": "other",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "possible",
+          "exit_code": null,
+          "exit_note": "pipeline exit cannot be attributed to this statement",
+          "exit_reliable": false,
+          "line": "head -30",
+          "may_edit_files": false,
+          "runner": "head",
+          "scope": "unknown",
+          "targets": null,
+          "tests": null
+        }
+      ]
+    },
+    {
+      "check_classes": [
+        "test"
+      ],
+      "original": {
+        "argv": null,
+        "cwd": "/fixture/repo",
+        "end": "2026-10-20T15:50:46.016Z",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "go test ./...",
+        "output": "ok  \texample.com/gocalc/calc\t0.002s",
+        "shell": true,
+        "start": "2026-10-20T15:50:45.803Z",
+        "status": "completed"
+      },
+      "output": "ok  \texample.com/gocalc/calc\t0.002s",
+      "output_truncated_by_agent": false,
+      "statements": [
+        {
+          "argv": [
+            "go",
+            "test",
+            "./..."
+          ],
+          "class": "test",
+          "current_definition": "",
+          "cwd": "/fixture/repo",
+          "edits": null,
+          "execution": "confirmed",
+          "exit_code": 0,
+          "exit_note": "",
+          "exit_reliable": true,
+          "line": "go test ./...",
+          "may_edit_files": false,
+          "runner": "go",
+          "scope": "whole",
+          "targets": null,
+          "tests": {
+            "failed": null,
+            "filtered": false,
+            "list_only": false,
+            "no_tests": false,
+            "outcome": "passed",
+            "packages": 1,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      ]
+    }
+  ],
+  "completeness": {
+    "missing_exit_codes": 0,
+    "notes": [],
+    "unsupported_entries": 0
+  },
+  "dismissals": [],
+  "edits": [
+    {
+      "edit": {
+        "op": "edit",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 2,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 16
+      },
+      "statement": -1,
+      "time": "2026-10-20T15:50:45.717Z"
+    },
+    {
+      "edit": {
+        "op": "edit",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 5,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 21
+      },
+      "statement": -1,
+      "time": "2026-10-20T15:50:50.397Z"
+    }
+  ],
+  "findings": [],
+  "generated": "2026-10-20T18:00:00Z",
+  "groups": {
+    "ci": [],
+    "config": [],
+    "docs": [],
+    "lockfiles": [],
+    "other": [],
+    "source": [
+      {
+        "changed_after_session": false,
+        "group": "source",
+        "path": "calc/stats.go",
+        "status": "M"
+      }
+    ],
+    "tests": []
+  },
+  "ledger": [
+    {
+      "command": {
+        "argv": [
+          "ls",
+          "-R",
+          "."
+        ],
+        "class": "other",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "possible",
+        "exit_code": null,
+        "exit_note": "pipeline exit cannot be attributed to this statement",
+        "exit_reliable": false,
+        "line": "ls -R .",
+        "may_edit_files": false,
+        "runner": "ls",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 1,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 12
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:38.591Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "head",
+          "-30"
+        ],
+        "class": "other",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "possible",
+        "exit_code": null,
+        "exit_note": "pipeline exit cannot be attributed to this statement",
+        "exit_reliable": false,
+        "line": "head -30",
+        "may_edit_files": false,
+        "runner": "head",
+        "scope": "unknown",
+        "targets": null,
+        "tests": null
+      },
+      "seq": 1,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 12
+      },
+      "statement": 1,
+      "time": "2026-10-20T15:50:38.591Z"
+    },
+    {
+      "edit": {
+        "op": "edit",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 2,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 16
+      },
+      "statement": -1,
+      "time": "2026-10-20T15:50:45.717Z"
+    },
+    {
+      "command": {
+        "argv": [
+          "go",
+          "test",
+          "./..."
+        ],
+        "class": "test",
+        "current_definition": "",
+        "cwd": "/fixture/repo",
+        "edits": null,
+        "execution": "confirmed",
+        "exit_code": 0,
+        "exit_note": "",
+        "exit_reliable": true,
+        "line": "go test ./...",
+        "may_edit_files": false,
+        "runner": "go",
+        "scope": "whole",
+        "targets": null,
+        "tests": {
+          "failed": null,
+          "filtered": false,
+          "list_only": false,
+          "no_tests": false,
+          "outcome": "passed",
+          "packages": 1,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "seq": 3,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 18
+      },
+      "statement": 0,
+      "time": "2026-10-20T15:50:45.803Z"
+    },
+    {
+      "edit": {
+        "op": "edit",
+        "path": "/fixture/repo/calc/stats.go"
+      },
+      "seq": 5,
+      "source": {
+        "file": "/fixture/session.jsonl",
+        "line": 21
+      },
+      "statement": -1,
+      "time": "2026-10-20T15:50:50.397Z"
+    }
+  ],
+  "repo": {
+    "baseline": {
+      "commit": "3890c7b6ec26cc4e75f7b5af447a51eb1ab4e19e",
+      "reason": "uncommitted changes only",
+      "ref": "HEAD"
+    },
+    "branch": "main",
+    "dirty": true,
+    "head": "3890c7b6ec26cc4e75f7b5af447a51eb1ab4e19e",
+    "root": "/fixture/repo"
+  },
+  "session": {
+    "agent": "claude-code",
+    "ended": "2026-10-20T15:50:53.515Z",
+    "id": "c4e4fc33-dd00-487b-b067-e4c1d22a10ef",
+    "models": [
+      "claude-sonnet-5-5"
+    ],
+    "prompt_count": 1,
+    "prompts": [
+      "Fix the bug in Average so its tests pass, and run go test ./... to check. After the tests pass, rename the parameter nums to values in calc/stats.go for readability. Do not run the tests again after t"
+    ],
+    "started": "2026-10-20T15:50:35.506Z",
+    "version": "2.1.293"
+  },
+  "tool_version": "test-version",
+  "type": "assaylight.report/v1"
+}

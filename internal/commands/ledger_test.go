@@ -435,3 +435,20 @@ func TestHeadCannotProveCompleteGoSuccess(t *testing.T) {
 		t.Fatal("cut output hid visible failure")
 	}
 }
+
+func TestInlineInterpreterWrites(t *testing.T) {
+	for _, tc := range []struct {
+		line    string
+		mayEdit bool
+	}{
+		{"python3 - <<'PY'\nopen(p,'w').write(s)\nPY", true},
+		{"python3 -c 'from pathlib import Path; Path(p).write_text(s)'", true},
+		{"node -e 'fs.writeFileSync(path, data)'", true},
+		{"python3 - <<'PY'\nprint(open(p).read())\nPY", false},
+	} {
+		got := Analyze(&session.Command{Line: tc.line, Shell: true, Cwd: "/repo"})
+		if len(got.Statements) != 1 || got.Statements[0].MayEditFiles != tc.mayEdit {
+			t.Fatalf("%s: %+v", tc.line, got.Statements)
+		}
+	}
+}

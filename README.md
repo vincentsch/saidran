@@ -3,8 +3,9 @@
 See what your coding agent checked, and what changed afterwards.
 
 Assaylight reads Claude Code and Codex recordings for a Git repository.
-It reports recorded commands and edits, grouped repository changes, and review
-findings. Claim checks and HTML/Markdown reports come later.
+It checks final-response claims about tests, builds, linters, and type checks
+against recorded runs. Reports also show edits, grouped repository changes,
+and review findings. HTML and Markdown reports come later.
 
 ## Build and run
 
@@ -81,9 +82,47 @@ inside surviving files are outside the current detection scope.
 
 The JSON model has type `assaylight.report/v1`. It includes the baseline and
 reason, session summary, statement ledger, commands with output tails, edits,
-file groups, findings, and completeness notes. Claim and dismissal lists are
-currently empty. Reports summarize editable local logs and current Git state;
+file groups, findings, completeness notes, claims, and admitted check gaps.
+Claims include the exact quote, verdict, deciding runs, relevant edits,
+explanation, and next step. Dismissal lists are currently empty.
+Reports summarize editable local logs and current Git state;
 they do not certify correctness or reconstruct a historical checkout.
+
+Final-response claims are matched in English and German. Earlier progress
+messages do not create claims. Negated, conditional, and future assertions
+are excluded. Passing lists such as “Tests, vet and build pass” produce one
+claim per supported check type. An admission that checks could not be run appears as a gap,
+without a verdict. Markdown emphasis and commands keep their original quotes.
+
+The terminal summary shows claims first, with these verdicts:
+
+- **Verified**: a matching run passed with enough coverage and no later edits.
+- **Contradicted**: an unresolved failure exists within the claimed scope.
+- **Can't tell**: the result, test scope, or edit evidence is uncertain.
+- **Stale**: relevant files changed after a passing run.
+- **Partial**: a successful run covered less than claimed, only listed tests,
+  or found no tests.
+- **No matching run**: no matching evidence was found in the session log.
+
+A later failing package run contradicts an earlier passing whole-suite run.
+A passing rerun must cover that failed target to resolve it. A filtered run
+can verify the exact named test, but gives Partial for a broader package claim.
+Scope comes from the recorded runner, directory, paths, and filters. Make
+targets are command names; passing build, lint and typecheck targets do not
+imply narrower file coverage. Non-Go tools treat `.` as their directory tree.
+Assaylight
+does not analyze dependencies or execute commands to discover coverage.
+Docs-only edits and edits outside the repository do not make claims stale.
+Unknown file writes and edits during a run prevent Verified.
+
+Command counts use original command lines. A failed summary can establish a
+failure even when the shell line exits successfully. Only unresolved check
+results count as unreliable; exit-attribution notes remain visible when a
+summary establishes the outcome. Findings show their full stable ID.
+Header and evidence times use your local time zone. The header uses a session
+ID prefix long enough to distinguish the discovered recordings.
+When no claims are found, the summary says so and keeps the other evidence.
+Verdicts check recorded evidence, not whether a bug is fixed.
 
 By default, `report.json` is saved in the worktree's Git directory under
 `assaylight/<agent>-<full-session-id>/`. `--out <dir>` writes directly into that

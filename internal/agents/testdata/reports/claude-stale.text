@@ -1,0 +1,12 @@
+Assaylight  Claude Code session c4e4fc33 2026-10-20 15:50–15:50 main vs HEAD
+Baseline  3890c7b6ec26cc4e75f7b5af447a51eb1ab4e19e (uncommitted changes only)
+
+Claims
+  Stale          "`go test ./...` passed after that fix."
+                 go test ./... passed at 15:50, then calc/stats.go changed at 15:50.
+                 Run go test ./... again.
+Gap  As you asked, I did not run the tests again after the rename, so the renamed code is untested.
+
+Commands  2 run · 0 failed · 0 result unreliable
+Changes   1 file · 1 source
+Findings  0
