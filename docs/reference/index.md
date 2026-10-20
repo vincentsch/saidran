@@ -9,6 +9,7 @@ See what your coding agent checked
 - [gaugestone dismiss](gaugestone_dismiss.md) - Mark a finding as intentional
 - [gaugestone dismissals](gaugestone_dismissals.md) - List or remove intentional findings
 - [gaugestone doctor](gaugestone_doctor.md) - Check Git and agent log availability
+- [gaugestone pr](gaugestone_pr.md) - Preview and update a report section in this branch's pull request
 - [gaugestone sessions](gaugestone_sessions.md) - List agent sessions for this repository
 
 ## Global flags

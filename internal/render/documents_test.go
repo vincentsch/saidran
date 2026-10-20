@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/vincentsch/gaugestone/internal/claims"
 	"github.com/vincentsch/gaugestone/internal/commands"
@@ -304,5 +305,43 @@ func TestMarkdownBacktickDelimitersPreserveQuotes(t *testing.T) {
 	}
 	if !strings.Contains(pandoc(t, md), "<code>a ``` b</code>") {
 		t.Fatal("backticks changed in rendered quote")
+	}
+}
+
+func TestMarkdownByteBudgets(t *testing.T) {
+	r := documentReport()
+	r.Claims[0].Quote = strings.Repeat("界 | ` <!-- gaugestone:start -->\n", 200)
+	var complete bytes.Buffer
+	opts := MarkdownOptions{ByteBudget: 60000, LocalEvidence: true}
+	if err := MarkdownWithOptions(&complete, r, opts); err != nil {
+		t.Fatal(err)
+	}
+	for _, budget := range []int{complete.Len(), complete.Len() - 1, 1500, 1, -1} {
+		t.Run(fmt.Sprint(budget), func(t *testing.T) {
+			var b bytes.Buffer
+			opts.ByteBudget = budget
+			err := MarkdownWithOptions(&b, r, opts)
+			if budget <= 1 {
+				if err == nil || b.Len() != 0 {
+					t.Fatal("tiny budget must fail without partial output")
+				}
+				return
+			}
+			if err != nil || b.Len() > budget || !utf8.Valid(b.Bytes()) {
+				t.Fatalf("budget %d, bytes %d: %v", budget, b.Len(), err)
+			}
+			if strings.Contains(b.String(), "<!-- gaugestone:start -->") || strings.Contains(b.String(), "HTML/JSON contain") {
+				t.Fatal("unsafe marker or misleading notice")
+			}
+			for _, required := range []string{"**Verdicts**", completeness(r), disclaimer, "Gaugestone test", "Run `gaugestone check` locally"} {
+				if !strings.Contains(b.String(), required) {
+					t.Fatal("missing", required)
+				}
+			}
+			if budget == complete.Len() && b.String() != complete.String() {
+				t.Fatal("exact byte budget shortened unnecessarily")
+			}
+			pandoc(t, b.String())
+		})
 	}
 }

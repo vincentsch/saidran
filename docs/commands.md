@@ -7,6 +7,7 @@ from the current CLI.
 | Command | What it does |
 | --- | --- |
 | `gaugestone check` | Checks a session and writes text, HTML, Markdown and JSON reports. This is the default command. |
+| `gaugestone pr` | Previews or updates a report section in the current pull request. See [pull requests](pull-requests.md). |
 | `gaugestone sessions` | Lists sessions for the current repository. |
 | `gaugestone demo` | Checks an embedded example without needing your own agent logs. |
 | `gaugestone doctor` | Checks git, session folders and supported log formats. |

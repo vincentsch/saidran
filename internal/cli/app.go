@@ -112,6 +112,7 @@ func New(version string, opts Options) *rungrad.App {
 		})
 	}})
 	addCheck(app, version, opts, r)
+	addPR(app, version, opts, r)
 	addDismissals(app, opts, r)
 	addDoctor(app, opts, r)
 	return app

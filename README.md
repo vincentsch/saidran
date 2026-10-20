@@ -196,6 +196,24 @@ Outside a Git repository it exits 5 with a hint; missing Git exits 2 with
 an installation command. Set `CLAUDE_CONFIG_DIR` or `CODEX_HOME` to use other
 log roots.
 
+## Add a report to a pull request
+
+```sh
+gaugestone pr --dry-run
+gaugestone pr --confirm
+```
+
+`pr` shows the final redacted Markdown section before publishing through GitHub
+CLI (`gh`). Without `--confirm`, it asks before updating the description.
+`--dry-run` previews without editing, including with `--confirm`. No local
+reports are written. The rest of the PR description stays unchanged.
+
+The default comparison uses the merge base with the PR target commit, including
+across forks. Use `--base` for a direct comparison or `--session` / `--transcript`
+to choose the recording. JSON output returns one section, URL and status document;
+publication in JSON mode requires `--confirm`. See [pull requests](docs/pull-requests.md)
+for marker replacement, size limits and errors.
+
 ## Mark intentional findings
 
 ```sh

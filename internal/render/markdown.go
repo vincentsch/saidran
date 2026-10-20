@@ -17,6 +17,16 @@ const markdownLimit = 60000
 // Markdown shortens values before assembling markup, then measures the escaped
 // document. It never cuts a completed table, code span or details block.
 func Markdown(w io.Writer, r report.Report) error {
+	return MarkdownWithOptions(w, r, MarkdownOptions{ByteBudget: markdownLimit})
+}
+
+// MarkdownOptions controls the complete escaped document, including its notices.
+type MarkdownOptions struct {
+	ByteBudget    int
+	LocalEvidence bool
+}
+
+func MarkdownWithOptions(w io.Writer, r report.Report, opts MarkdownOptions) error {
 	commands := []commands.Command{}
 	for _, c := range r.Commands {
 		failed, _ := commandResult(c)
@@ -31,8 +41,8 @@ func Markdown(w io.Writer, r report.Report) error {
 		lists = max(lists, len(r.Groups[g]))
 	}
 	for {
-		doc := markdownDocument(r, commands, n, cap, lists)
-		if len(doc) <= markdownLimit {
+		doc := markdownDocument(r, commands, n, cap, lists, opts.LocalEvidence)
+		if len(doc) <= opts.ByteBudget {
 			_, err := io.WriteString(w, doc)
 			return err
 		}
@@ -47,6 +57,9 @@ func Markdown(w io.Writer, r report.Report) error {
 		if cap > 80 {
 			cap /= 2
 			continue
+		}
+		if lists == 0 {
+			return fmt.Errorf("The shortest Markdown summary exceeds the %d-byte budget. Shorten the existing PR description or run gaugestone check locally.", opts.ByteBudget)
 		}
 		// Halving list sizes keeps very large sessions cheap to shorten.
 		lists /= 2
@@ -89,13 +102,19 @@ func mdCode(s string, limit int) string {
 	ticks := strings.Repeat("`", longest+1)
 	return ticks + " " + s + " " + ticks
 }
-func markdownDocument(r report.Report, selected []commands.Command, n, cap, lists int) string {
+func markdownDocument(r report.Report, selected []commands.Command, n, cap, lists int, localEvidence bool) string {
 	var b strings.Builder
+	notice := "HTML/JSON contain the complete evidence."
+	closing := "HTML/JSON contain the complete evidence within privacy limits."
+	if localEvidence {
+		notice = "Run `gaugestone check` locally to obtain full HTML/JSON evidence."
+		closing = notice
+	}
 	text := func(s string) string { return mdText(s, cap) }
 	code := func(s string) string { return mdCode(s, cap) }
 	omitted := func(count int, what string) {
 		if count > 0 {
-			fmt.Fprintf(&b, "\n%d %s omitted. HTML/JSON contain the complete evidence.\n", count, what)
+			fmt.Fprintf(&b, "\n%d %s omitted. %s\n", count, what, notice)
 		}
 	}
 	b.WriteString("### Gaugestone\n\n")
@@ -189,7 +208,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 	if r.Session != nil {
 		fmt.Fprintf(&b, " · %s session %s", text(session.AgentLabel(r.Session.Agent)), code(r.Session.ID))
 	}
-	fmt.Fprintf(&b, " · compared with %s\n\n%s\n\nHTML/JSON contain the complete evidence within privacy limits.\n", code(r.Repo.Baseline.Ref), disclaimer)
+	fmt.Fprintf(&b, " · compared with %s\n\n%s\n\n%s\n", code(r.Repo.Baseline.Ref), disclaimer, closing)
 	return b.String()
 }
 func side(s *string) string {
