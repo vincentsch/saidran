@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/vincentsch/assaylight/internal/report"
+	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad/output"
 )
 
@@ -29,7 +29,7 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 	} else if agent == "codex" {
 		agent = "Codex"
 	}
-	line("Assaylight  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format("2006-01-02 15:04"), r.Session.Ended.Local().Format("15:04"), r.Repo.Branch, r.Repo.Baseline.Ref))
+	line("Gaugestone  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format("2006-01-02 15:04"), r.Session.Ended.Local().Format("15:04"), r.Repo.Branch, r.Repo.Baseline.Ref))
 	line("Baseline  ", r.Repo.Baseline.Commit+" ("+r.Repo.Baseline.Reason+")")
 	fmt.Fprintln(w)
 	if len(r.Claims) == 0 {

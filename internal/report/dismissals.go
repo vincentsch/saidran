@@ -18,7 +18,7 @@ type DismissalStore struct {
 
 func LoadDismissals(gitDir string) (DismissalStore, error) {
 	s := DismissalStore{Version: 1, Entries: []Dismissal{}}
-	b, err := os.ReadFile(filepath.Join(gitDir, "assaylight", "dismissals.json"))
+	b, err := os.ReadFile(filepath.Join(gitDir, "gaugestone", "dismissals.json"))
 	if os.IsNotExist(err) {
 		return s, nil
 	}
@@ -29,7 +29,7 @@ func LoadDismissals(gitDir string) (DismissalStore, error) {
 		return s, fmt.Errorf("Could not read dismissals: %w", err)
 	}
 	if s.Version != 1 {
-		return s, fmt.Errorf("Unsupported dismissals version %d; update Assaylight", s.Version)
+		return s, fmt.Errorf("Unsupported dismissals version %d; update Gaugestone", s.Version)
 	}
 	return s, nil
 }
@@ -38,7 +38,7 @@ func (s DismissalStore) Save(gitDir string) error {
 	if err != nil {
 		return err
 	}
-	return WriteDocument(filepath.Join(gitDir, "assaylight"), "dismissals.json", append(b, '\n'))
+	return WriteDocument(filepath.Join(gitDir, "gaugestone"), "dismissals.json", append(b, '\n'))
 }
 func (r *Report) ApplyDismissals(s DismissalStore) {
 	for _, f := range r.Findings {
@@ -67,7 +67,7 @@ func ResolveFinding(ref string, ids []string) (int, error) {
 		}
 	}
 	if match < 0 {
-		return -1, rungrad.NewError(rungrad.ExitNotFound, "No matching finding. Check the current diff and baseline, or run assaylight dismissals.")
+		return -1, rungrad.NewError(rungrad.ExitNotFound, "No matching finding. Check the current diff and baseline, or run gaugestone dismissals.")
 	}
 	return match, nil
 }

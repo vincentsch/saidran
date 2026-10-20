@@ -24,11 +24,11 @@ func TestFindingReferences(t *testing.T) {
 }
 func TestDismissalStoreErrors(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(dir, "assaylight"), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "gaugestone"), 0700); err != nil {
 		t.Fatal(err)
 	}
 	for _, value := range []string{`{"version":2,"dismissals":[]}`, `{broken`} {
-		if err := os.WriteFile(filepath.Join(dir, "assaylight", "dismissals.json"), []byte(value), 0600); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, "gaugestone", "dismissals.json"), []byte(value), 0600); err != nil {
 			t.Fatal(err)
 		}
 		if _, err := LoadDismissals(dir); err == nil {

@@ -2,8 +2,8 @@ package agents_test
 
 import (
 	"encoding/json"
-	"github.com/vincentsch/assaylight/internal/findings"
-	"github.com/vincentsch/assaylight/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/findings"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/assaylight/internal/report"
+	"github.com/vincentsch/gaugestone/internal/report"
 )
 
 func TestFailurePolicy(t *testing.T) {
@@ -75,7 +75,7 @@ func TestFailurePolicy(t *testing.T) {
 		t.Fatalf("default: %d %s", code, stderr)
 	}
 	decodeReport(t, out)
-	if _, err := os.Stat(filepath.Join(repo, ".git", "assaylight")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(repo, ".git", "gaugestone")); !os.IsNotExist(err) {
 		t.Fatal("no-write wrote reports")
 	}
 }
@@ -94,7 +94,7 @@ func TestDismissalLifecycle(t *testing.T) {
 	}
 	initial := check(10, "--no-write")
 	id := initial.Findings[0].ID
-	storePath := filepath.Join(repo, ".git", "assaylight", "dismissals.json")
+	storePath := filepath.Join(repo, ".git", "gaugestone", "dismissals.json")
 	for _, args := range [][]string{
 		{"dismiss", id[:8], "--reason", "test", "--dry-run"},
 		{"dismiss", id[:8], "--reason", "test", "--dry-run", "--json"},
@@ -201,12 +201,12 @@ func TestDemoFromEmptyHome(t *testing.T) {
 	if code != 0 || stderr != "" || !strings.HasPrefix(out, "Demo: a recorded Claude Code session") || !strings.Contains(out, "Stale") {
 		t.Fatalf("demo: %d %s %s", code, out, stderr)
 	}
-	dirs, err := filepath.Glob(filepath.Join(base, "assaylight-demo-*"))
+	dirs, err := filepath.Glob(filepath.Join(base, "gaugestone-demo-*"))
 	if err != nil || len(dirs) != 1 {
 		t.Fatal(dirs, err)
 	}
 	repo := filepath.Join(dirs[0], "repo")
-	reports, err := filepath.Glob(filepath.Join(repo, ".git", "assaylight", "*", "report.json"))
+	reports, err := filepath.Glob(filepath.Join(repo, ".git", "gaugestone", "*", "report.json"))
 	if err != nil || len(reports) != 1 {
 		t.Fatal(reports, err)
 	}
@@ -235,12 +235,12 @@ func TestDemoFromEmptyHome(t *testing.T) {
 		t.Fatalf("json demo: %d %s", code, stderr)
 	}
 	decodeReport(t, out)
-	before, _ := filepath.Glob(filepath.Join(base, "assaylight-demo-*"))
+	before, _ := filepath.Glob(filepath.Join(base, "gaugestone-demo-*"))
 	code, _, stderr = runBinary(t, binary, base, "demo", "--dry-run")
 	if code != 0 {
 		t.Fatal(stderr)
 	}
-	after, _ := filepath.Glob(filepath.Join(base, "assaylight-demo-*"))
+	after, _ := filepath.Glob(filepath.Join(base, "gaugestone-demo-*"))
 	if len(before) != len(after) {
 		t.Fatal("dry-run extracted demo")
 	}
@@ -279,10 +279,10 @@ func TestDismissalWorktreeStorage(t *testing.T) {
 	if code != 0 {
 		t.Fatal(stderr)
 	}
-	if _, err := os.Stat(filepath.Join(strings.TrimSpace(string(dir)), "assaylight", "dismissals.json")); err != nil {
+	if _, err := os.Stat(filepath.Join(strings.TrimSpace(string(dir)), "gaugestone", "dismissals.json")); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Join(repo, ".git", "assaylight")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(repo, ".git", "gaugestone")); !os.IsNotExist(err) {
 		t.Fatal("wrote into main worktree")
 	}
 }
@@ -302,7 +302,7 @@ func inspectFindings(root string) ([]string, error) {
 func TestStoredDismissalResolutionFailuresDoNotWrite(t *testing.T) {
 	binary := buildBinary(t)
 	_, repo, _ := fixture(t, "claude-skip")
-	path := filepath.Join(repo, ".git", "assaylight", "dismissals.json")
+	path := filepath.Join(repo, ".git", "gaugestone", "dismissals.json")
 	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
 		t.Fatal(err)
 	}

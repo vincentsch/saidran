@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/vincentsch/assaylight/internal/claims"
-	"github.com/vincentsch/assaylight/internal/commands"
-	"github.com/vincentsch/assaylight/internal/findings"
-	"github.com/vincentsch/assaylight/internal/gitstate"
-	"github.com/vincentsch/assaylight/internal/redact"
-	"github.com/vincentsch/assaylight/internal/session"
+	"github.com/vincentsch/gaugestone/internal/claims"
+	"github.com/vincentsch/gaugestone/internal/commands"
+	"github.com/vincentsch/gaugestone/internal/findings"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/redact"
+	"github.com/vincentsch/gaugestone/internal/session"
 )
 
 type Session struct {
@@ -57,7 +57,7 @@ type Report struct {
 }
 
 func Build(version string, now time.Time, state gitstate.State, s *session.Session, notes []string) Report {
-	r := Report{Type: "assaylight.report/v1", Version: version, Generated: now, Repo: state, Groups: map[string][]gitstate.File{}, Findings: findings.Detect(state.Files), Commands: []commands.Command{}, Ledger: []commands.Entry{}, Edits: []commands.Entry{}, Claims: []claims.Claim{}, AdmittedGaps: []claims.Gap{}, Dismissals: []Dismissal{}}
+	r := Report{Type: "gaugestone.report/v1", Version: version, Generated: now, Repo: state, Groups: map[string][]gitstate.File{}, Findings: findings.Detect(state.Files), Commands: []commands.Command{}, Ledger: []commands.Entry{}, Edits: []commands.Entry{}, Claims: []claims.Claim{}, AdmittedGaps: []claims.Gap{}, Dismissals: []Dismissal{}}
 	r.Completeness.Notes = append([]string{}, notes...)
 	for _, group := range []string{"tests", "ci", "lockfiles", "config", "docs", "source", "other"} {
 		r.Groups[group] = []gitstate.File{}

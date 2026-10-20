@@ -1,4 +1,4 @@
-module github.com/vincentsch/assaylight
+module github.com/vincentsch/gaugestone
 
 go 1.27.2
 

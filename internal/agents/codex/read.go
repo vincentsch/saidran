@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	j "github.com/vincentsch/assaylight/internal/agents/logjson"
-	"github.com/vincentsch/assaylight/internal/session"
+	j "github.com/vincentsch/gaugestone/internal/agents/logjson"
+	"github.com/vincentsch/gaugestone/internal/session"
 )
 
 func cwd(v string) string {

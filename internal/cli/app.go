@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/assaylight/internal/agents"
-	"github.com/vincentsch/assaylight/internal/gitstate"
-	"github.com/vincentsch/assaylight/internal/redact"
-	"github.com/vincentsch/assaylight/internal/session"
+	"github.com/vincentsch/gaugestone/internal/agents"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/redact"
+	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
 )
 
@@ -48,7 +48,7 @@ func New(version string, opts Options) *rungrad.App {
 	}
 	home, _ := os.UserHomeDir()
 	r := redact.Redactor{Home: home}
-	app := rungrad.New(rungrad.AppConfig{Name: "assaylight", Short: "See what your coding agent checked", Long: "Review Claude Code and Codex evidence and repository changes.\nRun check (the default) for a report, or sessions to list recordings.", Version: version, ErrorPolicy: &rungrad.ErrorPolicy{Render: func(c rungrad.ErrorContext) error {
+	app := rungrad.New(rungrad.AppConfig{Name: "gaugestone", Short: "See what your coding agent checked", Long: "Review Claude Code and Codex evidence and repository changes.\nRun check (the default) for a report, or sessions to list recordings.", Version: version, ErrorPolicy: &rungrad.ErrorPolicy{Render: func(c rungrad.ErrorContext) error {
 		msg := r.Text(c.Err.Error())
 		if c.ExitCode == 10 {
 			_, e := fmt.Fprintln(c.Stderr, msg)
@@ -60,7 +60,7 @@ func New(version string, opts Options) *rungrad.App {
 		_, e := fmt.Fprintln(c.Stderr, "Error: "+msg)
 		return e
 	}}})
-	app.AddCommand(&rungrad.Command{Use: "sessions", Short: "List agent sessions for this repository", Long: "Show prompts, times, command counts and confirmed edit counts.\nAutomatic selection uses active sessions from the last seven days.\nSet CLAUDE_CONFIG_DIR or CODEX_HOME to read another log folder.", Examples: []string{"assaylight sessions", "assaylight sessions --json"}, Related: []string{"assaylight --help"}, Args: cobra.NoArgs, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	app.AddCommand(&rungrad.Command{Use: "sessions", Short: "List agent sessions for this repository", Long: "Show prompts, times, command counts and confirmed edit counts.\nAutomatic selection uses active sessions from the last seven days.\nSet CLAUDE_CONFIG_DIR or CODEX_HOME to read another log folder.", Examples: []string{"gaugestone sessions", "gaugestone sessions --json"}, Related: []string{"gaugestone --help"}, Args: cobra.NoArgs, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		root, err := gitstate.Root(opts.Dir)
 		if err != nil {
 			return err
@@ -93,7 +93,7 @@ func New(version string, opts Options) *rungrad.App {
 		}
 		return f.WriteResult(result, func(w io.Writer) {
 			if len(result.Sessions) == 0 {
-				fmt.Fprintf(w, "No sessions found. Searched %s. Run assaylight doctor to check agent logs.\n", strings.Join(result.Searched, ", "))
+				fmt.Fprintf(w, "No sessions found. Searched %s. Run gaugestone doctor to check agent logs.\n", strings.Join(result.Searched, ", "))
 			} else {
 				tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
 				fmt.Fprintln(tw, "AGENT\tID\tSTART\tEND\tDURATION\tPROMPT\tCOMMANDS\tEDITS\tPICK")

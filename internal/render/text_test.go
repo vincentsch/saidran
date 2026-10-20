@@ -8,12 +8,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/vincentsch/assaylight/internal/claims"
-	"github.com/vincentsch/assaylight/internal/commands"
-	"github.com/vincentsch/assaylight/internal/findings"
-	"github.com/vincentsch/assaylight/internal/gitstate"
-	"github.com/vincentsch/assaylight/internal/report"
-	"github.com/vincentsch/assaylight/internal/session"
+	"github.com/vincentsch/gaugestone/internal/claims"
+	"github.com/vincentsch/gaugestone/internal/commands"
+	"github.com/vincentsch/gaugestone/internal/findings"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad/output"
 )
 

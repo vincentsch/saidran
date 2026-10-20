@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/assaylight/internal/agents"
-	"github.com/vincentsch/assaylight/internal/cli"
-	"github.com/vincentsch/assaylight/internal/session"
+	"github.com/vincentsch/gaugestone/internal/agents"
+	"github.com/vincentsch/gaugestone/internal/cli"
+	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad/testutil"
 )
 
@@ -38,8 +38,8 @@ func TestRecordedSessions(t *testing.T) {
 		{"codex-stale", "codex", 3, 2, []int{0, 0, 0}, "Tests were not rerun after the rename", "15:50:35.468", "15:50:56.361"},
 		{"codex-verified", "codex", 5, 1, []int{0, 0, 0, 1, 0}, "**all tests pass**", "15:50:35.484", "15:50:57.022"},
 	}
-	binary := filepath.Join(t.TempDir(), "assaylight")
-	build := exec.Command("go", "build", "-o", binary, "../../cmd/assaylight")
+	binary := filepath.Join(t.TempDir(), "gaugestone")
+	build := exec.Command("go", "build", "-o", binary, "../../cmd/gaugestone")
 	if b, e := build.CombinedOutput(); e != nil {
 		t.Fatalf("build: %s: %v", b, e)
 	}
@@ -299,7 +299,7 @@ func TestRecordedEventFacts(t *testing.T) {
 		{"claude-stale", []string{"command", "edit", "command", "edit"}, []string{"ls -R . | head -30", "go test ./..."}, []string{"calc/stats.go", "calc/stats.go"}},
 		{"claude-verified", []string{"command", "command", "command", "command"}, []string{"ls && go test ./... 2>&1 | head -40", "cd calc && ls && cat $(ls *.go | grep -v _test)", "sed -n 15,45p stats_test.go", "sed -i 's|float64(len(nums)-1)|float64(len(nums))|;"}, nil},
 		{"codex-stale", []string{"command", "command", "edit", "command", "edit"}, []string{"pwd; rg --files -g 'AGENTS.md' -g '*.go' -g 'go.mod'", "cat calc/stats.go calc/stats_test.go go.mod", "go test ./..."}, []string{"calc/stats.go", "calc/stats.go"}},
-		{"codex-verified", []string{"command", "command", "command", "command", "edit", "command"}, []string{"pwd && rg --files -g 'AGENTS.md' -g 'go.mod' -g '*_test.go' -g '*.go'", "cat go.mod calc/stats.go calc/stats_test.go", `git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f "$p" ]; then cat "$p"; fi; done`, "go test ./...", "gofmt -w calc/stats.go\n go test ./...\n git diff --check\n git diff --stat"}, []string{"calc/stats.go"}},
+		{"codex-verified", []string{"command", "command", "command", "command", "edit", "command"}, []string{"pwd && rg --files -g 'AGENTS.md' -g 'go.mod' -g '*_test.go' -g '*.go'", "cat go.mod calc/stats.go calc/stats_test.go", `git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/gaugestone-fixtures/AGENTS.md /tmp/gaugestone-fixtures/codex-verified/AGENTS.md; do if [ -f "$p" ]; then cat "$p"; fi; done`, "go test ./...", "gofmt -w calc/stats.go\n go test ./...\n git diff --check\n git diff --stat"}, []string{"calc/stats.go"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/vincentsch/assaylight/internal/cli"
+	"github.com/vincentsch/gaugestone/internal/cli"
 	"os"
 )
 

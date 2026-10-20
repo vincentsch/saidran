@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/assaylight/internal/commands"
-	"github.com/vincentsch/assaylight/internal/findings"
-	"github.com/vincentsch/assaylight/internal/report"
+	"github.com/vincentsch/gaugestone/internal/commands"
+	"github.com/vincentsch/gaugestone/internal/findings"
+	"github.com/vincentsch/gaugestone/internal/report"
 )
 
 //go:embed report.html
@@ -119,7 +119,7 @@ func HTML(w io.Writer, r report.Report) error {
 		if ok {
 			v.DismissedCount++
 		}
-		v.FindingRows = append(v.FindingRows, findingView{Finding: f, Reason: reason, Dismissed: ok, Copy: fmt.Sprintf("assaylight dismiss %s --reason \"…\"", f.ID)})
+		v.FindingRows = append(v.FindingRows, findingView{Finding: f, Reason: reason, Dismissed: ok, Copy: fmt.Sprintf("gaugestone dismiss %s --reason \"…\"", f.ID)})
 	}
 	for _, g := range groupOrder {
 		group := groupView{Label: groupLabel(g)}

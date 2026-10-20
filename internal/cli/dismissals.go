@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/assaylight/internal/findings"
-	"github.com/vincentsch/assaylight/internal/gitstate"
-	"github.com/vincentsch/assaylight/internal/redact"
-	"github.com/vincentsch/assaylight/internal/report"
+	"github.com/vincentsch/gaugestone/internal/findings"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/redact"
+	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad"
 )
 
@@ -27,7 +27,7 @@ func dismissalLocation(dir string) (string, string, error) {
 	return root, strings.TrimSpace(string(b)), nil
 }
 func addDismissals(app *rungrad.App, opts Options, r redact.Redactor) {
-	app.AddCommand(&rungrad.Command{Use: "dismiss <finding-id>", Short: "Mark a finding as intentional", Long: "Resolve a finding from the current diff, without session logs.\nUse F- plus a full ID or a unique prefix of at least six hex characters.\nReasons are redacted before storage in this worktree's Git directory.", Examples: []string{`assaylight dismiss F-0123456789ab --reason "Intentional skip"`, `assaylight dismiss F-012345 --reason test --dry-run`}, Related: []string{"assaylight dismissals", "assaylight check"}, Args: cobra.ExactArgs(1), Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: func(cmd *cobra.Command) {
+	app.AddCommand(&rungrad.Command{Use: "dismiss <finding-id>", Short: "Mark a finding as intentional", Long: "Resolve a finding from the current diff, without session logs.\nUse F- plus a full ID or a unique prefix of at least six hex characters.\nReasons are redacted before storage in this worktree's Git directory.", Examples: []string{`gaugestone dismiss F-0123456789ab --reason "Intentional skip"`, `gaugestone dismiss F-012345 --reason test --dry-run`}, Related: []string{"gaugestone dismissals", "gaugestone check"}, Args: cobra.ExactArgs(1), Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: func(cmd *cobra.Command) {
 		cmd.Flags().String("reason", "", "Why this finding is intentional (required)")
 		cmd.Flags().String("base", "", "Compare against this Git revision")
 	}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
@@ -79,7 +79,7 @@ func addDismissals(app *rungrad.App, opts Options, r redact.Redactor) {
 		}
 		return f.WriteResult(entry, func(w io.Writer) { fmt.Fprintf(w, "Dismissed %s: %s\n", entry.ID, entry.Reason) })
 	}})
-	app.AddCommand(&rungrad.Command{Use: "dismissals", Short: "List or remove intentional findings", Long: "List reasons stored in this worktree's Git directory.\n--remove accepts a full finding ID or a unique F- prefix of at least six hex characters.", Examples: []string{"assaylight dismissals --json", "assaylight dismissals --remove F-012345"}, Related: []string{"assaylight dismiss", "assaylight check"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: func(cmd *cobra.Command) { cmd.Flags().String("remove", "", "Remove a stored dismissal") }, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	app.AddCommand(&rungrad.Command{Use: "dismissals", Short: "List or remove intentional findings", Long: "List reasons stored in this worktree's Git directory.\n--remove accepts a full finding ID or a unique F- prefix of at least six hex characters.", Examples: []string{"gaugestone dismissals --json", "gaugestone dismissals --remove F-012345"}, Related: []string{"gaugestone dismiss", "gaugestone check"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: func(cmd *cobra.Command) { cmd.Flags().String("remove", "", "Remove a stored dismissal") }, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		_, gitDir, err := dismissalLocation(opts.Dir)
 		if err != nil {
 			return err

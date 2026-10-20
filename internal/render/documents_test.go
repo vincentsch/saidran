@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/assaylight/internal/claims"
-	"github.com/vincentsch/assaylight/internal/commands"
-	"github.com/vincentsch/assaylight/internal/findings"
-	"github.com/vincentsch/assaylight/internal/gitstate"
-	"github.com/vincentsch/assaylight/internal/report"
-	"github.com/vincentsch/assaylight/internal/session"
+	"github.com/vincentsch/gaugestone/internal/claims"
+	"github.com/vincentsch/gaugestone/internal/commands"
+	"github.com/vincentsch/gaugestone/internal/findings"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/gaugestone/internal/session"
 )
 
 func documentReport() report.Report {
@@ -61,7 +61,7 @@ func pandoc(t *testing.T, md string) string {
 }
 func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 	r := documentReport()
-	poison := "a | b\n``` ` <script>alert(1)</script> <!-- assaylight:start --> <!-- assaylight:end --> <!-- assaylight -->"
+	poison := "a | b\n``` ` <script>alert(1)</script> <!-- gaugestone:start --> <!-- gaugestone:end --> <!-- gaugestone -->"
 	r.Claims[0].Quote = poison
 	r.Claims[0].Explanation = poison
 	r.Commands[0].Original.Line = poison
@@ -70,7 +70,7 @@ func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 	r.Findings = []findings.Finding{{ID: "F-0123456789ab", Path: poison, Code: "check_disabled", Explanation: poison}}
 	r.Dismissals = []report.Dismissal{{ID: r.Findings[0].ID, Reason: poison}}
 	h, m := documents(t, r)
-	for _, marker := range []string{"<!-- assaylight:start -->", "<!-- assaylight:end -->", "<!-- assaylight -->", "<script>alert(1)</script>"} {
+	for _, marker := range []string{"<!-- gaugestone:start -->", "<!-- gaugestone:end -->", "<!-- gaugestone -->", "<script>alert(1)</script>"} {
 		if strings.Contains(h, marker) || strings.Contains(m, marker) {
 			t.Fatalf("unescaped %q", marker)
 		}
@@ -83,11 +83,11 @@ func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 			t.Fatalf("missing %s", text)
 		}
 	}
-	if !strings.Contains(h, `assaylight dismiss F-0123456789ab --reason`) {
+	if !strings.Contains(h, `gaugestone dismiss F-0123456789ab --reason`) {
 		t.Fatal("missing copy command")
 	}
 	rendered := pandoc(t, m)
-	if strings.Contains(rendered, "<script>") || strings.Contains(rendered, "<!-- assaylight") {
+	if strings.Contains(rendered, "<script>") || strings.Contains(rendered, "<!-- gaugestone") {
 		t.Fatal("unsafe rendered Markdown")
 	}
 	// Network attributes and CSS must remain local. Untrusted text has no way to

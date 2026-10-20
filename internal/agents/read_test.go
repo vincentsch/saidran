@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/assaylight/internal/agents"
-	"github.com/vincentsch/assaylight/internal/session"
+	"github.com/vincentsch/gaugestone/internal/agents"
+	"github.com/vincentsch/gaugestone/internal/session"
 )
 
 func writeLog(t *testing.T, file string, records ...string) string {

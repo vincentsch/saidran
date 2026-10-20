@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/vincentsch/assaylight/internal/agents"
-	"github.com/vincentsch/assaylight/internal/commands"
+	"github.com/vincentsch/gaugestone/internal/agents"
+	"github.com/vincentsch/gaugestone/internal/commands"
 )
 
 // These expectations are hand-labelled from the original tool invocations and

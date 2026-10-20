@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/assaylight/internal/agents/claude"
-	"github.com/vincentsch/assaylight/internal/agents/codex"
-	"github.com/vincentsch/assaylight/internal/redact"
-	"github.com/vincentsch/assaylight/internal/session"
+	"github.com/vincentsch/gaugestone/internal/agents/claude"
+	"github.com/vincentsch/gaugestone/internal/agents/codex"
+	"github.com/vincentsch/gaugestone/internal/redact"
+	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
 	"github.com/vincentsch/rungrad/choose"
 )
@@ -248,11 +248,11 @@ func Select(all []*session.Session, ref, transcript string, now time.Time, f *ru
 		if len(matches) == 1 {
 			return Selection{Session: matches[0]}, nil
 		}
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Run assaylight doctor to check agent logs, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Run gaugestone doctor to check agent logs, or use --transcript.")
 	}
 	picks := Automatic(all, now)
 	if len(picks) == 0 {
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Run assaylight doctor to check agent logs, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Run gaugestone doctor to check agent logs, or use --transcript.")
 	}
 	if len(picks) == 2 {
 		if f != nil && f.CanPrompt() {

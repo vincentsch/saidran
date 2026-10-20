@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/vincentsch/assaylight/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
 )
 
 type Finding struct {

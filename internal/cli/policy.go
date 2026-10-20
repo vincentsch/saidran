@@ -3,7 +3,7 @@ package cli
 import (
 	"strings"
 
-	"github.com/vincentsch/assaylight/internal/report"
+	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad"
 )
 

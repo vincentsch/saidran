@@ -151,14 +151,14 @@
         "argv": [
           "/bin/bash",
           "-lc",
-          "git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done"
+          "git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/gaugestone-fixtures/AGENTS.md /tmp/gaugestone-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done"
         ],
         "cwd": "/fixture/repo",
         "end": "2026-10-20T15:50:47.51Z",
         "exit_code": 0,
         "exit_note": "",
         "exit_reliable": true,
-        "line": "git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
+        "line": "git status --short; for p in /AGENTS.md /tmp/AGENTS.md /tmp/gaugestone-fixtures/AGENTS.md /tmp/gaugestone-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
         "output": "",
         "shell": true,
         "start": "2026-10-20T15:50:47.509993429Z",
@@ -198,7 +198,7 @@
           "exit_code": 0,
           "exit_note": "",
           "exit_reliable": true,
-          "line": "for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
+          "line": "for p in /AGENTS.md /tmp/AGENTS.md /tmp/gaugestone-fixtures/AGENTS.md /tmp/gaugestone-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
           "may_edit_files": false,
           "runner": "",
           "scope": "unknown",
@@ -580,7 +580,7 @@
         "exit_code": 0,
         "exit_note": "",
         "exit_reliable": true,
-        "line": "for p in /AGENTS.md /tmp/AGENTS.md /tmp/assaylight-fixtures/AGENTS.md /tmp/assaylight-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
+        "line": "for p in /AGENTS.md /tmp/AGENTS.md /tmp/gaugestone-fixtures/AGENTS.md /tmp/gaugestone-fixtures/codex-verified/AGENTS.md; do if [ -f \"$p\" ]; then cat \"$p\"; fi; done",
         "may_edit_files": false,
         "runner": "",
         "scope": "unknown",
@@ -821,5 +821,5 @@
     "version": "0.163.0"
   },
   "tool_version": "test-version",
-  "type": "assaylight.report/v1"
+  "type": "gaugestone.report/v1"
 }

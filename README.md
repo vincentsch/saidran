@@ -1,8 +1,8 @@
-# Assaylight
+# Gaugestone
 
 See what your coding agent checked, and what changed afterwards.
 
-Assaylight reads Claude Code and Codex recordings for a Git repository.
+Gaugestone reads Claude Code and Codex recordings for a Git repository.
 It checks final-response claims about tests, builds, linters, and type checks
 against recorded runs. Reports also show edits, grouped repository changes,
 and review findings in text, HTML, Markdown and JSON reports.
@@ -14,12 +14,12 @@ Go downloads the matching toolchain when automatic toolchain selection is enable
 
 ```sh
 make build
-bin/assaylight
-bin/assaylight check --no-write --json
-bin/assaylight sessions
-bin/assaylight sessions --json
-bin/assaylight --help
-bin/assaylight --version
+bin/gaugestone
+bin/gaugestone check --no-write --json
+bin/gaugestone sessions
+bin/gaugestone sessions --json
+bin/gaugestone --help
+bin/gaugestone --version
 ```
 
 Run the command inside the repository you want to inspect. The list shows
@@ -29,7 +29,7 @@ Failed or pending edit calls do not count as confirmed edits. The session list
 counts edits recorded by the agent tools. Shell edits and individual check
 results appear in the check report.
 
-Assaylight searches `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/` and
+Gaugestone searches `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/` and
 `${CODEX_HOME:-~/.codex}/sessions/`. Sessions started in repository subfolders
 belong to the same repository. Automatic selection uses sessions from the last
 seven days with at least one command or confirmed edit. When two agents finish
@@ -49,15 +49,15 @@ writing reports.
 
 ## Repository evidence reports
 
-`assaylight` and `assaylight check` select a session and compare the current
+`gaugestone` and `gaugestone check` select a session and compare the current
 repository with a baseline. Use `--session <ID>` (or `claude:<ID>` /
 `codex:<ID>`) to select a recording, or `--transcript <file>` to read one
 explicitly, regardless of age. The recording must belong to this repository.
 
 ```sh
-assaylight check --base origin/main
-assaylight check --transcript /path/to/session.jsonl --format json --no-write
-assaylight check --session codex:session-id --out ./evidence
+gaugestone check --base origin/main
+gaugestone check --transcript /path/to/session.jsonl --format json --no-write
+gaugestone check --session codex:session-id --out ./evidence
 ```
 
 An explicit `--base` wins. Otherwise the baseline is the merge base of HEAD
@@ -80,7 +80,7 @@ script in package.json/composer.json or the literal Makefile `test` target.
 Findings have stable IDs tied to the exact diff context. Removed test functions
 inside surviving files are outside the current detection scope.
 
-The JSON model has type `assaylight.report/v1`. It includes the baseline and
+The JSON model has type `gaugestone.report/v1`. It includes the baseline and
 reason, session summary, statement ledger, commands with output tails, edits,
 file groups, findings, completeness notes, claims, and admitted check gaps.
 Claims include the exact quote, verdict, deciding runs, relevant edits,
@@ -110,7 +110,7 @@ can verify the exact named test, but gives Partial for a broader package claim.
 Scope comes from the recorded runner, directory, paths, and filters. Make
 targets are command names; passing build, lint and typecheck targets do not
 imply narrower file coverage. Non-Go tools treat `.` as their directory tree.
-Assaylight
+Gaugestone
 does not analyze dependencies or execute commands to discover coverage.
 Docs-only edits and edits outside the repository do not make claims stale.
 Unknown file writes and edits during a run prevent Verified.
@@ -126,7 +126,7 @@ Verdicts check recorded evidence, not whether a bug is fixed.
 
 By default, `report.html`, `report.md` and `report.json` are saved in the
 worktree's Git directory under
-`assaylight/<agent>-<full-session-id>/`. `--out <dir>` writes directly into that
+`gaugestone/<agent>-<full-session-id>/`. `--out <dir>` writes directly into that
 directory. `--no-write` creates no report files or directories. `--dry-run`
 previews the report write. `--json`, `--format json`, and `--format=json` print
 one redacted JSON document, with no progress or report-path lines; errors use
@@ -154,14 +154,14 @@ runtime failures exit 2. Findings do not change the exit code unless `--fail-on`
 
 ## Try the example or check your setup
 
-`assaylight demo` needs no agent history and works outside a repository. It
+`gaugestone demo` needs no agent history and works outside a repository. It
 extracts a recorded Claude Code session on a small Go project, shows a Stale
 claim, and writes HTML, Markdown and JSON reports. The transcript stays beside
 the extracted repository. The printed report path is inside a temporary
-`assaylight-demo-*` directory; delete that directory when you are done.
+`gaugestone-demo-*` directory; delete that directory when you are done.
 `demo --dry-run` previews extraction without creating files.
 
-`assaylight doctor` checks Git, the current repository and configured agent
+`gaugestone doctor` checks Git, the current repository and configured agent
 log roots. It shows session counts for this repository, the newest observed
 agent format versions, unsupported recordings and steps to fix problems.
 `--json` provides the same metadata without private session messages.
@@ -172,10 +172,10 @@ log roots.
 ## Mark intentional findings
 
 ```sh
-assaylight dismiss F-0123456789ab --reason "Intentional platform skip"
-assaylight dismiss F-012345 --reason "Intentional platform skip" --dry-run
-assaylight dismissals --json
-assaylight dismissals --remove F-012345
+gaugestone dismiss F-0123456789ab --reason "Intentional platform skip"
+gaugestone dismiss F-012345 --reason "Intentional platform skip" --dry-run
+gaugestone dismissals --json
+gaugestone dismissals --remove F-012345
 ```
 
 Use the full finding ID or a unique prefix with `F-` and at least six hex
@@ -185,7 +185,7 @@ Only findings can be dismissed. An unknown ID exits 5; an ambiguous or invalid
 prefix exits 1. Neither writes anything.
 
 Reasons are redacted before storage. Dismissals are saved atomically in this
-worktree's Git directory under `assaylight/dismissals.json`. Each entry keeps
+worktree's Git directory under `gaugestone/dismissals.json`. Each entry keeps
 the time, code, path and exact redacted diff context. Changed context gives a
 new ID and requires another dismissal. Reports retain matching findings and
 reasons: collapsed in HTML and Markdown, explicit in text and JSON.
@@ -194,8 +194,8 @@ reasons: collapsed in HTML and Markdown, explicit in text and JSON.
 ## Choose an exit policy
 
 ```sh
-assaylight check --fail-on contradicted,stale,test_skipped
-assaylight check --fail-on "stale, test_skipped" --no-write --json
+gaugestone check --fail-on contradicted,stale,test_skipped
+gaugestone check --fail-on "stale, test_skipped" --no-write --json
 ```
 
 `--fail-on` accepts comma-separated `verified`, `stale`, `contradicted`,

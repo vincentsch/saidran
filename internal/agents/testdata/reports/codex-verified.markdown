@@ -1,4 +1,4 @@
-### Assaylight
+### Gaugestone
 
 **Verdicts**: 1 Verified · 0 Stale · 0 Contradicted · 0 Partial · 0 No matching run · 0 Can't tell
 
@@ -30,7 +30,7 @@ Source (1):
 **Findings** (0)
 
 
-Assaylight test\-version · generated 2026-10-20 18:00:00 UTC · codex session ` 01a15a01-e096-75a0-949b-a6a54de28182 ` · compared with ` HEAD `
+Gaugestone test\-version · generated 2026-10-20 18:00:00 UTC · codex session ` 01a15a01-e096-75a0-949b-a6a54de28182 ` · compared with ` HEAD `
 
 This report summarises the agent's session log and your git state. Session logs are local files and can be edited. It is not a certificate.
 

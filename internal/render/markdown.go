@@ -7,8 +7,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/vincentsch/assaylight/internal/commands"
-	"github.com/vincentsch/assaylight/internal/report"
+	"github.com/vincentsch/gaugestone/internal/commands"
+	"github.com/vincentsch/gaugestone/internal/report"
 )
 
 const markdownLimit = 60000
@@ -97,7 +97,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 			fmt.Fprintf(&b, "\n%d %s omitted. HTML/JSON contain the complete evidence.\n", count, what)
 		}
 	}
-	b.WriteString("### Assaylight\n\n")
+	b.WriteString("### Gaugestone\n\n")
 	fmt.Fprintf(&b, "**Verdicts**: %s\n\n", verdictTotals(r))
 	b.WriteString("| Claim | Verdict | Evidence |\n| --- | --- | --- |\n")
 	for _, c := range r.Claims[:min(lists, len(r.Claims))] {
@@ -184,7 +184,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 		}
 	}
 	omitted(len(r.Findings)-min(lists, len(r.Findings)), "findings")
-	fmt.Fprintf(&b, "\nAssaylight %s · generated %s", text(r.Version), stamp(r.Generated))
+	fmt.Fprintf(&b, "\nGaugestone %s · generated %s", text(r.Version), stamp(r.Generated))
 	if r.Session != nil {
 		fmt.Fprintf(&b, " · %s session %s", text(r.Session.Agent), code(r.Session.ID))
 	}

@@ -9,12 +9,12 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/assaylight/internal/agents"
-	"github.com/vincentsch/assaylight/internal/demo"
-	"github.com/vincentsch/assaylight/internal/gitstate"
-	"github.com/vincentsch/assaylight/internal/redact"
-	"github.com/vincentsch/assaylight/internal/render"
-	"github.com/vincentsch/assaylight/internal/report"
+	"github.com/vincentsch/gaugestone/internal/agents"
+	"github.com/vincentsch/gaugestone/internal/demo"
+	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/redact"
+	"github.com/vincentsch/gaugestone/internal/render"
+	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad"
 	"github.com/vincentsch/rungrad/output"
 	"golang.org/x/term"
@@ -138,7 +138,7 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 			if s.ID == "" || s.ID == "." || s.ID == ".." || strings.ContainsAny(s.ID, "/\\") {
 				return rungrad.NewError(rungrad.ExitAPI, "The session has an invalid ID; choose another recording.")
 			}
-			dir = filepath.Join(state.GitDir, "assaylight", s.Agent+"-"+s.ID)
+			dir = filepath.Join(state.GitDir, "gaugestone", s.Agent+"-"+s.ID)
 		} else if !filepath.IsAbs(dir) {
 			dir = filepath.Join(opts.Dir, dir)
 		}
@@ -204,7 +204,7 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		return policyResult(model, policy)
 	}
 	run := func(f *rungrad.Factory, cmd *cobra.Command, args []string) error { return execute(opts, f, cmd, args) }
-	app.AddCommand(&rungrad.Command{Use: "demo", Short: "Try a recorded session without agent history", Long: "Extract a recorded Go project to a temporary directory and write all three reports.\nThe example stays there until you delete it.", Examples: []string{"assaylight demo", "assaylight demo --json"}, Related: []string{"assaylight check", "assaylight doctor"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	app.AddCommand(&rungrad.Command{Use: "demo", Short: "Try a recorded session without agent history", Long: "Extract a recorded Go project to a temporary directory and write all three reports.\nThe example stays there until you delete it.", Examples: []string{"gaugestone demo", "gaugestone demo --json"}, Related: []string{"gaugestone check", "gaugestone doctor"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		if f.DryRun() {
 			return f.WritePreview(output.DryRunPreview{Method: "extract", Path: "temporary demo directory"})
 		}
@@ -222,12 +222,12 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		demoOpts.Dir = repo
 		return execute(demoOpts, f, check, nil)
 	}})
-	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites local HTML, Markdown and JSON reports; --no-write only prints evidence.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"assaylight check", "assaylight check --transcript session.jsonl --json", "assaylight check --base origin/main --no-write"}, Related: []string{"assaylight sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
+	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites local HTML, Markdown and JSON reports; --no-write only prints evidence.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"gaugestone check", "gaugestone check --transcript session.jsonl --json", "gaugestone check --base origin/main --no-write"}, Related: []string{"gaugestone sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
 	root := app.Root()
 	configure(root)
 	root.Args = func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
-			return rungrad.NewError(rungrad.ExitUsage, "Unknown command: "+args[0]+". Use assaylight --help.")
+			return rungrad.NewError(rungrad.ExitUsage, "Unknown command: "+args[0]+". Use gaugestone --help.")
 		}
 		return nil
 	}

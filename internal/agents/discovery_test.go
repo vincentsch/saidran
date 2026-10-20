@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/vincentsch/assaylight/internal/agents"
+	"github.com/vincentsch/gaugestone/internal/agents"
 )
 
 func TestSymlinkedLogRootsAndProjectNames(t *testing.T) {

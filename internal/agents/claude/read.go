@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	j "github.com/vincentsch/assaylight/internal/agents/logjson"
-	"github.com/vincentsch/assaylight/internal/session"
+	j "github.com/vincentsch/gaugestone/internal/agents/logjson"
+	"github.com/vincentsch/gaugestone/internal/session"
 )
 
 var exitText = regexp.MustCompile(`^Exit code ([0-9]+)\b`)
