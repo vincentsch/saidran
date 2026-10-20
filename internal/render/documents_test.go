@@ -51,7 +51,7 @@ func pandoc(t *testing.T, md string) string {
 		t.Fatalf("pandoc: %v %s", err, b)
 	}
 	html := string(b)
-	if strings.Count(html, "<details>") != 1 || strings.Count(html, "</details>") != 1 || strings.Count(html, "<table>") != strings.Count(html, "</table>") {
+	if strings.Count(html, "<details>") < 1 || strings.Count(html, "<details>") != strings.Count(html, "</details>") || strings.Count(html, "<table>") != strings.Count(html, "</table>") {
 		t.Fatal("unbalanced Markdown HTML")
 	}
 	if strings.Count(html, "<h3") != 1 {

@@ -167,14 +167,21 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 	}
 	fmt.Fprintf(&b, "\n%d changed files in total.\n\n**Findings** (%d)\n\n", total, len(r.Findings))
 	for _, f := range r.Findings[:min(lists, len(r.Findings))] {
+		reason, dismissed := dismissal(r, f.ID)
+		if dismissed {
+			fmt.Fprintf(&b, "<details><summary>Dismissed: %s</summary>\n\n", mdCode(f.ID, 0))
+		}
 		fmt.Fprintf(&b, "- %s %s in %s: %s", mdCode(f.ID, 0), code(f.Code), code(fmt.Sprintf("%s:%d", f.Path, f.Line)), text(f.Explanation))
 		if f.Old != nil || f.New != nil {
 			fmt.Fprintf(&b, " · %s → %s", code(side(f.Old)), code(side(f.New)))
 		}
-		if reason, ok := dismissal(r, f.ID); ok {
+		if dismissed {
 			fmt.Fprintf(&b, " · Dismissed: %s", text(reason))
 		}
 		b.WriteByte('\n')
+		if dismissed {
+			b.WriteString("\n</details>\n\n")
+		}
 	}
 	omitted(len(r.Findings)-min(lists, len(r.Findings)), "findings")
 	fmt.Fprintf(&b, "\nAssaylight %s · generated %s", text(r.Version), stamp(r.Generated))

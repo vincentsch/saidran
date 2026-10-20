@@ -50,6 +50,10 @@ func New(version string, opts Options) *rungrad.App {
 	r := redact.Redactor{Home: home}
 	app := rungrad.New(rungrad.AppConfig{Name: "assaylight", Short: "See what your coding agent checked", Long: "Review Claude Code and Codex evidence and repository changes.\nRun check (the default) for a report, or sessions to list recordings.", Version: version, ErrorPolicy: &rungrad.ErrorPolicy{Render: func(c rungrad.ErrorContext) error {
 		msg := r.Text(c.Err.Error())
+		if c.ExitCode == 10 {
+			_, e := fmt.Fprintln(c.Stderr, msg)
+			return e
+		}
 		if c.MachineOutput {
 			return json.NewEncoder(c.Stderr).Encode(map[string]any{"error": msg, "exit_code": c.ExitCode})
 		}
@@ -89,7 +93,7 @@ func New(version string, opts Options) *rungrad.App {
 		}
 		return f.WriteResult(result, func(w io.Writer) {
 			if len(result.Sessions) == 0 {
-				fmt.Fprintf(w, "No sessions found. Searched %s.\n", strings.Join(result.Searched, ", "))
+				fmt.Fprintf(w, "No sessions found. Searched %s. Run assaylight doctor to check agent logs.\n", strings.Join(result.Searched, ", "))
 			} else {
 				tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
 				fmt.Fprintln(tw, "AGENT\tID\tSTART\tEND\tDURATION\tPROMPT\tCOMMANDS\tEDITS\tPICK")
@@ -108,6 +112,8 @@ func New(version string, opts Options) *rungrad.App {
 		})
 	}})
 	addCheck(app, version, opts, r)
+	addDismissals(app, opts, r)
+	addDoctor(app, opts, r)
 	return app
 }
 func row(s *session.Session, all []*session.Session, r redact.Redactor) Row {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vincentsch/assaylight/internal/agents"
+	"github.com/vincentsch/assaylight/internal/demo"
 	"github.com/vincentsch/assaylight/internal/gitstate"
 	"github.com/vincentsch/assaylight/internal/redact"
 	"github.com/vincentsch/assaylight/internal/render"
@@ -44,6 +45,7 @@ func Run(version string, opts Options, args []string, stdout, stderr io.Writer) 
 }
 func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor) {
 	configure := func(cmd *cobra.Command) {
+		cmd.Flags().String("fail-on", "", "Exit 10 after reporting matching verdicts or active finding codes (comma-separated)")
 		cmd.Flags().String("session", "", "Select a session ID or agent:ID")
 		cmd.Flags().String("transcript", "", "Read an explicit session recording")
 		cmd.Flags().String("base", "", "Compare against this Git revision")
@@ -52,8 +54,16 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		cmd.Flags().Bool("no-write", false, "Print evidence without writing a report")
 		cmd.Flags().Bool("open", false, "Open the written HTML report in your browser")
 	}
-	run := func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	execute := func(opts Options, f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		get := func(name string) string { v, _ := cmd.Flags().GetString(name); return v }
+		var policy map[string]bool
+		if cmd.Flags().Changed("fail-on") {
+			var err error
+			policy, err = parsePolicy(get("fail-on"))
+			if err != nil {
+				return err
+			}
+		}
 		format := get("format")
 		if format != "" && format != "text" && format != "html" && format != "markdown" {
 			return rungrad.NewError(rungrad.ExitUsage, "Choose --format text, html, markdown or json.")
@@ -96,6 +106,11 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 			notes = append(notes, selected.Note)
 		}
 		model := report.Build(version, opts.Now(), state, s, notes)
+		store, err := report.LoadDismissals(state.GitDir)
+		if err != nil {
+			return err
+		}
+		model.ApplyDismissals(store)
 		safe, err := model.SafeValue(r)
 		if err != nil {
 			return err
@@ -139,13 +154,19 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 			}
 		}
 		if format == "html" {
-			return render.HTML(f.Stdout, display)
+			if err := render.HTML(f.Stdout, display); err != nil {
+				return err
+			}
+			return policyResult(model, policy)
 		}
 		if format == "markdown" {
-			return render.Markdown(f.Stdout, display)
+			if err := render.Markdown(f.Stdout, display); err != nil {
+				return err
+			}
+			return policyResult(model, policy)
 		}
 
-		return f.WriteResult(safe, func(w io.Writer) {
+		err = f.WriteResult(safe, func(w io.Writer) {
 			width := 100
 			if file, ok := f.Stdout.(*os.File); ok {
 				if columns, _, err := term.GetSize(int(file.Fd())); err == nil {
@@ -161,7 +182,30 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 				fmt.Fprintf(w, "Report: %s\n", r.Text(filepath.Join(dir, "report.html")))
 			}
 		})
+		if err != nil {
+			return err
+		}
+		return policyResult(model, policy)
 	}
+	run := func(f *rungrad.Factory, cmd *cobra.Command, args []string) error { return execute(opts, f, cmd, args) }
+	app.AddCommand(&rungrad.Command{Use: "demo", Short: "Try a recorded session without agent history", Long: "Extract a recorded Go project to a temporary directory and write all three reports.\nThe example stays there until you delete it.", Examples: []string{"assaylight demo", "assaylight demo --json"}, Related: []string{"assaylight check", "assaylight doctor"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+		if f.DryRun() {
+			return f.WritePreview(output.DryRunPreview{Method: "extract", Path: "temporary demo directory"})
+		}
+		repo, transcript, err := demo.Extract()
+		if err != nil {
+			return err
+		}
+		if !f.Flags.JSON {
+			fmt.Fprintln(f.Stdout, "Demo: a recorded Claude Code session on a small Go project. Nothing here touches your repositories.")
+		}
+		check := &cobra.Command{}
+		configure(check)
+		_ = check.Flags().Set("transcript", transcript)
+		demoOpts := opts
+		demoOpts.Dir = repo
+		return execute(demoOpts, f, check, nil)
+	}})
 	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites local HTML, Markdown and JSON reports; --no-write only prints evidence.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"assaylight check", "assaylight check --transcript session.jsonl --json", "assaylight check --base origin/main --no-write"}, Related: []string{"assaylight sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
 	root := app.Root()
 	configure(root)

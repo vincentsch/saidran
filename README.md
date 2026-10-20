@@ -84,7 +84,7 @@ The JSON model has type `assaylight.report/v1`. It includes the baseline and
 reason, session summary, statement ledger, commands with output tails, edits,
 file groups, findings, completeness notes, claims, and admitted check gaps.
 Claims include the exact quote, verdict, deciding runs, relevant edits,
-explanation, and next step. Dismissal lists are currently empty.
+explanation, and next step. Dismissals include reasons and the matching finding IDs.
 Reports summarize editable local logs and current Git state;
 they do not certify correctness or reconstruct a historical checkout.
 
@@ -150,7 +150,66 @@ the session ended. Local session logs can be edited. A report is not a
 certificate.
 
 Conflicting formats exit 1. No matching session or no repository exits 5;
-runtime failures exit 2. Findings do not change the exit code.
+runtime failures exit 2. Findings do not change the exit code unless `--fail-on` is given.
+
+## Try the example or check your setup
+
+`assaylight demo` needs no agent history and works outside a repository. It
+extracts a recorded Claude Code session on a small Go project, shows a Stale
+claim, and writes HTML, Markdown and JSON reports. The transcript stays beside
+the extracted repository. The printed report path is inside a temporary
+`assaylight-demo-*` directory; delete that directory when you are done.
+`demo --dry-run` previews extraction without creating files.
+
+`assaylight doctor` checks Git, the current repository and configured agent
+log roots. It shows session counts for this repository, the newest observed
+agent format versions, unsupported recordings and steps to fix problems.
+`--json` provides the same metadata without private session messages.
+Outside a Git repository it exits 5 with a hint; missing Git exits 2 with
+an installation command. Set `CLAUDE_CONFIG_DIR` or `CODEX_HOME` to use other
+log roots.
+
+## Mark intentional findings
+
+```sh
+assaylight dismiss F-0123456789ab --reason "Intentional platform skip"
+assaylight dismiss F-012345 --reason "Intentional platform skip" --dry-run
+assaylight dismissals --json
+assaylight dismissals --remove F-012345
+```
+
+Use the full finding ID or a unique prefix with `F-` and at least six hex
+characters. Dismiss resolves against the current diff, using check's baseline
+rules and an optional `--base`. It needs no session logs or saved report.
+Only findings can be dismissed. An unknown ID exits 5; an ambiguous or invalid
+prefix exits 1. Neither writes anything.
+
+Reasons are redacted before storage. Dismissals are saved atomically in this
+worktree's Git directory under `assaylight/dismissals.json`. Each entry keeps
+the time, code, path and exact redacted diff context. Changed context gives a
+new ID and requires another dismissal. Reports retain matching findings and
+reasons: collapsed in HTML and Markdown, explicit in text and JSON.
+`--dry-run` previews dismissals and removals without changing files.
+
+## Choose an exit policy
+
+```sh
+assaylight check --fail-on contradicted,stale,test_skipped
+assaylight check --fail-on "stale, test_skipped" --no-write --json
+```
+
+`--fail-on` accepts comma-separated `verified`, `stale`, `contradicted`,
+`partial`, `no_matching_run`, `cant_tell`, `test_skipped`, `test_deleted`,
+`check_disabled`, `ci_ignores_failure`, and `test_command_changed`. Whitespace
+around values is ignored. Unknown or empty values exit 1.
+
+Matching claim verdicts or active findings give exit 10 after successful
+report generation. Dismissed findings do not count. Normal stdout stays
+intact, including one complete JSON report with either JSON alias. One stderr
+line names the matches. Report-write failures exit 2 instead; ordinary JSON
+errors still use empty stdout and a JSON error on stderr. `--no-write`
+evaluates the report without saving files. Without `--fail-on`, findings
+and verdicts leave exit 0.
 
 ## Development checks
 

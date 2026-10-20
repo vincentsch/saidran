@@ -31,8 +31,12 @@ type Completeness struct {
 	Notes        []string `json:"notes"`
 }
 type Dismissal struct {
-	ID     string `json:"id"`
-	Reason string `json:"reason"`
+	ID      string    `json:"id"`
+	Reason  string    `json:"reason"`
+	Time    time.Time `json:"time,omitempty"`
+	Code    string    `json:"code,omitempty"`
+	Path    string    `json:"path,omitempty"`
+	Context string    `json:"context,omitempty"`
 }
 
 type Report struct {

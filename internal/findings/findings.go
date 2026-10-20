@@ -14,6 +14,7 @@ import (
 )
 
 type Finding struct {
+	Context     string  `json:"-"`
 	ID          string  `json:"id"`
 	Code        string  `json:"code"`
 	Path        string  `json:"path"`
@@ -73,7 +74,7 @@ func Detect(files []gitstate.File) []Finding {
 		key := code + "\x00" + f.Path + "\x00" + hunk
 		counts[key]++
 		sum := sha256.Sum256([]byte(fmt.Sprintf("%s\x00%d", key, counts[key])))
-		result = append(result, Finding{ID: fmt.Sprintf("F-%x", sum[:6]), Code: code, Path: f.Path, Line: line, Explanation: explanation, Old: old, New: newValue, Values: values})
+		result = append(result, Finding{Context: hunk, ID: fmt.Sprintf("F-%x", sum[:6]), Code: code, Path: f.Path, Line: line, Explanation: explanation, Old: old, New: newValue, Values: values})
 	}
 	for _, f := range files {
 		if f.Status == "D" && f.Group == "tests" {

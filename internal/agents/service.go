@@ -55,7 +55,15 @@ func Read(file string) (*session.Session, error) {
 	}
 }
 
+type Observation struct {
+	Agent, Version string
+	Ended          time.Time
+	Unsupported    int
+	Supported      bool
+}
+
 type Discovery struct {
+	Observed []Observation
 	Sessions []*session.Session
 	Roots    []string
 	Notes    []string
@@ -132,6 +140,9 @@ func Discover(repo string) (Discovery, error) {
 			}
 			// Confirm the cwd from the recording rather than trusting encoded names.
 			s, e := Read(path)
+			if s != nil && Within(repo, s.Cwd) {
+				d.Observed = append(d.Observed, Observation{Agent: s.Agent, Version: s.AgentVersion, Ended: s.Ended, Unsupported: s.Unsupported, Supported: e == nil})
+			}
 			if e != nil {
 				d.Notes = append(d.Notes, e.Error())
 				return nil
@@ -237,11 +248,11 @@ func Select(all []*session.Session, ref, transcript string, now time.Time, f *ru
 		if len(matches) == 1 {
 			return Selection{Session: matches[0]}, nil
 		}
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Check CLAUDE_CONFIG_DIR or CODEX_HOME, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Run assaylight doctor to check agent logs, or use --transcript.")
 	}
 	picks := Automatic(all, now)
 	if len(picks) == 0 {
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Check CLAUDE_CONFIG_DIR or CODEX_HOME, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Run assaylight doctor to check agent logs, or use --transcript.")
 	}
 	if len(picks) == 2 {
 		if f != nil && f.CanPrompt() {

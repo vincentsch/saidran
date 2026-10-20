@@ -160,7 +160,7 @@ func Read(file string) (*session.Session, error) {
 		return nil, err
 	}
 	if !completed {
-		return nil, fmt.Errorf("%s: unsupported Codex log format; update Codex", file)
+		return s, fmt.Errorf("%s: unsupported Codex log format; update Codex", file)
 	}
 	s.Order()
 	return s, nil

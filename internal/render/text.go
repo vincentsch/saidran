@@ -114,6 +114,9 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 		}
 		line("Findings  ", text)
 		line("          ", f.Explanation)
+		if reason, ok := dismissal(r, f.ID); ok {
+			line("          ", "Dismissed: "+reason)
+		}
 		if f.Values {
 			side := func(v *string) string {
 				if v == nil {
