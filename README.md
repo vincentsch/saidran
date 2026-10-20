@@ -7,6 +7,30 @@ It checks final-response claims about tests, builds, linters, and type checks
 against recorded runs. Reports also show edits, grouped repository changes,
 and review findings in text, HTML, Markdown and JSON reports.
 
+## Install
+
+On Linux and macOS, download and run the installer:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/vincentsch/gaugestone/main/install.sh -o install.sh
+bash install.sh
+```
+
+The installer verifies SHA-256 and installs to `~/.local/bin`. Set `INSTALL_DIR`
+to choose another folder, or `GAUGESTONE_VERSION=v0.1.0` to pin a published version.
+It prints the installed path and a PATH setup line when needed. Release downloads
+become available after the first public release.
+
+On Windows, download the [amd64 executable](https://github.com/vincentsch/gaugestone/releases/latest/download/gaugestone-windows-amd64.exe)
+or [arm64 executable](https://github.com/vincentsch/gaugestone/releases/latest/download/gaugestone-windows-arm64.exe).
+Verify its SHA-256 against the release’s `checksums.txt`, rename it to
+`gaugestone.exe` and add its folder to PATH.
+
+Git is required. Report generation runs offline and makes no model calls.
+Installation and GitHub publication use the network. See the
+[command reference](docs/reference/index.md), [command guide](docs/commands.md)
+and [contributor checks](CONTRIBUTING.md).
+
 ## Build and run
 
 You need Go 1.27.2 to build and Git to inspect repositories.

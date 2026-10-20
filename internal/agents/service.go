@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -19,6 +18,7 @@ import (
 	"github.com/vincentsch/gaugestone/internal/agents/codex"
 	"github.com/vincentsch/gaugestone/internal/agents/opencode"
 	"github.com/vincentsch/gaugestone/internal/agents/pi"
+	"github.com/vincentsch/gaugestone/internal/pathutil"
 	"github.com/vincentsch/gaugestone/internal/redact"
 	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
@@ -94,14 +94,8 @@ func Roots() []string {
 	return []string{filepath.Join(claudeRoot, "projects"), filepath.Join(codexRoot, "sessions"), filepath.Join(xdg, "opencode", "storage"), filepath.Join(piRoot, "sessions")}
 }
 func Within(repo, path string) bool {
-	if path == "" {
-		return false
-	}
-	rel, err := filepath.Rel(repo, path)
-	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
+	return pathutil.Within(repo, path)
 }
-
-var projectCharacters = regexp.MustCompile(`[^a-zA-Z0-9]`)
 
 func Discover(repo string) (Discovery, error) {
 	d := Discovery{Roots: Roots()}
@@ -133,10 +127,6 @@ func Discover(repo string) (Discovery, error) {
 					return filepath.SkipDir
 				}
 				if n == 0 && path != root {
-					encoded := projectCharacters.ReplaceAllString(repo, "-")
-					if !strings.HasPrefix(entry.Name(), encoded) {
-						return filepath.SkipDir
-					}
 					rel, _ := filepath.Rel(root, path)
 					if strings.Contains(rel, string(filepath.Separator)) {
 						return filepath.SkipDir
@@ -147,8 +137,8 @@ func Discover(repo string) (Discovery, error) {
 			if (n == 2 && filepath.Ext(path) != ".json") || (n != 2 && filepath.Ext(path) != ".jsonl") {
 				return nil
 			}
-			if n == 1 {
-				belongs, e := codexCandidate(path, repo)
+			if n == 0 || n == 1 {
+				belongs, e := jsonlCandidate(path, repo)
 				if e != nil {
 					d.Notes = append(d.Notes, e.Error())
 					return nil
@@ -308,7 +298,7 @@ func chooseSession(picks, all []*session.Session, f *rungrad.Factory) (Selection
 	return Selection{Session: picks[idx]}, nil
 }
 
-func codexCandidate(path, repo string) (bool, error) {
+func jsonlCandidate(path, repo string) (bool, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return false, err
@@ -319,12 +309,25 @@ func codexCandidate(path, repo string) (bool, error) {
 		line, err := r.ReadBytes('\n')
 		var o struct {
 			Type    string `json:"type"`
+			Cwd     string `json:"cwd"`
 			Payload struct {
 				Cwd string `json:"cwd"`
 			} `json:"payload"`
 		}
-		if json.Unmarshal(line, &o) == nil && (o.Type == "session_meta" || o.Type == "turn_context") && o.Payload.Cwd != "" {
-			v := o.Payload.Cwd
+		if json.Unmarshal(line, &o) == nil {
+			v := o.Cwd
+			if o.Type == "session_meta" || o.Type == "turn_context" {
+				v = o.Payload.Cwd
+			}
+			if v == "" {
+				if errors.Is(err, io.EOF) {
+					return false, nil
+				}
+				if err != nil {
+					return false, err
+				}
+				continue
+			}
 			if strings.HasPrefix(v, "file://") {
 				u, e := url.Parse(v)
 				if e != nil {

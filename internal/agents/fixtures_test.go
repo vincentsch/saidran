@@ -180,7 +180,10 @@ func TestRecordedSessions(t *testing.T) {
 }
 func fixture(t *testing.T, name string) (string, string, string) {
 	t.Helper()
-	base := t.TempDir()
+	base, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
 	t.Setenv("HOME", filepath.Join(base, "home"))
 	t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(base, "claude"))
 	t.Setenv("CODEX_HOME", filepath.Join(base, "codex"))
@@ -261,7 +264,11 @@ func fixture(t *testing.T, name string) (string, string, string) {
 		if e != nil {
 			return e
 		}
-		b = []byte(strings.ReplaceAll(string(b), "/fixtures/"+name+"/repo", repo))
+		replacement, e := json.Marshal(repo)
+		if e != nil {
+			return e
+		}
+		b = []byte(strings.ReplaceAll(string(b), "/fixtures/"+name+"/repo", string(replacement[1:len(replacement)-1])))
 		dest := filepath.Join(base, rel)
 		if e = os.MkdirAll(filepath.Dir(dest), 0700); e != nil {
 			return e

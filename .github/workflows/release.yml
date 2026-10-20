@@ -1,0 +1,40 @@
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: read
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+  release:
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version-file: go.mod
+      - name: Build release assets
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: make build-all VERSION="$RELEASE_VERSION"
+      - name: Attest each binary
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: dist/gaugestone-*
+      - name: Extract release notes
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: python3 scripts/release-notes.py "$RELEASE_VERSION" > "$RUNNER_TEMP/release-notes.md"
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_VERSION" --verify-tag --title "$RELEASE_VERSION" --notes-file "$RUNNER_TEMP/release-notes.md" dist/gaugestone-* dist/checksums.txt

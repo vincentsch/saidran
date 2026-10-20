@@ -27,6 +27,10 @@ func Extract() (repo, transcript string, err error) {
 			os.RemoveAll(parent)
 		}
 	}()
+	parent, err = filepath.EvalSymlinks(parent)
+	if err != nil {
+		return "", "", err
+	}
 	archive, err := data.ReadFile("data/repo.tar.gz")
 	if err != nil {
 		return "", "", err

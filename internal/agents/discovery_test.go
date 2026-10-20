@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/vincentsch/gaugestone/internal/agents"
@@ -60,5 +61,37 @@ func TestSymlinkedLogRootsAndProjectNames(t *testing.T) {
 				t.Fatal("symlinked agent root skipped")
 			}
 		})
+	}
+}
+
+func TestSessionCwdThroughSymlink(t *testing.T) {
+	base, repo, transcript := fixture(t, "claude-stale")
+	alias := filepath.Join(base, "alias")
+	if err := os.Symlink(repo, alias); err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(transcript)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b = []byte(strings.ReplaceAll(string(b), repo, alias))
+	encoded := regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(alias, "-")
+	path := filepath.Join(agents.Roots()[0], encoded, "session.jsonl")
+	writeLog(t, path, string(b))
+	d, err := agents.Discover(repo)
+	if err != nil || len(d.Sessions) != 1 {
+		t.Fatalf("discover: %+v %v", d, err)
+	}
+	other := filepath.Join(base, "other")
+	if err := os.Mkdir(other, 0700); err != nil {
+		t.Fatal(err)
+	}
+	for _, cwd := range []string{"", ".", other} {
+		if agents.Within(repo, cwd) {
+			t.Fatalf("unrelated cwd accepted: %q", cwd)
+		}
+	}
+	if !agents.Within(repo, alias) {
+		t.Fatal("symlinked cwd rejected")
 	}
 }

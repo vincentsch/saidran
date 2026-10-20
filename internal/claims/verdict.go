@@ -11,6 +11,7 @@ import (
 
 	"github.com/vincentsch/gaugestone/internal/commands"
 	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/gaugestone/internal/pathutil"
 	"github.com/vincentsch/gaugestone/internal/session"
 )
 
@@ -30,10 +31,8 @@ type candidate struct {
 	position int
 }
 
-func within(parent, child string) bool {
-	rel, err := filepath.Rel(parent, child)
-	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
-}
+func within(parent, child string) bool { return pathutil.Within(parent, child) }
+
 func resolve(root, cwd, target string) string {
 	// Resolve Go import paths using the recorded repository's module name.
 	if b, err := os.ReadFile(filepath.Join(root, "go.mod")); err == nil {
@@ -45,18 +44,16 @@ func resolve(root, cwd, target string) string {
 					return root
 				}
 				if strings.HasPrefix(target, module+"/") {
-					return filepath.Join(root, strings.TrimPrefix(target, module+"/"))
+					return pathutil.Resolve(root, strings.TrimPrefix(target, module+"/"))
 				}
 				break
 			}
 		}
 	}
-	if filepath.IsAbs(target) {
-		return filepath.Clean(target)
-	}
-	return filepath.Join(cwd, target)
+	return pathutil.Resolve(cwd, target)
 }
 func area(root string, st commands.Statement) coverage {
+	st.Cwd = pathutil.Resolve(root, st.Cwd)
 	a := coverage{unknown: st.Class == "test" && st.Scope == "unknown"}
 	// Filters are separate from paths: a passing filtered run covers only that filter.
 	for i, arg := range st.Argv {
@@ -96,6 +93,7 @@ func area(root string, st commands.Statement) coverage {
 	return a
 }
 func claimArea(root, cwd string, c Claim) coverage {
+	cwd = pathutil.Resolve(root, cwd)
 	if c.invocation != nil {
 		st := *c.invocation
 		st.Cwd = cwd
@@ -188,6 +186,7 @@ func finalTime(s *session.Session) time.Time {
 }
 
 func Evaluate(root string, s *session.Session, ledger commands.Ledger) ([]Claim, []Gap) {
+	root = pathutil.Resolve("", root)
 	claims, gaps := Extract(s.Final, finalTime(s))
 	originals := map[int]*session.Command{}
 	for _, e := range s.Events {
@@ -354,10 +353,7 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 		}
 		relevant := false
 		if e.Edit != nil {
-			path := e.Edit.Path
-			if !filepath.IsAbs(path) {
-				path = filepath.Join(s.Cwd, path)
-			}
+			path := pathutil.Resolve(s.Cwd, e.Edit.Path)
 			if within(root, path) {
 				rel, _ := filepath.Rel(root, path)
 				if gitstate.Group(filepath.ToSlash(rel), true) != "docs" {
@@ -438,7 +434,9 @@ func defaultNext(c Claim) string {
 func relativeWhole(c Claim) bool {
 	return c.Scope == "whole" && (c.invocation == nil || c.invocation.Scope == "whole")
 }
-func wholeAt(cwd string) coverage { return coverage{paths: []string{cwd}, recursive: true} }
+func wholeAt(cwd string) coverage {
+	return coverage{paths: []string{pathutil.Resolve("", cwd)}, recursive: true}
+}
 
 // Check commands use conventional positional paths. Script bodies remain hints.
 func invocationTargets(st commands.Statement) []string {

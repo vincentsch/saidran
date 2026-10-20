@@ -12,3 +12,6 @@ coverage.*
 *.log
 .DS_Store
 /tmp/
+
+# Private operator state
+/.vroni/

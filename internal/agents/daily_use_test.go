@@ -328,3 +328,29 @@ func TestStoredDismissalResolutionFailuresDoNotWrite(t *testing.T) {
 		}
 	}
 }
+
+func TestDemoWithSymlinkedTempDirectory(t *testing.T) {
+	binary := buildBinary(t)
+	base := t.TempDir()
+	target := filepath.Join(base, "temp")
+	if err := os.Mkdir(target, 0700); err != nil {
+		t.Fatal(err)
+	}
+	alias := filepath.Join(base, "alias")
+	if err := os.Symlink(target, alias); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("TMPDIR", alias)
+	code, out, stderr := runBinary(t, binary, base, "demo", "--json")
+	if code != 0 || stderr != "" {
+		t.Fatalf("demo: %d %s %s", code, out, stderr)
+	}
+	got := decodeReport(t, out)
+	if len(got.Claims) == 0 || got.Claims[0].Verdict != "stale" {
+		t.Fatalf("claims=%+v", got.Claims)
+	}
+	paths, err := filepath.Glob(filepath.Join(target, "gaugestone-demo-*", "repo", ".git", "gaugestone", "*", "report.*"))
+	if err != nil || len(paths) != 3 {
+		t.Fatalf("report writes=%v: %v", paths, err)
+	}
+}

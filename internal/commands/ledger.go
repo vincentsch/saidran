@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vincentsch/gaugestone/internal/pathutil"
 	"github.com/vincentsch/gaugestone/internal/redact"
 	"github.com/vincentsch/gaugestone/internal/session"
 	"mvdan.cc/sh/v3/syntax"
@@ -79,12 +80,15 @@ func Build(s *session.Session) Ledger {
 	var ledger Ledger
 	for _, e := range s.Events {
 		if e.Edit != nil {
-			ledger.Entries = append(ledger.Entries, Entry{Time: e.Time, Seq: e.Seq, Statement: -1, Source: e.Source, Edit: e.Edit})
+			ledger.Entries = append(ledger.Entries, Entry{Time: e.Time, Seq: e.Seq, Statement: -1, Source: e.Source, Edit: &session.Edit{Path: pathutil.Resolve(s.Cwd, e.Edit.Path), Op: e.Edit.Op}})
 		}
 		if e.Command == nil {
 			continue
 		}
-		c := Analyze(e.Command)
+		recorded := *e.Command
+		recorded.Cwd = pathutil.Resolve(s.Cwd, recorded.Cwd)
+		c := Analyze(&recorded)
+		c.Original = e.Command
 		ledger.Commands = append(ledger.Commands, c)
 		for i := range c.Statements {
 			st := &c.Statements[i]
@@ -277,7 +281,7 @@ func Analyze(c *session.Command) Command {
 			}
 		}
 	}
-	cwd := c.Cwd
+	cwd := pathutil.Resolve("", c.Cwd)
 	for _, n := range roots {
 		resolve(n, &result, &cwd)
 	}
@@ -427,15 +431,7 @@ func resolve(n *node, c *Command, cwd *string) {
 	}
 }
 
-func absolute(cwd, path string) string {
-	if filepath.IsAbs(path) {
-		return filepath.Clean(path)
-	}
-	if cwd == "" {
-		return ""
-	}
-	return filepath.Join(cwd, path)
-}
+func absolute(cwd, path string) string { return pathutil.Resolve(cwd, path) }
 
 // Result lets attributable failure evidence take precedence over an unrelated
 // successful line exit. Unknown counts never imply a successful test run.

@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/vincentsch/gaugestone/internal/cli"
+	"github.com/vincentsch/gaugestone/internal/version"
 	"os"
 )
 
-var version = "dev"
-
-func main() { os.Exit(cli.Run(version, cli.Options{}, os.Args[1:], os.Stdout, os.Stderr)) }
+func main() { os.Exit(cli.Run(version.Version, cli.Options{}, os.Args[1:], os.Stdout, os.Stderr)) }
