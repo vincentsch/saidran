@@ -9,6 +9,8 @@ the coding agent claimed against recorded commands and repository changes.
 - Show findings in repository changes, with reasons for intentional dismissals.
 - Write self-contained HTML reports, Markdown and JSON alongside terminal output.
 - List sessions, diagnose log formats and try an embedded example with `demo`.
+- Write offline CI reports with optional checkout-local transcripts and diff-only views.
+- Save job summaries and HTML artifacts, then update a marked GitHub Action bot comment.
 - Preview and update a marked report section in pull request descriptions with `pr`.
 - Install and remove local Claude Stop hooks; print Codex notify configuration.
 - Handle exact-session completion payloads without blocking agent completion.

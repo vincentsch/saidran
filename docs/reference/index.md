@@ -5,6 +5,7 @@ See what your coding agent checked
 ## Commands
 
 - [gaugestone check](gaugestone_check.md) - Show session evidence and repository changes
+- [gaugestone ci](gaugestone_ci.md) - Write CI reports from a diff and optional checkout-local log
 - [gaugestone demo](gaugestone_demo.md) - Try a recorded session without agent history
 - [gaugestone dismiss](gaugestone_dismiss.md) - Mark a finding as intentional
 - [gaugestone dismissals](gaugestone_dismissals.md) - List or remove intentional findings

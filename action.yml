@@ -1,0 +1,63 @@
+name: Gaugestone
+description: Report Git changes and optional checkout-local agent evidence without invoking a model
+inputs:
+  transcript:
+    description: Supported agent CLI log recorded inside this checkout
+    required: false
+    default: ''
+  base:
+    description: Direct comparison commit; defaults to the PR base SHA (merge-ref checkout)
+    required: false
+    default: ''
+  fail-on:
+    description: Comma-separated verdicts or active finding codes that fail the job
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Install verified release
+      shell: bash
+      env:
+        GAUGESTONE_VERSION: v0.1.0
+      run: |
+        set -euo pipefail
+        case "$RUNNER_OS" in Linux|macOS) ;; *) echo 'Gaugestone Action requires Linux or macOS.' >&2; exit 1 ;; esac
+        export INSTALL_DIR
+        INSTALL_DIR=$(mktemp -d "$RUNNER_TEMP/gaugestone-bin.XXXXXX")
+        bash "$GITHUB_ACTION_PATH/install.sh"
+        printf '%s\n' "$INSTALL_DIR" >> "$GITHUB_PATH"
+    - name: Generate reports
+      id: report
+      shell: bash
+      env:
+        INPUT_TRANSCRIPT: ${{ inputs.transcript }}
+        INPUT_BASE: ${{ inputs.base }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/action/report.sh"
+    - name: Write job summary
+      if: ${{ success() && (steps.report.outputs.status == '0' || steps.report.outputs.status == '10') }}
+      shell: bash
+      env:
+        REPORT_DIR: ${{ steps.report.outputs.report_dir }}
+      run: cat "$REPORT_DIR/report.md" >> "$GITHUB_STEP_SUMMARY"
+    - name: Preserve HTML report
+      if: ${{ success() && (steps.report.outputs.status == '0' || steps.report.outputs.status == '10') }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: gaugestone-report-${{ github.job }}-${{ github.run_attempt }}
+        path: ${{ steps.report.outputs.report_dir }}/report.html
+        if-no-files-found: error
+    - name: Publish PR comment
+      if: ${{ success() && github.event.pull_request && (steps.report.outputs.status == '0' || steps.report.outputs.status == '10') }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPORT_DIR: ${{ steps.report.outputs.report_dir }}
+      run: python3 "$GITHUB_ACTION_PATH/scripts/action/comment.py"
+    - name: Apply report policy
+      if: ${{ always() && steps.report.outputs.status != '' }}
+      shell: bash
+      env:
+        REPORT_STATUS: ${{ steps.report.outputs.status }}
+      run: exit "$REPORT_STATUS"

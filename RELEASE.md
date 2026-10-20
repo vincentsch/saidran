@@ -5,9 +5,14 @@ Report generation runs offline. Installation and GitHub publication use the netw
 
 ## Before tagging
 
-1. Update CHANGELOG.md with implemented behavior. Change the version heading from
+1. Set the install step's `GAUGESTONE_VERSION` in action.yml to the release tag.
+   Update the simulation's expected release version and the Action guide's version
+   examples together. The Action installs that embedded version even from a SHA
+   pin or local checkout; never replace it with an implicit latest download.
+   Update CHANGELOG.md with implemented behavior. Change the version heading from
    unreleased to its release date. The release job extracts that section as its notes.
 2. Check README.md, docs, SECURITY.md and CONTRIBUTING.md against the current CLI.
+   Confirm `check`, `ci`, `pr`, hooks and their shared output/exit conventions.
    Run `make docs` after changing commands. Keep handwritten docs outside docs/reference.
 3. Run the local checks with the toolchain from go.mod:
 
@@ -29,7 +34,12 @@ Report generation runs offline. Installation and GitHub publication use the netw
 6. Inspect tracked public files for credentials, home paths and private operator
    files. Confirm `.vroni` is absent from `git ls-files`.
 7. Require a green first hosted CI run, including all platform jobs, before tagging.
-   Local syntax checks do not establish hosted success.
+   Local syntax checks do not establish hosted success. Validate the composite
+   Action on Linux and macOS with both diff-only and same-checkout CLI evidence,
+   merge-ref checkout and an available PR base SHA. Verify summary/artifact
+   preservation for policy failures and forbidden fork comment writes. Require
+   public latest/pinned installation after publication; local fake releases do
+   not establish public availability.
 
 ## Publish a version
 

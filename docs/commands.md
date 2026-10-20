@@ -7,6 +7,7 @@ from the current CLI.
 | Command | What it does |
 | --- | --- |
 | `gaugestone check` | Checks a session and writes text, HTML, Markdown and JSON reports. This is the default command. |
+| `gaugestone ci` | Writes CI reports from the diff and an optional checkout-local CLI transcript. See [GitHub Action](github-action.md). |
 | `gaugestone pr` | Previews or updates a report section in the current pull request. See [pull requests](pull-requests.md). |
 | `gaugestone install claude` / `uninstall claude` | Add or remove the local Claude Stop hook; `--user` selects user settings. |
 | `gaugestone install codex` | Print an absolute-path notify entry for manual configuration. |

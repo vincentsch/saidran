@@ -137,7 +137,25 @@ Gaugestone previews the exact redacted section before confirmation and keeps
 text outside its markers unchanged. Review the preview before posting.
 Use `--session` or `--transcript` to select the evidence. See
 [pull request behavior](docs/pull-requests.md) for baselines and size limits.
-A GitHub Action integration is planned; there is no Action quickstart yet.
+For CI, use the [GitHub Action](docs/github-action.md). Its diff-only mode needs
+no agent credentials:
+
+```yaml
+- uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+  with:
+    fetch-depth: 0
+- uses: vincentsch/gaugestone@v0.1.0
+  with:
+    fail-on: test_skipped,check_disabled
+```
+
+Run on `pull_request` with `contents: read` and `pull-requests: write` permissions.
+Keep checkout's default merge ref: the Action compares directly with the PR base
+SHA. It saves the job summary and HTML artifact before updating its PR comment.
+Fork token restrictions can prevent comments. The Action embeds its binary
+version (v0.1.0 here); SHA pins and local checkouts retain that version. See the
+complete workflow and same-job CLI transcript example in the Action guide.
+Locally, `gaugestone ci` writes a diff-only report without discovering a session.
 
 ## Ask the agent to check before finishing
 

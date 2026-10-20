@@ -117,7 +117,11 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 			fmt.Fprintf(&b, "\n%d %s omitted. %s\n", count, what, notice)
 		}
 	}
-	b.WriteString("### Gaugestone\n\n")
+	if r.Session == nil {
+		b.WriteString("### Diff-only report\n\nNo session log was available; recorded checks cannot be verified.\n\n")
+	} else {
+		b.WriteString("### Gaugestone\n\n")
+	}
 	fmt.Fprintf(&b, "**Verdicts**: %s\n\n", verdictTotals(r))
 	b.WriteString("| Claim | Verdict | Evidence |\n| --- | --- | --- |\n")
 	for _, c := range r.Claims[:min(lists, len(r.Claims))] {
@@ -137,7 +141,11 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 		fmt.Fprintf(&b, "| %s | %s | %s |\n", code(c.Quote), labels[c.Verdict], evidence)
 	}
 	if len(r.Claims) == 0 {
-		b.WriteString("\nClaims: none found in the agent's final message.\n")
+		if r.Session == nil {
+			b.WriteString("\nClaims: none; no session log was available.\n")
+		} else {
+			b.WriteString("\nClaims: none found in the agent's final message.\n")
+		}
 	}
 	omitted(len(r.Claims)-min(lists, len(r.Claims)), "claims")
 	for _, g := range r.AdmittedGaps[:min(lists, len(r.AdmittedGaps))] {

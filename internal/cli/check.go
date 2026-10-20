@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/vincentsch/gaugestone/internal/agents"
@@ -15,6 +16,7 @@ import (
 	"github.com/vincentsch/gaugestone/internal/redact"
 	"github.com/vincentsch/gaugestone/internal/render"
 	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
 	"github.com/vincentsch/rungrad/output"
 	"golang.org/x/term"
@@ -62,13 +64,17 @@ func (v *outputFormat) Set(value string) error {
 func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor) {
 	configure := func(cmd *cobra.Command) {
 		cmd.Flags().String("fail-on", "", "Exit 10 after reporting matching verdicts or active finding codes (comma-separated)")
-		cmd.Flags().String("session", "", "Select an ID or claude:ID, codex:ID, opencode:ID, pi:ID")
+		if cmd.Name() != "ci" {
+			cmd.Flags().String("session", "", "Select an ID or claude:ID, codex:ID, opencode:ID, pi:ID")
+		}
 		cmd.Flags().String("transcript", "", "Read a JSONL recording or OpenCode storage/session/<project>/<id>.json")
 		cmd.Flags().String("base", "", "Compare against this Git revision")
 		cmd.Flags().Var(&outputFormat{}, "format", "Output format: text, html, markdown or json")
 		cmd.Flags().String("out", "", "Write report.html, report.md and report.json into this directory")
-		cmd.Flags().Bool("no-write", false, "Print evidence without writing a report")
-		cmd.Flags().Bool("open", false, "Open the written HTML report in your browser")
+		if cmd.Name() != "ci" {
+			cmd.Flags().Bool("no-write", false, "Print evidence without writing a report")
+			cmd.Flags().Bool("open", false, "Open the written HTML report in your browser")
+		}
 	}
 	execute := func(opts Options, f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		get := func(name string) string { v, _ := cmd.Flags().GetString(name); return v }
@@ -95,7 +101,8 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 			return err
 		}
 		var d agents.Discovery
-		if get("transcript") == "" {
+		isCI := cmd.Name() == "ci"
+		if get("transcript") == "" && !isCI {
 			d, err = agents.Discover(root)
 			if err != nil {
 				return err
@@ -105,21 +112,32 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		if transcript != "" && !filepath.IsAbs(transcript) {
 			transcript = filepath.Join(opts.Dir, transcript)
 		}
-		selected, err := agents.Select(d.Sessions, get("session"), transcript, opts.Now(), f)
-		if err != nil {
-			return err
-		}
-		s := selected.Session
-		if !agents.Within(root, s.Cwd) {
-			return rungrad.NewError(rungrad.ExitNotFound, "The selected session belongs to another repository.")
-		}
-		state, err := gitstate.Inspect(root, get("base"), s.Ended)
-		if err != nil {
-			return err
-		}
+		var s *session.Session
+		var ended time.Time
 		notes := []string{}
-		if selected.Note != "" {
-			notes = append(notes, selected.Note)
+		if !isCI || transcript != "" {
+			selected, selectErr := agents.Select(d.Sessions, get("session"), transcript, opts.Now(), f)
+			if selectErr != nil {
+				if isCI {
+					return rungrad.NewError(rungrad.ExitAPI, selectErr.Error())
+				}
+				return selectErr
+			}
+			s = selected.Session
+			if !agents.Within(root, s.Cwd) {
+				if !isCI {
+					return rungrad.NewError(rungrad.ExitNotFound, "The selected session belongs to another repository.")
+				}
+				return rungrad.NewError(rungrad.ExitNotFound, "The session must have run inside this checkout; transcripts recorded in another repository or on another machine cannot be remapped.")
+			}
+			ended = s.Ended
+			if selected.Note != "" {
+				notes = append(notes, selected.Note)
+			}
+		}
+		state, err := gitstate.Inspect(root, get("base"), ended)
+		if err != nil {
+			return err
 		}
 		model := report.Build(version, opts.Now(), state, s, notes)
 		store, err := report.LoadDismissals(state.GitDir)
@@ -133,7 +151,9 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		}
 		noWrite, _ := cmd.Flags().GetBool("no-write")
 		dir := get("out")
-		if dir == "" {
+		if dir == "" && isCI {
+			dir = filepath.Join(state.GitDir, "gaugestone", "ci")
+		} else if dir == "" {
 			// Session IDs come from local recordings; keep them within one path component.
 			if s.ID == "" || s.ID == "." || s.ID == ".." || strings.ContainsAny(s.ID, "/\\") {
 				return rungrad.NewError(rungrad.ExitAPI, "The session has an invalid ID; choose another recording.")
@@ -193,7 +213,11 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 			if _, set := os.LookupEnv("NO_COLOR"); set {
 				mode.Color = false
 			}
-			render.Text(w, display, r.Text(agents.DisplayID(s, d.Sessions)), width, mode)
+			displayID := ""
+			if s != nil {
+				displayID = agents.DisplayID(s, d.Sessions)
+			}
+			render.Text(w, display, r.Text(displayID), width, mode)
 			if !noWrite {
 				fmt.Fprintf(w, "Report: %s\n", r.Text(filepath.Join(dir, "report.html")))
 			}
@@ -223,6 +247,7 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		return execute(demoOpts, f, check, nil)
 	}})
 	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites local HTML, Markdown and JSON reports; --no-write only prints evidence.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"gaugestone check", "gaugestone check --transcript session.jsonl --json", "gaugestone check --base origin/main --no-write"}, Related: []string{"gaugestone sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
+	app.AddCommand(&rungrad.Command{Use: "ci", Short: "Write CI reports from a diff and optional checkout-local log", Long: "Write report.html, report.md and report.json to <git dir>/gaugestone/ci/.\nWithout --transcript, report only the diff without discovering sessions.\nExplicit --base compares directly with that commit; reports do not certify correctness.", Examples: []string{"gaugestone ci", "gaugestone ci --base origin/main --fail-on test_skipped", "gaugestone ci --transcript session.jsonl --out reports --json"}, Related: []string{"gaugestone check", "gaugestone pr"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
 	root := app.Root()
 	configure(root)
 	root.Args = func(cmd *cobra.Command, args []string) error {

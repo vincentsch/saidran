@@ -86,5 +86,24 @@ Usage and confirmation errors exit 1; other runtime failures exit 2.
 
 ## GitHub Action
 
-A GitHub Action integration is planned. Use the local CLI described above
-until the Action and its examples have been tested.
+The [GitHub Action](github-action.md) saves a summary and HTML artifact, then
+creates or updates its own marked bot comment. It supports diff-only reports or
+a CLI transcript recorded in the same checkout. The Action compares directly
+against the event's PR base SHA, assuming checkout's default merge ref and
+`fetch-depth: 0`; this differs from `gaugestone pr`'s inferred merge base.
+
+```yaml
+- uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+  with:
+    fetch-depth: 0
+- uses: vincentsch/gaugestone@v0.1.0
+  with:
+    fail-on: contradicted,stale,test_skipped
+```
+
+The Action installs its embedded binary version (v0.1.0 here), including with a
+SHA pin or local checkout. It never selects the latest release implicitly.
+
+Use `pull_request` with `contents: read` and `pull-requests: write`. Fork runs
+may be unable to comment; summary and artifact remain available. See the guide
+for a complete workflow, permissions and transcript restrictions.

@@ -25,16 +25,25 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 		width = 100
 	}
 	line := func(prefix, text string) { wrap(w, prefix, text, width) }
-	agent := session.AgentLabel(r.Session.Agent)
-	startLayout, endLayout := "2006-01-02 15:04", "15:04"
-	if r.Session.Started.Truncate(time.Minute).Equal(r.Session.Ended.Truncate(time.Minute)) {
-		startLayout, endLayout = "2006-01-02 15:04:05", "15:04:05"
+	if r.Session == nil {
+		line("Gaugestone  ", "Diff-only report")
+		line("", "No session log was available; recorded checks cannot be verified.")
+	} else {
+		agent := session.AgentLabel(r.Session.Agent)
+		startLayout, endLayout := "2006-01-02 15:04", "15:04"
+		if r.Session.Started.Truncate(time.Minute).Equal(r.Session.Ended.Truncate(time.Minute)) {
+			startLayout, endLayout = "2006-01-02 15:04:05", "15:04:05"
+		}
+		line("Gaugestone  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format(startLayout), r.Session.Ended.Local().Format(endLayout), r.Repo.Branch, r.Repo.Baseline.Ref))
 	}
-	line("Gaugestone  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format(startLayout), r.Session.Ended.Local().Format(endLayout), r.Repo.Branch, r.Repo.Baseline.Ref))
 	line("Baseline  ", shortCommit(r.Repo.Baseline.Commit)+" ("+r.Repo.Baseline.Ref+", "+r.Repo.Baseline.Reason+")")
 	fmt.Fprintln(w)
 	if len(r.Claims) == 0 {
-		line("Claims  ", "none found in the agent's final message")
+		if r.Session == nil {
+			line("Claims  ", "none; no session log was available")
+		} else {
+			line("Claims  ", "none found in the agent's final message")
+		}
 	} else {
 		fmt.Fprintln(w, "Claims")
 		for _, c := range r.Claims {
