@@ -15,7 +15,10 @@ The report shows the path, line and evidence. The baseline determines which
 diff is inspected. These are pattern checks for supported syntax, not a full
 language analysis or a judgment about test quality. See the fixtures for
 examples such as `claude-skip`. Skip findings include focus markers like
-`test.only` and `describe.only`. Deleting a test function from a retained file
+`test.only` and `describe.only`, and Go’s `t.Skip`, `t.Skipf` and `t.SkipNow`.
+Test-command changes are detected in `package.json`, `composer.json` and
+`Makefile` at the root or in subdirectories, retaining the full relative path.
+Only their supported test entries are compared; unrelated scripts are ignored. Deleting a test function from a retained file
 is not detected; `test_deleted` covers deleted test files and excludes renames.
 
 Record an intentional reason with `saidran dismiss <id> --reason "..."`.

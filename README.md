@@ -57,7 +57,9 @@ folder. You can remove that folder afterwards.
 
 ## Check your repository
 
-Run inside the repository your agent changed:
+Run inside the repository your agent changed. The repository needs at least one
+commit; in a new project, review and stage your files and make the first commit
+before checking changes:
 
 ```sh
 saidran
@@ -98,7 +100,8 @@ before finishing or write a report afterwards. Hooks never request another turn.
 The [pull request guide](docs/pull-requests.md) explains previews and publication
 through GitHub CLI. Review the exact redacted preview before posting.
 The [GitHub Action](docs/github-action.md) saves a summary and HTML artifact;
-its diff-only mode needs no agent credentials.
+its diff-only mode needs no agent credentials. Local `saidran ci` also requires
+a repository with a first commit.
 
 [Findings](docs/findings.md) explains skip markers, deleted test files and disabled
 checks. [Commands](docs/commands.md) covers dismissals, baselines and exit policies.

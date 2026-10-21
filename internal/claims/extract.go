@@ -102,9 +102,73 @@ func sentences(text string) []string {
 	return out
 }
 
+// Split independent assertions without changing existing single-assertion quotes.
+// Commas inside shared passing lists and punctuation inside commands stay intact.
+// These recognize clause structure, including non-passing assertions. Claim
+// admission still applies negation and modality to each original clause.
+var conditionalContext = regexp.MustCompile(`(?i)\b(if|when|once|unless|wenn|falls|sobald|(?:after|before|until) (?:the )?tests pass|so they pass)\b`)
+var checkPredicate = regexp.MustCompile(`(?i)\b(?:tests?|test suite|build|lint|linter|type ?checks?)\s+(?:(?:are|were|is|was|do|does|did|not|don't|doesn't|didn't|should|would|will|might|may|could|sind|waren|ist|war|nicht|sollte[n]?|würde[n]?)\s+)*(?:pass(?:es|ed|ing)?|green|grün|bestehen|bestanden|läuft|lief)\b`)
+var clauseBoundary = regexp.MustCompile(`(?i)^(?:;\s*|,\s*(?:but|aber)\s+|\s+(?:and|und)\s+)`)
+
+func assertionClauses(text string) []string {
+	var out []string
+	for _, sentence := range sentences(text) {
+		start, ticks := 0, false
+		for i := 0; i < len(sentence); i++ {
+			if sentence[i] == '`' {
+				ticks = !ticks
+			}
+			if ticks {
+				continue
+			}
+			loc := clauseBoundary.FindStringIndex(sentence[i:])
+			if loc == nil || loc[0] != 0 {
+				continue
+			}
+			delimiter := strings.ToLower(strings.TrimSpace(sentence[i : i+loc[1]]))
+			if (delimiter == "and" || delimiter == "und") && (conditionalContext.MatchString(sentence[start:i]) || !assertion(sentence[start:i]) || !assertion(sentence[i+loc[1]:])) {
+				continue
+			}
+			if clause := strings.TrimSpace(sentence[start:i]); clause != "" {
+				out = append(out, clause)
+			}
+			i += loc[1] - 1
+			start = i + 1
+		}
+		if clause := strings.TrimSpace(sentence[start:]); clause != "" {
+			out = append(out, clause)
+		}
+	}
+	return out
+}
+
+// A conjunction separates assertions only when each side states its own
+// result (positive, negated or conditional) or admitted gap. Shared passing
+// lists keep their original quote.
+func assertion(text string) bool {
+	plain := strings.NewReplacer("`", "", "*", "", "’", "'").Replace(text)
+	if gapPhrase.MatchString(plain) {
+		return true
+	}
+	if checkPredicate.MatchString(plain) {
+		return true
+	}
+	for _, rule := range rules {
+		if rule.phrase.MatchString(plain) {
+			return true
+		}
+	}
+	for _, m := range inline.FindAllStringIndex(text, -1) {
+		if passed.MatchString(text[m[1]:]) {
+			return true
+		}
+	}
+	return false
+}
+
 func Extract(final string, at time.Time) ([]Claim, []Gap) {
 	claims, gaps := []Claim{}, []Gap{}
-	for _, quote := range sentences(final) {
+	for _, quote := range assertionClauses(final) {
 		plain := underscoreEmphasis.ReplaceAllString(strings.NewReplacer("`", "", "*", "", "__", "", "’", "'").Replace(quote), "$1$2$3")
 		if gapPhrase.MatchString(plain) {
 			gaps = append(gaps, Gap{quote, at})

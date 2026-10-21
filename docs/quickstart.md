@@ -68,7 +68,10 @@ The [README screenshots](../README.md#install-and-try-the-demo) show this exampl
 
 ## Check your repository
 
-Run inside the Git repository your agent changed:
+Run inside the Git repository your agent changed. It must have at least one
+commit. For a new project, review and stage your files, then make the first
+commit with `git commit` before running Saidran. The tool compares against
+committed history and does not create that commit for you:
 
 ```sh
 saidran

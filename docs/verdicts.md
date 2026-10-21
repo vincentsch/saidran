@@ -26,3 +26,35 @@ An empty claim list means the selected final response contained no recognized
 claims. Inspect the command results and later edits anyway. New progress text
 can replace an earlier claim without changing the execution history. Changes
 after the recorded session end are marked separately and are not covered.
+
+Independent assertions receive separate claims and quotes. For example,
+“`go test ./other` passed; `go test ./calc` passed” does not let the calc run
+verify the other package. “All tests pass, but I did not run lint” keeps the
+test assertion and a separate admitted lint gap.
+
+Generic suite claims use the session's starting directory. Running
+`cd calc && go test ./...` in a root-started session gives Partial for “All
+tests pass”; a session starting in calc can verify that claim within calc.
+A quoted `go test ./...` assertion describes that command at its recorded
+working directory. Bare `go build` and `go vet` cover the current package,
+so they give Partial for explicit recursive assertions.
+
+Quoted TypeScript commands must match the same project configuration. Relative
+`-p` and `--project` paths are resolved against each run's working directory
+and the session directory for claims. Omitting the selector matches only
+another omitted selector in the same directory. Generic prose keeps its usual
+coverage rules; Saidran does not discover configuration inheritance.
+
+Go text and JSON output retain package counts and no-tests results. A run
+where all packages have no tests gives Partial. Unreadable or incomplete Go
+JSON without completion evidence gives Can't tell even with a recorded exit 0.
+A later passing package rerun can resolve an identified earlier package failure,
+while still giving Partial for a broader suite assertion.
+
+Recognized shell writes include `cp` destinations, `eslint --fix`,
+`ruff check --fix` and `git apply`. Known relevant writes after a passing
+check make it Stale; unresolved patch or fix destinations give Can't tell.
+Read-only lint and `git apply --check` create no edit evidence. Explicit
+`--apply` re-enables patch writing even alongside `--check` or `--stat`. A fresh check
+after the write can provide current evidence. Recorded commands are never run,
+and current patch contents are never used to infer historical targets.

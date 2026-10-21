@@ -22,7 +22,8 @@ func TestFailurePolicy(t *testing.T) {
 	}{
 		{"claude-contradicted", "contradicted", 10}, {"claude-verified", "contradicted", 0},
 		{"claude-stale", " stale, test_skipped ", 10}, {"claude-skip", "test_skipped", 10},
-		{"claude-verified", "verified", 10},
+		{"claude-verified", "verified", 0}, {"claude-verified", "partial", 10},
+		{"codex-verified", "verified", 10},
 	} {
 		t.Run(tc.fixture+tc.policy, func(t *testing.T) {
 			base, repo, transcript := fixture(t, tc.fixture)

@@ -78,6 +78,16 @@ func value(root string, args ...string) (string, error) {
 	return strings.TrimSpace(string(b)), e
 }
 func SelectBaseline(root, ref string) (Baseline, error) {
+	if _, err := value(root, "rev-parse", "--verify", "HEAD^{commit}"); err != nil {
+		// Distinguish an unborn branch from an unavailable explicit baseline.
+		if branch, e := value(root, "symbolic-ref", "--quiet", "HEAD"); e == nil {
+			if _, e = value(root, "show-ref", "--verify", branch); e != nil {
+				return Baseline{}, rungrad.NewError(rungrad.ExitAPI, "This repository needs a first commit before Saidran can compare changes. Review and stage your files, then run `git commit` and try again.")
+			}
+		}
+		return Baseline{}, err
+	}
+
 	if ref != "" {
 		commit, err := value(root, "rev-parse", "--verify", "--end-of-options", ref+"^{commit}")
 		return Baseline{ref, commit, "explicit --base"}, err

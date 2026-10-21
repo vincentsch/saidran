@@ -15,6 +15,9 @@ import (
 )
 
 type TestSummary struct {
+	// JSON completion and package identities are internal evidence, not schema additions.
+	RequireCompletion bool     `json:"-"`
+	FailedPackages    []string `json:"-"`
 	// Outcome is independent of counts: Go reports package results, not test counts.
 	Outcome  string `json:"outcome"`
 	Passed   *int   `json:"passed"`
@@ -444,6 +447,9 @@ func (s Statement) Result() string {
 	}
 	if s.ExitReliable && s.ExitCode != nil {
 		if *s.ExitCode == 0 {
+			if s.Tests != nil && (s.Tests.RequireCompletion || s.Runner == "go" && has(s.Argv, "-json")) && s.Tests.Outcome != "passed" {
+				return "unknown"
+			}
 			return "passed"
 		}
 		return "failed"

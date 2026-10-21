@@ -22,7 +22,7 @@ func TestSkipCallForms(t *testing.T) {
 		path               string
 		positive, negative []string
 	}{
-		{"calc_test.go", []string{`t.Skip("why")`, `t.SkipNow()`}, []string{`// t.Skip("why")`, `/* t.SkipNow() */`, `fmt.Println("t.SkipNow()")`, `other.Skip()`}},
+		{"calc_test.go", []string{`t.Skip("why")`, `t.SkipNow()`, `t.Skipf("why %s", reason)`}, []string{`// t.Skip("why")`, `/* t.SkipNow() */`, `fmt.Println("t.SkipNow()")`, `other.Skip()`, `// t.Skipf("why")`, `fmt.Println("t.Skipf()")`}},
 		{"test_calc.py", []string{`@pytest.mark.skip`, `pytest.skip("why")`, `@unittest.skip("why")`, `@pytest.mark.xfail`}, []string{`# @pytest.mark.skip`, `"""pytest.skip('why')"""`, `pytest.mark.skipper`}},
 		{"calc.test.ts", []string{`it.skip('a', fn)`, `test.skip('a', fn)`, `describe.skip('a', fn)`, `it.only('a', fn)`, `test.only('a', fn)`, `describe.only('a', fn)`, `xit('a', fn)`, `xdescribe('a', fn)`}, []string{`// it.skip('a', fn)`, `/* test.only('a', fn) */`, `const text = 'xit(';`, `test.skipped()`}},
 		{"tests/CalcTest.php", []string{`$this->markTestSkipped('why');`, `test('a')->skip();`, `#[Skip]`}, []string{`// $this->markTestSkipped('why')`, `# test('a')->skip()`, `/* #[Skip] */`, `$test->skipped()`}},
@@ -92,17 +92,17 @@ func changed(p, old, newValue string) gitstate.File {
 	return f
 }
 func TestTestCommands(t *testing.T) {
-	for _, p := range []string{"package.json", "composer.json", "Makefile"} {
+	for _, p := range []string{"package.json", "composer.json", "Makefile", "web/package.json", "api/composer.json", "tools/Makefile"} {
 		old, newValue := `{"scripts":{"test":"go test ./..."}}`, `{"scripts":{"test":"go test ./calc"}}`
 		absent := `{"scripts":{"post-install-cmd":"install"}}`
-		if p == "Makefile" {
+		if strings.HasSuffix(p, "Makefile") {
 			old = "test:\n\tgo test ./...\n"
 			newValue = "test:\n\tgo test ./calc\n"
 			absent = "build:\n\tgo build ./...\n"
 		}
 		for _, sides := range [][2]string{{old, newValue}, {absent, newValue}, {old, absent}} {
 			got := Detect([]gitstate.File{changed(p, sides[0], sides[1])})
-			if len(got) != 1 || got[0].Code != "test_command_changed" {
+			if len(got) != 1 || got[0].Code != "test_command_changed" || got[0].Path != p {
 				t.Fatal(p, got)
 			}
 			b, e := json.Marshal(got[0])
@@ -181,5 +181,27 @@ func TestCommandSpanAndContext(t *testing.T) {
 	f.Hunks[1].Lines[0].Text = "unrelated old setting"
 	if again := Detect([]gitstate.File{f}); len(again) != 1 || again[0].ID != got[0].ID {
 		t.Fatal("unrelated hunk changed identity", again)
+	}
+}
+
+func TestGoSkipAndSkipfInOneDiff(t *testing.T) {
+	got := Detect([]gitstate.File{added("calc/calc_test.go", `t.Skip("later"); t.Skipf("later %s", reason)
+// t.Skipf("comment")
+fmt.Println("t.Skipf()")`)})
+	if len(got) != 2 || got[0].Code != "test_skipped" || got[1].Code != "test_skipped" || got[0].ID == got[1].ID {
+		t.Fatalf("%+v", got)
+	}
+}
+
+func TestNestedUnrelatedScripts(t *testing.T) {
+	for _, p := range []string{"web/package.json", "api/composer.json", "tools/Makefile"} {
+		old, newValue := `{"scripts":{"test":"check","build":"old"}}`, `{"scripts":{"test":"check","build":"new"}}`
+		if strings.HasSuffix(p, "Makefile") {
+			old = "test:\n\tcheck\n\nbuild:\n\told\n"
+			newValue = "test:\n\tcheck\n\nbuild:\n\tnew\n"
+		}
+		if got := Detect([]gitstate.File{changed(p, old, newValue)}); len(got) != 0 {
+			t.Fatalf("%s: %+v", p, got)
+		}
 	}
 }

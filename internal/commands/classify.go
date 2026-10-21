@@ -187,7 +187,7 @@ func supported(r string) bool {
 }
 
 func invocation(s *Statement) *TestSummary {
-	t := &TestSummary{Outcome: "unknown"}
+	t := &TestSummary{Outcome: "unknown", RequireCompletion: s.Runner == "go" && has(s.Argv, "-json")}
 	a := executable(s.Argv)
 	if len(a) == 0 {
 		return t

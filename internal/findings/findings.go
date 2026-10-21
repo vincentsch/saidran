@@ -58,7 +58,7 @@ func (f Finding) MarshalJSON() ([]byte, error) {
 }
 
 var skipCalls = map[string]*regexp.Regexp{
-	".go":  regexp.MustCompile(`\bt\.(?:Skip|SkipNow)\s*\(`),
+	".go":  regexp.MustCompile(`\bt\.(?:Skip|Skipf|SkipNow)\s*\(`),
 	".py":  regexp.MustCompile(`(?:@pytest\.mark\.(?:skip|xfail)\b|@unittest\.skip\b|\bpytest\.skip\s*\()`),
 	".js":  regexp.MustCompile(`\b(?:(?:it|test|describe)\.(?:skip|only)|xit|xdescribe)\s*\(`),
 	".php": regexp.MustCompile(`(?:\bmarkTestSkipped\s*\(|->skip\s*\(|#\[Skip\])`),
@@ -118,9 +118,10 @@ func Detect(files []gitstate.File) []Finding {
 				}
 			}
 		}
-		if f.Path == "package.json" || f.Path == "composer.json" || f.Path == "Makefile" {
-			old, os, oe := testCommand(f.Path, f.Old)
-			newValue, ns, ne := testCommand(f.Path, f.New)
+		name := path.Base(f.Path)
+		if name == "package.json" || name == "composer.json" || name == "Makefile" {
+			old, os, oe := testCommand(name, f.Old)
+			newValue, ns, ne := testCommand(name, f.New)
 			if equal(old, newValue) {
 				continue
 			}

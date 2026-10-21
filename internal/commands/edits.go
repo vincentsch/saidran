@@ -85,10 +85,56 @@ func edits(s *Statement, stmt *syntax.Stmt) {
 				recognized = true
 			}
 		}
+	case "cp":
+		// A copy writes only its destination. Directory copies remain relevant edits
+		// at that path; the historical filesystem is never inferred from today's tree.
+		var operands []string
+		destination := ""
+		for i := 0; i < len(args); i++ {
+			arg := args[i]
+			if arg == "-t" || arg == "--target-directory" {
+				if i+1 < len(args) {
+					i++
+					destination = args[i]
+				}
+				continue
+			}
+			if v, ok := strings.CutPrefix(arg, "--target-directory="); ok {
+				destination = v
+				continue
+			}
+			if arg == "--" {
+				operands = append(operands, args[i+1:]...)
+				break
+			}
+			if !strings.HasPrefix(arg, "-") {
+				operands = append(operands, arg)
+			}
+		}
+		if destination == "" && len(operands) >= 2 {
+			destination = operands[len(operands)-1]
+		}
+		add(destination, "write", static(destination))
+		return
+	case "eslint", "ruff":
+		recognized = has(args, "--fix") && !has(args, "--fix-dry-run")
+		if name == "ruff" {
+			recognized = recognized && len(args) > 0 && args[0] == "check"
+			if len(args) > 0 {
+				args = args[1:]
+			}
+		}
 	case "mv", "rm":
 		recognized = true
 		op = "delete"
 	case "git":
+		if len(args) > 0 && args[0] == "apply" {
+			// Patch contents at report time cannot establish their historical targets.
+			if has(args, "--apply") || (!has(args, "--check") && !has(args, "--stat") && !has(args, "--numstat") && !has(args, "--summary")) {
+				s.MayEditFiles = true
+			}
+			return
+		}
 		if len(args) > 0 && args[0] == "checkout" && has(args, "--") {
 			recognized = true
 			for i, v := range args {
@@ -124,7 +170,7 @@ func edits(s *Statement, stmt *syntax.Stmt) {
 					sedScript = true
 					skipNext = true
 				}
-				if (name == "black" && (arg == "--line-length" || arg == "-l" || arg == "--target-version" || arg == "-t" || arg == "--exclude" || arg == "--include" || arg == "--config")) || (name == "prettier" && (arg == "--config" || arg == "--ignore-path" || arg == "--parser" || arg == "--plugin")) || (name == "git" && (arg == "--source" || arg == "-s")) {
+				if ((name == "eslint" || name == "ruff") && (arg == "--config" || arg == "-c" || arg == "--select" || arg == "--ignore" || arg == "--output-file" || arg == "--format" || arg == "--ext" || arg == "--cache-location")) || (name == "black" && (arg == "--line-length" || arg == "-l" || arg == "--target-version" || arg == "-t" || arg == "--exclude" || arg == "--include" || arg == "--config")) || (name == "prettier" && (arg == "--config" || arg == "--ignore-path" || arg == "--parser" || arg == "--plugin")) || (name == "git" && (arg == "--source" || arg == "-s")) {
 					skipNext = true
 				}
 				continue
@@ -148,6 +194,6 @@ func edits(s *Statement, stmt *syntax.Stmt) {
 		if name == "mv" && i == len(targets)-1 {
 			targetOp = "write"
 		}
-		add(path, targetOp, static(path) && !(name == "prettier" && strings.ContainsAny(path, "*?[{")))
+		add(path, targetOp, static(path) && !((name == "prettier" || name == "eslint" || name == "ruff") && strings.ContainsAny(path, "*?[{")))
 	}
 }

@@ -88,6 +88,12 @@ func TestRecordedReports(t *testing.T) {
 					t.Fatalf("claims: %+v; expected %+v", r.Claims, expected.Claims)
 				}
 				for i, want := range expected.Claims {
+					// The immutable recording has a failing root suite followed by a
+					// passing calc-only suite. Session-anchored generic coverage
+					// intentionally corrects its legacy Verified label to Partial.
+					if name == "claude-verified" && want.Type == "tests" {
+						want.Verdict = "PARTIAL"
+					}
 					got := r.Claims[i]
 					verdict := strings.ReplaceAll(strings.ToUpper(got.Verdict), "_", " ")
 					if got.Type != want.Type || verdict != want.Verdict || !strings.Contains(got.Quote, want.QuoteContains) || !strings.Contains(s.Final, got.Quote) {

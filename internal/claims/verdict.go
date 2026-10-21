@@ -225,7 +225,15 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 		if end.After(c.Time) {
 			continue
 		}
+		if c.invocation != nil && c.Runner == "tsc" && projectIdentity(root, s.Cwd, *c.invocation) != projectIdentity(root, st.Cwd, *st) {
+			continue
+		}
 		a := area(root, *st)
+		if c.invocation != nil && c.Runner == "tsc" && projectSelector(*st) != "" {
+			// The same explicit configuration defines the source set regardless of
+			// which directory the invocation started in. Generic prose keeps cwd scope.
+			a = desired
+		}
 		wanted := desired
 		// An explicit whole-suite command describes the suite at the run's cwd.
 		if relativeWhole(*c) && within(root, st.Cwd) {
@@ -279,11 +287,18 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 			}
 			// Go names failed packages. A rerun of those packages can resolve
 			// an earlier failure without repeating unrelated passing packages.
-			if matches := failedGoPackages.FindAllStringSubmatch(raw, -1); len(matches) > 0 {
+			packages := []string{}
+			if summary := failure.entry.Command.Tests; summary != nil {
+				packages = append(packages, summary.FailedPackages...)
+			}
+			for _, match := range failedGoPackages.FindAllStringSubmatch(raw, -1) {
+				packages = append(packages, match[1])
+			}
+			if len(packages) > 0 {
 				failedArea.paths = nil
 				failedArea.recursive = false
-				for _, match := range matches {
-					failedArea.paths = append(failedArea.paths, resolve(root, failure.run.Cwd, match[1]))
+				for _, pkg := range packages {
+					failedArea.paths = append(failedArea.paths, resolve(root, failure.run.Cwd, pkg))
 				}
 			}
 		}
@@ -432,7 +447,7 @@ func defaultNext(c Claim) string {
 }
 
 func relativeWhole(c Claim) bool {
-	return c.Scope == "whole" && (c.invocation == nil || c.invocation.Scope == "whole")
+	return c.Scope == "whole" && c.invocation != nil && c.invocation.Scope == "whole" && c.Runner != "tsc"
 }
 func wholeAt(cwd string) coverage {
 	return coverage{paths: []string{pathutil.Resolve("", cwd)}, recursive: true}
@@ -478,6 +493,9 @@ func invocationTargets(st commands.Statement) []string {
 		}
 		targets = append(targets, arg)
 	}
+	if len(targets) == 0 && st.Runner == "go" {
+		return []string{"."}
+	}
 	return targets
 }
 
@@ -486,4 +504,26 @@ func editClock(t, other time.Time) string {
 		return t.Local().Format("15:04:05")
 	}
 	return clock(t)
+}
+
+// Project selectors identify configurations, independently of source coverage.
+func projectSelector(st commands.Statement) string {
+	for i, arg := range st.Argv {
+		if (arg == "-p" || arg == "--project") && i+1 < len(st.Argv) {
+			return st.Argv[i+1]
+		}
+		for _, flag := range []string{"-p=", "--project="} {
+			if v, ok := strings.CutPrefix(arg, flag); ok {
+				return v
+			}
+		}
+	}
+	return ""
+}
+func projectIdentity(root, cwd string, st commands.Statement) string {
+	cwd = pathutil.Resolve(root, cwd)
+	if config := projectSelector(st); config != "" {
+		return "explicit:" + pathutil.Resolve(cwd, config)
+	}
+	return "implicit:" + cwd
 }

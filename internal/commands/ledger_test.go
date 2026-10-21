@@ -452,3 +452,42 @@ func TestInlineInterpreterWrites(t *testing.T) {
 		}
 	}
 }
+
+func TestShellWriterDestinations(t *testing.T) {
+	for _, tc := range []struct {
+		line    string
+		paths   []string
+		unknown bool
+	}{
+		{"cp calc/calc.go calc/replaced.go", []string{"calc/replaced.go"}, false},
+		{"cp -t calc source.go", []string{"calc"}, false},
+		{"cp source.go \"$DEST\"", nil, true},
+		{"eslint --fix --config eslint.config.js web/app.js", []string{"web/app.js"}, false},
+		{"ruff check --fix --select I app.py", []string{"app.py"}, false},
+		{"eslint --fix", nil, true},
+		{"ruff check --fix", nil, true},
+		{"git apply fix.patch", nil, true},
+		{"git apply --check fix.patch", nil, false},
+		{"git apply --stat fix.patch", nil, false},
+		{"git apply --numstat fix.patch", nil, false},
+		{"git apply --summary fix.patch", nil, false},
+		{"git apply --stat --apply fix.patch", nil, true},
+		{"git apply --check --apply fix.patch", nil, true},
+		{"git apply --apply --summary fix.patch", nil, true},
+		{"eslint app.js", nil, false},
+		{"eslint --fix-dry-run app.js", nil, false},
+		{"ruff check app.py", nil, false},
+	} {
+		t.Run(tc.line, func(t *testing.T) {
+			st := analyze(tc.line, "", 0).Statements[0]
+			if st.MayEditFiles != tc.unknown || len(st.Edits) != len(tc.paths) {
+				t.Fatalf("%+v", st)
+			}
+			for i, p := range tc.paths {
+				if st.Edits[i].Path != absolute(st.Cwd, p) {
+					t.Fatal(st.Edits)
+				}
+			}
+		})
+	}
+}

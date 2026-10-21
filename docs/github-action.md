@@ -7,6 +7,11 @@ Markdown to the job summary, uploads the HTML artifact, then creates or updates 
 invokes an agent or model. Direct Windows binary use remains supported; the Unix
 installer and this Action do not support Windows runners.
 
+Both the Action and local `saidran ci` need a repository with at least one
+commit. Immediately after `git init`, review and stage your files and make the
+first commit before running the check. An unborn branch exits 2 with guidance
+and writes no report.
+
 ## Diff-only quickstart
 
 Save this as `.github/workflows/saidran.yml`:

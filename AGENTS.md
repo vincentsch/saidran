@@ -9,6 +9,9 @@ Working on Saidran's source? Read CONTRIBUTING.md.
 ## Install and run
 
 1. Keep the user's repository and session identity before changing directories.
+   Reports require at least one Git commit. If the repository has no first
+   commit, explain the prerequisite and ask the user to review, stage and commit
+   their files before retrying. Do not create a commit on their behalf.
    If you know your transcript path or session ID, use it for the report.
 2. Install through this repository's `install.sh`. If you have cloned the source,
    run `bash /absolute/path/to/saidran/install.sh`. Otherwise download and run:

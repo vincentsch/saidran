@@ -1,6 +1,9 @@
 package commands
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 // Compact summary excerpts from tiny local projects, run with Go 1.27.2,
 // pytest 9.1.1, Jest 30.2.0, Vitest 3.2.4, PHPUnit 11.5.56 and Pest 3.8.7.
@@ -90,5 +93,57 @@ func TestRunScopeAndListOnly(t *testing.T) {
 	c = analyze("pytest -k median", "=== 1 passed, 2 deselected in 0.01s ===", 0)
 	if !c.Statements[0].Tests.Filtered || c.Statements[0].Tests.Passed == nil {
 		t.Fatal("filtered result lost")
+	}
+}
+
+func TestGoJSONOutput(t *testing.T) {
+	for _, tc := range []struct {
+		name, raw, outcome string
+		packages           int
+		empty              bool
+		skipped            int
+		failedPackage      string
+	}{
+		{"pass", "{\"Action\":\"start\",\"Package\":\"example/calc\"}\n{\"Action\":\"skip\",\"Package\":\"example/calc\",\"Test\":\"TestOptional\"}\n{\"Action\":\"pass\",\"Package\":\"example/calc\"}\n", "passed", 1, false, 1, ""},
+		{"fail", "{\"Action\":\"fail\",\"Package\":\"example/calc\"}\n{\"Action\":\"pass\",\"Package\":\"example/other\"}\n", "failed", 2, false, 0, "example/calc"},
+		{"no tests", "{\"Action\":\"output\",\"Package\":\"example/calc\",\"Output\":\"? example/calc [no test files]\\n\"}\n{\"Action\":\"skip\",\"Package\":\"example/calc\"}\n", "passed", 1, true, 0, ""},
+
+		{"test failure before package completion", "{\"Action\":\"fail\",\"Package\":\"example/calc\",\"Test\":\"TestSum\"}\n", "failed", 0, false, 0, "example/calc"},
+		{"unreadable", "{broken", "unknown", 0, false, 0, ""},
+		{"incomplete", "{\"Action\":\"start\",\"Package\":\"example/calc\"}\n", "unknown", 0, false, 0, ""},
+		{"missing package completion", "{\"Action\":\"start\",\"Package\":\"example/other\"}\n{\"Action\":\"pass\",\"Package\":\"example/calc\"}\n", "unknown", 1, false, 0, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			st := analyze("go test -json ./...", tc.raw, 0).Statements[0]
+			s := st.Tests
+			if s == nil || s.Outcome != tc.outcome || s.NoTests != tc.empty || s.Passed != nil || s.Failed != nil {
+				t.Fatalf("%+v", s)
+			}
+			if tc.packages > 0 && (s.Packages == nil || *s.Packages != tc.packages) || tc.packages == 0 && s.Packages != nil {
+				t.Fatalf("packages: %+v", s)
+			}
+			if tc.skipped > 0 && (s.Skipped == nil || *s.Skipped != tc.skipped) {
+				t.Fatalf("skips: %+v", s)
+			}
+			if tc.failedPackage != "" && (len(s.FailedPackages) != 1 || s.FailedPackages[0] != tc.failedPackage) {
+				t.Fatalf("failed identity: %+v", s)
+			}
+			if st.Result() != tc.outcome {
+				t.Fatalf("exit overrode JSON: %+v", st)
+			}
+			// Report redaction serializes statements. Internal evidence fields
+			// may disappear, but rendering must retain the same result.
+			data, err := json.Marshal(st)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var saved Statement
+			if err = json.Unmarshal(data, &saved); err != nil {
+				t.Fatal(err)
+			}
+			if saved.Result() != tc.outcome {
+				t.Fatalf("saved result changed: %+v", saved)
+			}
+		})
 	}
 }

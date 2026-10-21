@@ -13,7 +13,7 @@ import (
 
 func TestCIDiffReportsAndPolicy(t *testing.T) {
 	f := prSetup(t)
-	if err := os.WriteFile(filepath.Join(f.repo, "sample_test.go"), []byte("package sample\nfunc TestSample(t *testing.T) { t.Skip(\"intentional\") }\n"), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(f.repo, "sample_test.go"), []byte("package sample\nfunc TestSample(t *testing.T) { t.Skipf(\"intentional %s\", \"skip\") }\n"), 0600); err != nil {
 		t.Fatal(err)
 	}
 	gitDir := gitPR(t, f.repo, "rev-parse", "--absolute-git-dir")
@@ -148,5 +148,33 @@ func TestCIUsesWorktreeGitDirectory(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(f.repo, ".git", "saidran", "ci")); !os.IsNotExist(err) {
 		t.Fatalf("worktree wrote to main git directory: %v", err)
+	}
+}
+
+func TestCINeedsFirstCommit(t *testing.T) {
+	repo := t.TempDir()
+	gitPR(t, repo, "init")
+	for _, args := range [][]string{{"ci"}, {"ci", "--json"}} {
+		r := testutil.Run(New("test", Options{Dir: repo}), args...)
+		if r.Exit != 2 || !strings.Contains(r.Stdout+r.Stderr, "first commit") {
+			t.Fatal(r)
+		}
+		if len(args) > 1 {
+			var doc struct {
+				Error    string `json:"error"`
+				ExitCode int    `json:"exit_code"`
+			}
+			if err := json.Unmarshal([]byte(r.Stderr), &doc); err != nil || doc.ExitCode != 2 || doc.Error == "" || r.Stdout != "" {
+				t.Fatalf("invalid JSON error: %+v", r)
+			}
+		}
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".git", "saidran")); !os.IsNotExist(err) {
+		t.Fatalf("unexpected reports: %v", err)
+	}
+	gitPR(t, repo, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "--allow-empty", "-m", "Initial commit")
+	r := testutil.Run(New("test", Options{Dir: repo}), "ci", "--json")
+	if r.Exit != 0 {
+		t.Fatal(r)
 	}
 }

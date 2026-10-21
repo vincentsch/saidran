@@ -1,10 +1,13 @@
 package commands
 
 import (
-	"mvdan.cc/sh/v3/syntax"
+	"encoding/json"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+
+	"mvdan.cc/sh/v3/syntax"
 )
 
 var ansi = regexp.MustCompile(`\x1b\[[0-?]*[ -/]*[@-~]`)
@@ -25,6 +28,9 @@ func parseOutput(runner, raw string, flags *TestSummary) *TestSummary {
 	}
 	switch runner {
 	case "go":
+		if t.RequireCompletion || strings.HasPrefix(strings.TrimSpace(raw), "{") {
+			return parseGoJSON(raw, t)
+		}
 		packages := map[string]string{}
 		for _, m := range goPackage.FindAllStringSubmatch(raw, -1) {
 			packages[m[2]] = m[1] + m[3]
@@ -250,4 +256,74 @@ func headMayCut(n *node, c *Command, raw string) bool {
 		lines++
 	}
 	return lines >= limit
+}
+
+// Go JSON emits package completions separately from individual test events.
+// Counts stay unknown: package success is not a count of successful tests.
+func parseGoJSON(raw string, t TestSummary) *TestSummary {
+	t.RequireCompletion = true
+	started := map[string]bool{}
+	completed := map[string]string{}
+	noTests := map[string]bool{}
+	failed := map[string]bool{}
+	invalid := false
+	skips := 0
+	for _, line := range strings.Split(raw, "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		var event struct{ Action, Package, Test, Output string }
+		if json.Unmarshal([]byte(line), &event) != nil || event.Action == "" {
+			invalid = true
+			continue
+		}
+		if event.Package == "" {
+			continue
+		}
+		started[event.Package] = true
+		if event.Action == "fail" {
+			failed[event.Package] = true
+		}
+		if strings.Contains(event.Output, "[no test files]") || strings.Contains(event.Output, "[no tests to run]") {
+			noTests[event.Package] = true
+		}
+		if event.Test != "" {
+			if event.Action == "skip" {
+				skips++
+			}
+			continue
+		}
+		switch event.Action {
+		case "pass", "fail", "skip":
+			completed[event.Package] = event.Action
+			if event.Action == "skip" {
+				noTests[event.Package] = true
+			}
+		}
+	}
+	t.Outcome = "unknown"
+	if len(completed) > 0 {
+		t.Packages = intp(len(completed))
+		empty := 0
+		for pkg := range completed {
+			if noTests[pkg] {
+				empty++
+			}
+		}
+		t.NoTests = empty == len(completed)
+		if !invalid && len(started) == len(completed) {
+			t.Outcome = "passed"
+		}
+	}
+	for pkg := range failed {
+		t.FailedPackages = append(t.FailedPackages, pkg)
+	}
+	sort.Strings(t.FailedPackages)
+	if len(t.FailedPackages) > 0 {
+		t.Outcome = "failed"
+	}
+	if skips > 0 {
+		t.Skipped = intp(skips)
+	}
+	return &t
 }
