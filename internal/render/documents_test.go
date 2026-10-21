@@ -64,6 +64,7 @@ func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 	r := documentReport()
 	poison := "a | b\n``` ` <script>alert(1)</script> <!-- gaugestone:start --> <!-- gaugestone:end --> <!-- gaugestone -->"
 	r.Claims[0].Quote = poison
+	r.AdmittedGaps = []claims.Gap{{Quote: "**<img src=https://example.org onerror=alert(1)>** `<script>alert(1)</script>`"}}
 	r.Claims[0].Explanation = poison
 	r.Commands[0].Original.Line = poison
 	r.Commands[0].Output = poison
@@ -75,6 +76,9 @@ func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 		if strings.Contains(h, marker) || strings.Contains(m, marker) {
 			t.Fatalf("unescaped %q", marker)
 		}
+	}
+	if !strings.Contains(h, "<strong>&lt;img src=https://example.org onerror=alert(1)&gt;</strong>") || !strings.Contains(h, "<code>&lt;script&gt;alert(1)&lt;/script&gt;</code>") {
+		t.Fatal("admitted gap formatting or escaping missing")
 	}
 	if !strings.Contains(m, "<code>") || !strings.Contains(m, "&#124;") || !strings.Contains(h, "&lt;script&gt;") {
 		t.Fatal("escaping missing")
@@ -343,5 +347,155 @@ func TestMarkdownByteBudgets(t *testing.T) {
 			}
 			pandoc(t, b.String())
 		})
+	}
+}
+
+func TestHTMLQuotationFormatting(t *testing.T) {
+	for _, tc := range []struct{ source, want string }{
+		{"Ran `go test ./...`: **all tests pass**.", "Ran <code>go test ./...</code>: <strong>all tests pass</strong>."},
+		{"__Alles grün__ mit `**literal** __literal__ <img src=https://example.org>`.", "<strong>Alles grün</strong> mit <code>**literal** __literal__ &lt;img src=https://example.org&gt;</code>."},
+		{"**Passed `go test`**", "<strong>Passed <code>go test</code></strong>"},
+		{"**A `**` B**", "<strong>A <code>**</code> B</strong>"},
+		{"unmatched **bold and `code", "unmatched **bold and `code"},
+		{"*italic* [link](https://example.org) ~~strike~~", "*italic* [link](https://example.org) ~~strike~~"},
+		{"```literal``` ***literal*** ___literal___", "```literal``` ***literal*** ___literal___"},
+	} {
+		t.Run(tc.source, func(t *testing.T) {
+			if got := string(quoteView(tc.source).Full); got != tc.want {
+				t.Fatalf("got %s, want %s", got, tc.want)
+			}
+			r := documentReport()
+			r.Claims[0].Quote = tc.source
+			r.AdmittedGaps = []claims.Gap{{Quote: tc.source}}
+			h, _ := documents(t, r)
+			if strings.Count(h, "<blockquote>"+tc.want+"</blockquote>") != 2 {
+				t.Fatal("claims and admitted gaps must share quotation formatting")
+			}
+		})
+	}
+}
+
+func TestHTMLQuotationPreview(t *testing.T) {
+	for _, letter := range []string{"a", "ü", "界"} {
+		for _, length := range []int{200, 201} {
+			r := documentReport()
+			source := strings.Repeat(letter, length)
+			r.Claims[0].Quote = source
+			r.AdmittedGaps = []claims.Gap{{Quote: source}}
+			h, _ := documents(t, r)
+			q := quoteView(source)
+			if q.Long != (length > 200) || strings.Count(h, `class="quote-toggle"`) != 2*(length-200) {
+				t.Fatalf("wrong controls for %d characters of %s", length, letter)
+			}
+			if length == 201 && string(q.Preview) != strings.Repeat(letter, 200)+"…" {
+				t.Fatal("preview did not count source characters")
+			}
+		}
+	}
+	for _, delimiter := range []string{"`", "**", "__"} {
+		tag := "strong"
+		if delimiter == "`" {
+			tag = "code"
+		}
+		source := strings.Repeat("ä", 190) + delimiter + strings.Repeat("ö", 20) + delimiter
+		q := quoteView(source)
+		want := strings.Repeat("ä", 190) + "<" + tag + ">" + strings.Repeat("ö", 10-len(delimiter)) + "</" + tag + ">…"
+		if string(q.Preview) != want {
+			t.Fatalf("unbalanced or incorrectly limited preview: %s", q.Preview)
+		}
+	}
+}
+
+func TestHTMLDurationAndHeader(t *testing.T) {
+	start := time.Date(2026, 10, 21, 12, 0, 0, 0, time.UTC)
+	for _, tc := range []struct {
+		elapsed time.Duration
+		want    string
+	}{
+		{104900 * time.Microsecond, "104 ms"},
+		{999999999, "999 ms"}, {time.Second, "1 s"},
+		{18900 * time.Millisecond, "18 s"},
+		{time.Minute - time.Nanosecond, "59 s"}, {time.Minute, "1 min 0 s"},
+		{21*time.Minute + 3900*time.Millisecond, "21 min 3 s"},
+		{time.Hour - time.Nanosecond, "59 min 59 s"}, {time.Hour, "1 h 0 min"},
+		{time.Hour + 4*time.Minute + 59*time.Second, "1 h 4 min"},
+	} {
+		t.Run(tc.want, func(t *testing.T) {
+			r := documentReport()
+			r.Session.Started, r.Session.Ended = start, start.Add(tc.elapsed)
+			r.Commands[0].Original.Start, r.Commands[0].Original.End = start, start.Add(tc.elapsed)
+			h, _ := documents(t, r)
+			if !strings.Contains(h, " · "+tc.want+"<br>Models:") || !strings.Contains(h, `data-label="Duration">`+tc.want+"</td>") {
+				t.Fatalf("duration missing: %s", tc.want)
+			}
+		})
+	}
+	for _, times := range [][2]time.Time{{{}, start}, {start, {}}, {{}, {}}} {
+		r := documentReport()
+		r.Session.Started, r.Session.Ended = times[0], times[1]
+		r.Commands[0].Original.Start, r.Commands[0].Original.End = times[0], times[1]
+		h, _ := documents(t, r)
+		if !strings.Contains(h, " · unknown<br>Models:") || !strings.Contains(h, `data-label="Duration">unknown</td>`) {
+			t.Fatal("missing timestamps should show unknown")
+		}
+	}
+	r := documentReport()
+	r.Repo.Root = "~/projects/sample-folder"
+	r.Repo.Baseline.Commit = "3890c7b1234567890"
+	r.Session.ID = "full-session-123456789"
+	h, _ := documents(t, r)
+	for _, want := range []string{"<strong>sample-folder</strong>", "<code>~/projects/sample-folder</code>", "<code>3890c7b</code> (HEAD, uncommitted changes only)", "<code>full-session-123456789</code>", `<summary>Output</summary>`} {
+		if !strings.Contains(h, want) {
+			t.Fatal("missing header or command context", want)
+		}
+	}
+	if strings.Contains(h, r.Repo.Baseline.Commit) {
+		t.Fatal("HTML should abbreviate baseline")
+	}
+}
+
+func TestWritePreservesFormattedQuotes(t *testing.T) {
+	r := documentReport()
+	r.Repo.Baseline.Commit = "3890c7b1234567890"
+	r.Session.ID = "full-session-123456789"
+	r.Claims[0].Quote = "Ran `go test ./...`: **all tests pass**."
+	r.AdmittedGaps = []claims.Gap{{Quote: "Could not run `pytest` with __this setup__."}}
+	before, err := json.Marshal(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	if err := Write(dir, r); err != nil {
+		t.Fatal(err)
+	}
+	after, err := json.Marshal(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatal("rendering mutated the shared report")
+	}
+	data, err := os.ReadFile(filepath.Join(dir, "report.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var saved report.Report
+	if err := json.Unmarshal(data, &saved); err != nil {
+		t.Fatal(err)
+	}
+	if saved.Repo.Baseline.Commit != r.Repo.Baseline.Commit || saved.Session.ID != r.Session.ID {
+		t.Fatal("saved JSON shortened header identifiers")
+	}
+	if saved.Claims[0].Quote != r.Claims[0].Quote || saved.AdmittedGaps[0].Quote != r.AdmittedGaps[0].Quote {
+		t.Fatal("saved JSON changed quote strings")
+	}
+	data, err = os.ReadFile(filepath.Join(dir, "report.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, escaped := range []string{mdCode(r.Claims[0].Quote, 0), mdText(r.AdmittedGaps[0].Quote, 0)} {
+		if !strings.Contains(string(data), escaped) {
+			t.Fatal("saved Markdown lost original quote delimiters")
+		}
 	}
 }

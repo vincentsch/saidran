@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ var htmlSource string
 var htmlTemplate = template.Must(template.New("report").Funcs(template.FuncMap{
 	"agentLabel": session.AgentLabel, "label": func(v string) string { return labels[v] }, "clock": clock, "stamp": stamp, "join": strings.Join,
 	"preview": func(s string) string { return shorten(s, 200) }, "side": side,
+	"quote": quoteView, "folder": filepath.Base, "shortCommit": shortCommit, "duration": htmlDuration,
 }).Parse(htmlSource))
 
 type commandView struct {
@@ -58,7 +60,7 @@ type htmlView struct {
 }
 
 func commandRow(c commands.Command, r report.Report) commandView {
-	v := commandView{Command: c, Check: hasCheck(c)}
+	v := commandView{Command: c, Check: hasCheck(c), Duration: "unknown"}
 	v.Failed, v.Unreliable = commandResult(c)
 	if c.Original != nil {
 		o := c.Original
@@ -77,9 +79,7 @@ func commandRow(c commands.Command, r report.Report) commandView {
 		if v.Unreliable {
 			v.Exit += " · result unreliable"
 		}
-		if !o.Start.IsZero() && !o.End.IsZero() {
-			v.Duration = o.End.Sub(o.Start).Round(time.Millisecond).String()
-		}
+		v.Duration = htmlDuration(o.Start, o.End)
 		for _, e := range r.Edits {
 			if e.Time.After(o.End) {
 				v.EditsAfter = true
@@ -139,4 +139,21 @@ func HTML(w io.Writer, r report.Report) error {
 		}
 	}
 	return htmlTemplate.Execute(w, v)
+}
+
+func htmlDuration(start, end time.Time) string {
+	if start.IsZero() || end.IsZero() {
+		return "unknown"
+	}
+	d := end.Sub(start)
+	switch {
+	case d < time.Second:
+		return fmt.Sprintf("%d ms", d/time.Millisecond)
+	case d < time.Minute:
+		return fmt.Sprintf("%d s", d/time.Second)
+	case d < time.Hour:
+		return fmt.Sprintf("%d min %d s", d/time.Minute, d/time.Second%60)
+	default:
+		return fmt.Sprintf("%d h %d min", d/time.Hour, d/time.Minute%60)
+	}
 }
