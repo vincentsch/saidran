@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/media/wordmark-dark.svg">
-    <img src="docs/media/wordmark-light.svg" alt="Saidran, a checked square beside the name" width="380">
+    <img src="docs/media/wordmark-light.svg" alt="Saidran, a checked square beside the name" width="238">
   </picture>
 </p>
 
