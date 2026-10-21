@@ -107,7 +107,11 @@ func sentences(text string) []string {
 // These recognize clause structure, including non-passing assertions. Claim
 // admission still applies negation and modality to each original clause.
 var conditionalContext = regexp.MustCompile(`(?i)\b(if|when|once|unless|wenn|falls|sobald|(?:after|before|until) (?:the )?tests pass|so they pass)\b`)
-var checkPredicate = regexp.MustCompile(`(?i)\b(?:tests?|test suite|build|lint|linter|type ?checks?)\s+(?:(?:are|were|is|was|do|does|did|not|don't|doesn't|didn't|should|would|will|might|may|could|sind|waren|ist|war|nicht|sollte[n]?|würde[n]?)\s+)*(?:pass(?:es|ed|ing)?|green|grün|bestehen|bestanden|läuft|lief)\b`)
+
+const resultPredicate = `(?:(?:are|were|is|was|do|does|did|not|don't|doesn't|didn't|should|would|will|might|may|could|sind|waren|ist|war|nicht|sollte[n]?|würde[n]?)\s+)*(?:pass(?:es|ed|ing)?|green|grün|bestehen|bestanden|läuft|lief)\b`
+
+var checkPredicate = regexp.MustCompile(`(?i)\b(?:tests?|test suite|build|lint|linter|type ?checks?)\s+` + resultPredicate)
+var quotedPredicate = regexp.MustCompile(`(?i)^\s*(?:\*\*|__)?\s*` + resultPredicate)
 var clauseBoundary = regexp.MustCompile(`(?i)^(?:;\s*|,\s*(?:but|aber)\s+|\s+(?:and|und)\s+)`)
 
 func assertionClauses(text string) []string {
@@ -159,7 +163,7 @@ func assertion(text string) bool {
 		}
 	}
 	for _, m := range inline.FindAllStringIndex(text, -1) {
-		if passed.MatchString(text[m[1]:]) {
+		if quotedPredicate.MatchString(text[m[1]:]) {
 			return true
 		}
 	}

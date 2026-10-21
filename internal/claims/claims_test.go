@@ -1,6 +1,7 @@
 package claims
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -354,6 +355,35 @@ func TestPositiveAssertionsBesideNegatedOrConditionalClauses(t *testing.T) {
 	for _, text := range []string{"If tests pass and lint passes, merge", "Tests pass when build passes and lint passes", "Wenn Tests bestehen und Build läuft, fortfahren"} {
 		if got, _ := Extract(text, at); len(got) != 0 {
 			t.Fatalf("conditional created claims: %+v", got)
+		}
+	}
+}
+
+func TestQuotedAssertionsBesideNegatedOrModalResults(t *testing.T) {
+	root := t.TempDir()
+	at := time.Now()
+	positive := "`go test ./calc` passed"
+	for _, suffix := range []string{"did not pass", "didn't pass", "should pass", "would pass"} {
+		other := "`go vet ./...` " + suffix
+		for _, join := range []string{" and ", "; "} {
+			for _, text := range []string{positive + join + other, other + join + positive} {
+				for _, exit := range []int{0, 1} {
+					t.Run(fmt.Sprintf("%s/exit%d", text, exit), func(t *testing.T) {
+						s := &session.Session{Cwd: root, Final: text, FinalTime: at.Add(time.Minute), Events: []session.Event{{Seq: 1, Time: at, Command: &session.Command{Line: "go test ./calc", Shell: true, Cwd: root, Start: at, End: at, ExitCode: &exit, ExitReliable: true}}}}
+						got, gaps := Evaluate(root, s, commands.Build(s))
+						want := "verified"
+						if exit != 0 {
+							want = "contradicted"
+						}
+						if len(got) != 1 || got[0].Quote != positive || got[0].Type != "tests" || got[0].Verdict != want || len(gaps) != 0 {
+							t.Fatalf("claims=%+v gaps=%+v; want %s", got, gaps, want)
+						}
+					})
+				}
+			}
+		}
+		if got, _ := Extract(other, at); len(got) != 0 {
+			t.Fatalf("non-passing assertion admitted: %+v", got)
 		}
 	}
 }
