@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/vincentsch/rungrad"
+	"github.com/vincentsch/saidran/internal/findings"
 )
 
 func TestFindingReferences(t *testing.T) {
@@ -34,5 +35,13 @@ func TestDismissalStoreErrors(t *testing.T) {
 		if _, err := LoadDismissals(dir); err == nil {
 			t.Fatal("invalid store accepted")
 		}
+	}
+}
+
+func TestReportDismissalsOmitStoredHunk(t *testing.T) {
+	r := Report{Findings: []findings.Finding{{ID: "F-123456abcdef"}}}
+	r.ApplyDismissals(DismissalStore{Version: 1, Entries: []Dismissal{{ID: "F-123456abcdef", Reason: "Integration test", Context: "+func TestIntegration(t *testing.T) {"}}})
+	if len(r.Dismissals) != 1 || r.Dismissals[0].Reason != "Integration test" || r.Dismissals[0].Context != "" {
+		t.Fatalf("%+v", r.Dismissals)
 	}
 }

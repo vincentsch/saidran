@@ -4,18 +4,19 @@ Verdicts compare a claim in the final response with recorded execution and
 edits before that response. They cover tests, builds, linters and type checks.
 They cannot say whether a bug was fixed. Session logs can be edited.
 
-| Verdict | Example and next step |
-| --- | --- |
-| Verified | The `codex-verified` recording has passing checks after its last relevant edit. No rerun is needed for that claim within the recorded session. |
-| Stale | In `claude-stale`, `go test ./...` passed, then `calc/stats.go` changed in the same minute. The explanation shows seconds. Run the check again. |
-| Contradicted | `claude-contradicted` claims passing tests despite a matching failure. Fix the failure and rerun. |
-| Partial | The synthetic narrow-coverage example claims all tests after `go test ./calc`. Run the wider suite. Listing tests or finding none also gives Partial. |
-| No matching run | The synthetic missing-run example claims passing tests after only `git status --short`. Find or record a supporting run. An incomplete log may omit one. |
-| Can't tell | The synthetic unreliable-result example pipes `go test ./...` through `tail` without a readable summary. The pipe's exit does not prove the test result. Rerun with reliable evidence. |
+| Verdict | What happened | What to do |
+| --- | --- | --- |
+| Verified | A matching check passed with full coverage, and no relevant file changed afterwards. | Nothing for that claim within the recorded session. |
+| Stale | `go test ./...` passed, then `calc/stats.go` changed. When both happen in the same minute, the explanation shows seconds. | Run the check again. |
+| Contradicted | The agent says the tests pass, but a matching test run failed and no later passing run covers that failure. | Fix the failure and rerun. |
+| Partial | The agent claims all tests pass after running only `go test ./calc`. For an unrestricted claim, a run that only lists tests, finds none, or leaves tests out with `-short` or `-skip` also gives Partial. | Run the wider suite. |
+| No matching run | The agent claims passing tests, but the log only shows `git status --short`. | Find or record a supporting run. An incomplete log may omit one. |
+| Can't tell | `go test ./...` was piped through `tail`, and the output has no readable test summary. The pipe's exit code says nothing about the tests. | Rerun so the result is recorded reliably. |
 
-These examples live in [recorded fixtures](../testdata/sessions/README.md) and
-[synthetic examples](../testdata/synthetic/README.md). `saidran demo` shows
-the recorded Stale example without needing agent history.
+The Verified, Stale and Contradicted rows match the `codex-verified`,
+`claude-stale` and `claude-contradicted` [recorded fixtures](../testdata/sessions/README.md);
+the others are [synthetic examples](../testdata/synthetic/README.md).
+`saidran demo` shows the Stale example without needing agent history.
 
 A targeted passing rerun cannot erase an unresolved failure outside its coverage.
 Unknown runners, uncertain edits and missing results stay unknown. Edits during
@@ -27,10 +28,11 @@ claims. Inspect the command results and later edits anyway. New progress text
 can replace an earlier claim without changing the execution history. Changes
 after the recorded session end are marked separately and are not covered.
 
-Independent assertions receive separate claims and quotes. For example,
-“`go test ./other` passed; `go test ./calc` passed” does not let the calc run
-verify the other package. “All tests pass, but I did not run lint” keeps the
-test assertion and a separate admitted lint gap.
+Every quoted command gets its own claim. For example, in
+“`go test ./other` passed; `go test ./calc` passed” or “`go test ./other` and
+`go test ./calc` passed”, the calc run cannot verify the other package.
+“All tests pass, but I did not run lint” keeps the test assertion and a
+separate admitted lint gap.
 
 Generic suite claims use the session's starting directory. Running
 `cd calc && go test ./...` in a root-started session gives Partial for “All

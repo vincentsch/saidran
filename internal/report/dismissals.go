@@ -44,6 +44,9 @@ func (r *Report) ApplyDismissals(s DismissalStore) {
 	for _, f := range r.Findings {
 		for _, d := range s.Entries {
 			if d.ID == f.ID {
+				// The stored diff hunk stays in the local store; reports show
+				// only the finding's own excerpt.
+				d.Context = ""
 				r.Dismissals = append(r.Dismissals, d)
 				break
 			}

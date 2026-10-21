@@ -79,6 +79,9 @@ var pathName = regexp.MustCompile(`(?:\./|[a-zA-Z0-9_-]+/)[a-zA-Z0-9_./*-]+|\b[a
 var wholeWords = regexp.MustCompile(`(?i)\b(all|alle|whole suite|entire suite)\b`)
 var passed = regexp.MustCompile(`(?i)^\s*(?:\*\*|__)?\s*pass(?:es|ed)?\b`)
 
+// commandList joins inline commands that share one result, as in "`a`, `b` and `c` passed".
+var commandList = regexp.MustCompile(`(?i)^\s*(?:,\s*(?:(?:and|und)\s+)?|(?:and|und|&)\s+)`)
+
 // sentences keeps original Markdown and avoids splitting paths or command text.
 func sentences(text string) []string {
 	var out []string
@@ -180,9 +183,24 @@ func Extract(final string, at time.Time) ([]Claim, []Gap) {
 		if blocked.MatchString(plain) {
 			continue
 		}
-		asserted := map[string]*commands.Statement{}
-		for _, m := range inline.FindAllStringSubmatchIndex(quote, -1) {
-			if !passed.MatchString(quote[m[1]:]) {
+		// Every asserted command keeps its own claim, so one passing command
+		// cannot stand in for another named in the same sentence.
+		inlines := inline.FindAllStringSubmatchIndex(quote, -1)
+		shared := make([]bool, len(inlines))
+		for i := len(inlines) - 1; i >= 0; i-- {
+			rest := quote[inlines[i][1]:]
+			if passed.MatchString(rest) {
+				shared[i] = true
+			} else if i+1 < len(inlines) {
+				if sep := commandList.FindString(rest); sep != "" && inlines[i][1]+len(sep) == inlines[i+1][0] {
+					shared[i] = shared[i+1]
+				}
+			}
+		}
+		asserted := map[string][]*commands.Statement{}
+		seen := map[string]bool{}
+		for i, m := range inlines {
+			if !shared[i] {
 				continue
 			}
 			line := quote[m[2]:m[3]]
@@ -195,8 +213,9 @@ func Extract(final string, at time.Time) ([]Claim, []Gap) {
 			if kind == "test" {
 				kind = "tests"
 			}
-			if kind == "tests" || kind == "build" || kind == "lint" || kind == "typecheck" {
-				asserted[kind] = &st
+			if (kind == "tests" || kind == "build" || kind == "lint" || kind == "typecheck") && !seen[st.Line] {
+				seen[st.Line] = true
+				asserted[kind] = append(asserted[kind], &st)
 			}
 		}
 		listed := map[string]bool{}
@@ -208,63 +227,73 @@ func Extract(final string, at time.Time) ([]Claim, []Gap) {
 			}
 		}
 		for _, rule := range rules {
-			st, commandClaim := asserted[rule.kind]
-			if !commandClaim && !listed[rule.kind] && !rule.phrase.MatchString(plain) {
+			statements := asserted[rule.kind]
+			if len(statements) == 0 && !listed[rule.kind] && !rule.phrase.MatchString(plain) {
 				continue
 			}
-			c := Claim{Type: rule.kind, Quote: quote, Time: at, Scope: "whole", Targets: []string{}, Runs: []Run{}, Edits: []Edit{}}
-			if tool := toolName.FindString(plain); tool != "" {
-				c.Runner = strings.ToLower(tool)
-				c.Scope = "targeted"
+			if len(statements) == 0 || listed[rule.kind] {
+				statements = []*commands.Statement{nil}
 			}
-			if commandClaim {
-				c.Runner, c.invocation = st.Runner, st
-				c.Targets = append(c.Targets, st.Targets...)
-				c.Scope = st.Scope
-				if st.Class != "test" {
-					c.Targets = invocationTargets(*st)
-					c.Scope = "whole"
-					for _, target := range c.Targets {
-						if target != "." && target != "./..." {
-							c.Scope = "targeted"
-						}
-					}
-				}
-			} else {
-				if m := namedPackage.FindStringSubmatch(plain); len(m) > 1 {
-					if !scopeWord(m[1]) {
-						c.Targets = append(c.Targets, strings.TrimRight(m[1], ".,:;"))
-					}
-				}
-				for _, path := range pathName.FindAllString(plain, -1) {
-					if !strings.HasSuffix(path, "/...") {
-						path = strings.TrimRight(path, ".,:;")
-					}
-					c.Targets = append(c.Targets, path)
-				}
-				if test := namedTest.FindString(plain); test != "" {
-					c.Targets = append(c.Targets, test)
-					if m := inPackage.FindStringSubmatch(plain); len(m) > 1 {
-						c.Targets = append(c.Targets, strings.TrimRight(m[1], ".,:;"))
-					}
-				}
-				if len(c.Targets) > 0 {
-					c.Scope = "targeted"
-				}
+			for _, st := range statements {
+				claims = append(claims, newClaim(rule.kind, quote, plain, at, st, listed[rule.kind]))
 			}
-			if listed[rule.kind] {
-				c.Runner = ""
-				c.Targets = []string{}
-				c.Scope = "whole"
-				c.invocation = nil
-			}
-			if wholeWords.MatchString(plain) {
-				c.Scope = "whole"
-			}
-			claims = append(claims, c)
 		}
 	}
 	return claims, gaps
+}
+
+// newClaim builds one claim; st is the asserted command, or nil for prose.
+func newClaim(kind, quote, plain string, at time.Time, st *commands.Statement, listed bool) Claim {
+	c := Claim{Type: kind, Quote: quote, Time: at, Scope: "whole", Targets: []string{}, Runs: []Run{}, Edits: []Edit{}}
+	if tool := toolName.FindString(plain); tool != "" {
+		c.Runner = strings.ToLower(tool)
+		c.Scope = "targeted"
+	}
+	if st != nil {
+		c.Runner, c.invocation = st.Runner, st
+		c.Targets = append(c.Targets, st.Targets...)
+		c.Scope = st.Scope
+		if st.Class != "test" {
+			c.Targets = invocationTargets(*st)
+			c.Scope = "whole"
+			for _, target := range c.Targets {
+				if target != "." && target != "./..." {
+					c.Scope = "targeted"
+				}
+			}
+		}
+	} else {
+		if m := namedPackage.FindStringSubmatch(plain); len(m) > 1 {
+			if !scopeWord(m[1]) {
+				c.Targets = append(c.Targets, strings.TrimRight(m[1], ".,:;"))
+			}
+		}
+		for _, path := range pathName.FindAllString(plain, -1) {
+			if !strings.HasSuffix(path, "/...") {
+				path = strings.TrimRight(path, ".,:;")
+			}
+			c.Targets = append(c.Targets, path)
+		}
+		if test := namedTest.FindString(plain); test != "" {
+			c.Targets = append(c.Targets, test)
+			if m := inPackage.FindStringSubmatch(plain); len(m) > 1 {
+				c.Targets = append(c.Targets, strings.TrimRight(m[1], ".,:;"))
+			}
+		}
+		if len(c.Targets) > 0 {
+			c.Scope = "targeted"
+		}
+	}
+	if listed {
+		c.Runner = ""
+		c.Targets = []string{}
+		c.Scope = "whole"
+		c.invocation = nil
+	}
+	if wholeWords.MatchString(plain) {
+		c.Scope = "whole"
+	}
+	return c
 }
 
 func scopeWord(s string) bool {

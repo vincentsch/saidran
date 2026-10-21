@@ -137,6 +137,11 @@ func TestVerdictsFromRecordedEvidence(t *testing.T) {
 		{"json reliable failure without summary", "All tests pass.", "contradicted", []step{{line: "go test -json ./...", output: "{broken", exit: 1, start: 1, end: 2}}, 1},
 		{"json unreliable empty result", "All tests pass.", "cant_tell", []step{{line: "go test -json ./... | tail", output: "{broken", start: 1, end: 2}}, 1},
 		{"matching suite", "All tests pass.", "verified", []step{pass}, 1},
+		{"short run for full claim", "`go test ./...` passed.", "partial", []step{run("go test -short ./...", 0)}, 1},
+		{"short run for prose claim", "All tests pass.", "partial", []step{run("go test -short ./...", 0)}, 1},
+		{"short run for short claim", "`go test -short ./...` passed.", "verified", []step{run("go test -short ./...", 0)}, 1},
+		{"skip run for full claim", "`go test ./...` passed.", "partial", []step{run("go test -skip TestIntegration ./...", 0)}, 1},
+		{"full run after short failure", "All tests pass.", "verified", []step{run("go test -short ./...", 1), {line: "go test ./...", start: 3, end: 4}}, 1},
 		{"no candidate", "All tests pass.", "no_matching_run", nil, 0},
 		{"failure", "All tests pass.", "contradicted", []step{run("go test ./...", 1)}, 1},
 		{"unknown pipeline", "All tests pass.", "cant_tell", []step{run("go test ./... | tail", 0)}, 1},
@@ -304,6 +309,22 @@ func TestIndependentAssertions(t *testing.T) {
 			default:
 				t.Fatalf("shared assertion: %+v", c)
 			}
+		}
+	}
+	// Commands sharing one result keep separate claims under the same quote.
+	for _, text := range []string{"`go test ./other` passed, `go test ./calc` passed.", "`go test ./other` and `go test ./calc` passed.", "`go test ./calc`, `go test ./other` passed.", "`go test ./calc`, `go test ./other` and `go test ./calc` passed."} {
+		exit := 0
+		s := &session.Session{Cwd: root, Final: text, FinalTime: at.Add(time.Minute), Events: []session.Event{{Seq: 1, Time: at, Command: &session.Command{Line: "go test ./calc", Shell: true, Cwd: root, Start: at, End: at, ExitCode: &exit, ExitReliable: true}}}}
+		got, _ := Evaluate(root, s, commands.Build(s))
+		verdicts := map[string]string{}
+		for _, c := range got {
+			if c.Quote != text || c.invocation == nil {
+				t.Fatalf("%s: %+v", text, c)
+			}
+			verdicts[c.invocation.Line] = c.Verdict
+		}
+		if len(got) != 2 || verdicts["go test ./calc"] != "verified" || verdicts["go test ./other"] != "no_matching_run" {
+			t.Fatalf("%s: %+v", text, got)
 		}
 	}
 	for _, text := range []string{"All tests pass, but I did not run lint", "All tests pass and I did not run lint", "Alle Tests sind grün, aber Lint wurde nicht ausgeführt"} {

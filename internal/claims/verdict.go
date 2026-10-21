@@ -20,6 +20,9 @@ type coverage struct {
 	recursive bool
 	filters   []string
 	unknown   bool
+	// Go's -short and -skip leave out tests that an unrestricted run includes.
+	short bool
+	skips []string
 }
 
 var failedGoPackages = regexp.MustCompile(`(?m)^FAIL[ \t]+([^ \t\r\n]+)`)
@@ -55,6 +58,9 @@ func resolve(root, cwd, target string) string {
 func area(root string, st commands.Statement) coverage {
 	st.Cwd = pathutil.Resolve(root, st.Cwd)
 	a := coverage{unknown: st.Class == "test" && st.Scope == "unknown"}
+	if st.Runner == "go" {
+		a.short, a.skips = goRestrictions(st.Argv)
+	}
 	// Filters are separate from paths: a passing filtered run covers only that filter.
 	for i, arg := range st.Argv {
 		for _, flag := range []string{"-run", "-bench", "-k", "-m", "-t", "--filter", "--testNamePattern", "--testsuite"} {
@@ -123,8 +129,19 @@ func claimArea(root, cwd string, c Claim) coverage {
 	return a
 }
 func covers(a, b coverage) bool {
-	if a.unknown {
+	if a.unknown || a.short && !b.short {
 		return false
+	}
+	for _, skip := range a.skips {
+		found := false
+		for _, claimed := range b.skips {
+			if skip == claimed {
+				found = true
+			}
+		}
+		if !found {
+			return false
+		}
 	}
 	if len(a.filters) > 0 {
 		if len(b.filters) == 0 {
@@ -237,7 +254,7 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 		wanted := desired
 		// An explicit whole-suite command describes the suite at the run's cwd.
 		if relativeWhole(*c) && within(root, st.Cwd) {
-			wanted = wholeAt(st.Cwd)
+			wanted = wholeAt(st.Cwd, desired)
 		}
 		if !overlaps(a, wanted) {
 			continue
@@ -261,7 +278,7 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 	for j := range candidates {
 		wanted := desired
 		if relativeWhole(*c) && within(root, candidates[j].run.Cwd) {
-			wanted = wholeAt(candidates[j].run.Cwd)
+			wanted = wholeAt(candidates[j].run.Cwd, desired)
 		}
 		if covers(candidates[j].area, wanted) {
 			chosen = j
@@ -304,7 +321,7 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 		}
 		wanted := desired
 		if relativeWhole(*c) && within(root, failure.run.Cwd) {
-			wanted = wholeAt(failure.run.Cwd)
+			wanted = wholeAt(failure.run.Cwd, desired)
 		}
 		if !overlaps(failedArea, wanted) {
 			continue
@@ -404,10 +421,15 @@ func evaluate(root string, s *session.Session, c *Claim, ledger commands.Ledger,
 	}
 	wanted := desired
 	if relativeWhole(*c) && within(root, run.run.Cwd) {
-		wanted = wholeAt(run.run.Cwd)
+		wanted = wholeAt(run.run.Cwd, desired)
 	}
 	partial := !covers(run.area, wanted)
 	reason := "the run covered less than the claim"
+	if run.area.short && !wanted.short {
+		reason = "it ran with -short, so tests that skip in short mode did not run"
+	} else if len(run.area.skips) > 0 && partial {
+		reason = "its -skip pattern left out matching tests"
+	}
 	if t := run.entry.Command.Tests; t != nil {
 		if t.ListOnly {
 			partial = true
@@ -449,8 +471,30 @@ func defaultNext(c Claim) string {
 func relativeWhole(c Claim) bool {
 	return c.Scope == "whole" && c.invocation != nil && c.invocation.Scope == "whole" && c.Runner != "tsc"
 }
-func wholeAt(cwd string) coverage {
-	return coverage{paths: []string{pathutil.Resolve("", cwd)}, recursive: true}
+func wholeAt(cwd string, desired coverage) coverage {
+	return coverage{paths: []string{pathutil.Resolve("", cwd)}, recursive: true, short: desired.short, skips: desired.skips}
+}
+
+// goRestrictions reports go test's -short mode and -skip patterns.
+func goRestrictions(argv []string) (short bool, skips []string) {
+	for i, arg := range argv {
+		name, value, hasValue := strings.Cut(strings.TrimLeft(arg, "-"), "=")
+		if !strings.HasPrefix(arg, "-") {
+			continue
+		}
+		name = strings.TrimPrefix(name, "test.")
+		switch name {
+		case "short":
+			short = !hasValue || value == "true" || value == "1"
+		case "skip":
+			if hasValue {
+				skips = append(skips, value)
+			} else if i+1 < len(argv) {
+				skips = append(skips, argv[i+1])
+			}
+		}
+	}
+	return short, skips
 }
 
 // Check commands use conventional positional paths. Script bodies remain hints.
