@@ -200,6 +200,9 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 			fmt.Fprintf(&b, "<details><summary>Dismissed: %s</summary>\n\n", mdCode(f.ID, 0))
 		}
 		fmt.Fprintf(&b, "- %s %s in %s: %s", mdCode(f.ID, 0), code(f.Code), code(fmt.Sprintf("%s:%d", f.Path, f.Line)), text(f.Explanation))
+		if f.Excerpt != "" {
+			fmt.Fprintf(&b, " · %s", mdCode(f.Excerpt, 0))
+		}
 		if f.Old != nil || f.New != nil {
 			fmt.Fprintf(&b, " · %s → %s", code(side(f.Old)), code(side(f.New)))
 		}

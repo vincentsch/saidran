@@ -6,7 +6,7 @@ import (
 	"unicode"
 )
 
-var assignments = regexp.MustCompile(`(?i)\b([a-z0-9_]*(?:_KEY|_TOKEN|_SECRET)|[a-z0-9_]*PASSWORD)(\s*[=:]\s*)("[^"\n]*"|'[^'\n]*'|[^\s;,]+)`)
+var assignments = regexp.MustCompile(`(?i)\b([a-z0-9_]*(?:_KEY|_TOKEN|_SECRET)|[a-z0-9_]*PASSWORD)(\s*[=:]\s*)(\[redacted\]|"[^"\n]*"|'[^'\n]*'|[^\s;,]+)`)
 var tokens = regexp.MustCompile(`\b(?:sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+|xox[baprs]-[A-Za-z0-9-]{20,}|AKIA[A-Z0-9]{16}|[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,})`)
 var longAssignment = regexp.MustCompile(`([=:]\s*["']?)[A-Za-z0-9_+/=-]{33,}`)
 

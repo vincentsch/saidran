@@ -58,6 +58,11 @@ type Report struct {
 
 func Build(version string, now time.Time, state gitstate.State, s *session.Session, notes []string) Report {
 	r := Report{Type: "saidran.report/v1", Version: version, Generated: now, Repo: state, Groups: map[string][]gitstate.File{}, Findings: findings.Detect(state.Files), Commands: []commands.Command{}, Ledger: []commands.Entry{}, Edits: []commands.Entry{}, Claims: []claims.Claim{}, AdmittedGaps: []claims.Gap{}, Dismissals: []Dismissal{}}
+	home, _ := os.UserHomeDir()
+	redactor := redact.Redactor{Home: home}
+	for i := range r.Findings {
+		r.Findings[i].PrepareExcerpt(redactor)
+	}
 	r.Completeness.Notes = append([]string{}, notes...)
 	for _, group := range []string{"tests", "ci", "lockfiles", "config", "docs", "source", "other"} {
 		r.Groups[group] = []gitstate.File{}
@@ -78,8 +83,6 @@ func Build(version string, now time.Time, state gitstate.State, s *session.Sessi
 	if s == nil {
 		return r
 	}
-	home, _ := os.UserHomeDir()
-	redactor := redact.Redactor{Home: home}
 	r.Session = &Session{Agent: s.Agent, Version: s.AgentVersion, ID: s.ID, Started: s.Started, Ended: s.Ended, Models: append([]string{}, s.Models...), PromptCount: len(s.Prompts), Prompts: []string{}}
 	for _, p := range s.Prompts {
 		r.Session.Prompts = append(r.Session.Prompts, redactor.Prompt(p.Text))

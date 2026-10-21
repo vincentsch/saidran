@@ -11,17 +11,21 @@ import (
 	"strings"
 
 	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
 )
 
 type Finding struct {
-	Context     string  `json:"-"`
-	ID          string  `json:"id"`
-	Code        string  `json:"code"`
-	Path        string  `json:"path"`
-	Line        int     `json:"line"`
-	Explanation string  `json:"explanation"`
-	Old         *string `json:"old,omitempty"`
-	New         *string `json:"new,omitempty"`
+	Context       string `json:"-"`
+	triggerLine   string
+	triggerMarker string
+	Excerpt       string  `json:"excerpt,omitempty"`
+	ID            string  `json:"id"`
+	Code          string  `json:"code"`
+	Path          string  `json:"path"`
+	Line          int     `json:"line"`
+	Explanation   string  `json:"explanation"`
+	Old           *string `json:"old,omitempty"`
+	New           *string `json:"new,omitempty"`
 	// Values distinguishes a missing command side from findings without command values.
 	Values bool `json:"-"`
 }
@@ -70,11 +74,11 @@ var ignored = regexp.MustCompile(`\|\|\s*true\b`)
 func Detect(files []gitstate.File) []Finding {
 	result := []Finding{}
 	counts := map[string]int{}
-	add := func(f gitstate.File, code string, line int, hunk, explanation string, old, newValue *string, values bool) {
+	add := func(f gitstate.File, code string, line int, hunk, explanation string, old, newValue *string, values bool, trigger, marker string) {
 		key := code + "\x00" + f.Path + "\x00" + hunk
 		counts[key]++
 		sum := sha256.Sum256([]byte(fmt.Sprintf("%s\x00%d", key, counts[key])))
-		result = append(result, Finding{Context: hunk, ID: fmt.Sprintf("F-%x", sum[:6]), Code: code, Path: f.Path, Line: line, Explanation: explanation, Old: old, New: newValue, Values: values})
+		result = append(result, Finding{triggerLine: trigger, triggerMarker: marker, Context: hunk, ID: fmt.Sprintf("F-%x", sum[:6]), Code: code, Path: f.Path, Line: line, Explanation: explanation, Old: old, New: newValue, Values: values})
 	}
 	for _, f := range files {
 		if f.Status == "D" && f.Group == "tests" {
@@ -82,7 +86,7 @@ func Detect(files []gitstate.File) []Finding {
 			for _, v := range f.Hunks {
 				h += v.Normalized()
 			}
-			add(f, "test_deleted", 1, h, "A test file was deleted.", nil, nil, false)
+			add(f, "test_deleted", 1, h, "A test file was deleted.", nil, nil, false, "", "")
 		}
 		ext := path.Ext(f.Path)
 		if ext == ".ts" || ext == ".tsx" || ext == ".jsx" || ext == ".mjs" || ext == ".cjs" {
@@ -97,22 +101,22 @@ func Detect(files []gitstate.File) []Finding {
 					continue
 				}
 				if f.Group == "tests" && skipCalls[ext] != nil && l.New > 0 && l.New <= len(codeLines) {
-					for range skipCalls[ext].FindAllStringIndex(codeLines[l.New-1], -1) {
-						add(f, "test_skipped", l.New, h.Normalized(), "A skip or focus marker was added to a test.", nil, nil, false)
+					for _, match := range skipCalls[ext].FindAllStringIndex(codeLines[l.New-1], -1) {
+						add(f, "test_skipped", l.New, h.Normalized(), "A skip or focus marker was added to a test.", nil, nil, false, l.Text, l.Text[match[0]:match[1]])
 					}
 				}
 				if l.New > 0 && l.New <= len(suppressionLines) {
-					for range disabled.FindAllStringIndex(suppressionLines[l.New-1], -1) {
-						add(f, "check_disabled", l.New, h.Normalized(), "A check suppression was added.", nil, nil, false)
+					for _, match := range disabled.FindAllStringIndex(suppressionLines[l.New-1], -1) {
+						add(f, "check_disabled", l.New, h.Normalized(), "A check suppression was added.", nil, nil, false, l.Text, l.Text[match[0]:match[1]])
 					}
 				}
 				if f.Group == "ci" && !strings.HasPrefix(strings.TrimSpace(l.Text), "#") {
-					for range ciFlag.FindAllStringIndex(l.Text, -1) {
-						add(f, "ci_ignores_failure", l.New, h.Normalized(), "A CI check was configured to allow failure.", nil, nil, false)
+					for _, match := range ciFlag.FindAllStringIndex(l.Text, -1) {
+						add(f, "ci_ignores_failure", l.New, h.Normalized(), "A CI check was configured to allow failure.", nil, nil, false, l.Text, l.Text[match[0]:match[1]])
 					}
 					if ciRuns[l.New] {
-						for range ignored.FindAllStringIndex(l.Text, -1) {
-							add(f, "ci_ignores_failure", l.New, h.Normalized(), "A CI command was changed to ignore failure.", nil, nil, false)
+						for _, match := range ignored.FindAllStringIndex(l.Text, -1) {
+							add(f, "ci_ignores_failure", l.New, h.Normalized(), "A CI command was changed to ignore failure.", nil, nil, false, l.Text, l.Text[match[0]:match[1]])
 						}
 					}
 				}
@@ -149,11 +153,44 @@ func Detect(files []gitstate.File) []Finding {
 					normalized += h.Normalized()
 				}
 			}
-			add(f, "test_command_changed", line, normalized, "The test command changed.", old, newValue, true)
+			add(f, "test_command_changed", line, normalized, "The test command changed.", old, newValue, true, "", "")
 		}
 	}
 	return result
 }
+
+// PrepareExcerpt redacts the whole source line before choosing a bounded window.
+// Diff context remains unchanged because it supplies identity and dismissals.
+func (f *Finding) PrepareExcerpt(r redact.Redactor) {
+	if f.triggerLine == "" {
+		return
+	}
+	line := strings.TrimSpace(r.Text(f.triggerLine))
+	marker := r.Text(f.triggerMarker)
+	at := strings.Index(line, marker)
+	if at < 0 {
+		// A secret assignment can consume a trailing suppression comment too.
+		f.Excerpt = "… " + marker + " …"
+		return
+	}
+	const limit = 240
+	chars := []rune(line)
+	if len(chars) <= limit {
+		f.Excerpt = line
+		return
+	}
+	start := max(0, len([]rune(line[:at]))-60)
+	start = min(start, len(chars)-(limit-4))
+	end := min(len(chars), start+limit-4)
+	f.Excerpt = string(chars[start:end])
+	if start > 0 {
+		f.Excerpt = "… " + f.Excerpt
+	}
+	if end < len(chars) {
+		f.Excerpt += " …"
+	}
+}
+
 func equal(a, b *string) bool { return a == nil && b == nil || a != nil && b != nil && *a == *b }
 
 // codeOnly masks comments and quoted text but preserves columns and line numbers.

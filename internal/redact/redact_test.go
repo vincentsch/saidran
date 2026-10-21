@@ -50,3 +50,13 @@ func TestTokenBoundariesAndPasswordVariables(t *testing.T) {
 		}
 	}
 }
+
+func TestRedactedAssignmentsKeepSourcePunctuation(t *testing.T) {
+	r := Redactor{}
+	for _, source := range []string{`t.Skipf("API_TOKEN='private words'")`, `API_KEY=private; t.SkipNow()`, `PASSWORD="private" // explanation`} {
+		once := r.Text(source)
+		if twice := r.Text(once); twice != once {
+			t.Fatalf("second redaction changed source: %q -> %q", once, twice)
+		}
+	}
+}

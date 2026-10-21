@@ -12,7 +12,7 @@ compares claims about tests, builds, linters and type checks with recorded
 runs. If code changed after a passing test, the report shows it. It also
 points out skipped tests and disabled checks in the diff.
 
-[Quickstart](docs/quickstart.md) · [FAQ](docs/faq.md) ·
+[Website](https://www.saidran.com) · [Quickstart](docs/quickstart.md) · [FAQ](docs/faq.md) ·
 [Commands](docs/commands.md) · [AGENTS.md](AGENTS.md) ·
 [Releases](https://github.com/vincentsch/saidran/releases)
 

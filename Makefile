@@ -24,7 +24,9 @@ test:
 race:
 	go test -race ./...
 lint:
-	@test -z "$$(gofmt -l .)" || { gofmt -l .; exit 1; }
+	@files=$$(find cmd internal scripts -type f -name '*.go') && \
+		result=$$(printf '%s\n' "$$files" | xargs gofmt -l) && \
+		{ test -z "$$result" || { printf '%s\n' "$$result"; exit 1; }; }
 	go vet ./...
 conformance:
 	scripts/conformance.sh

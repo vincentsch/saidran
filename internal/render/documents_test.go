@@ -18,6 +18,7 @@ import (
 	"github.com/vincentsch/saidran/internal/commands"
 	"github.com/vincentsch/saidran/internal/findings"
 	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
 	"github.com/vincentsch/saidran/internal/report"
 	"github.com/vincentsch/saidran/internal/session"
 )
@@ -123,6 +124,7 @@ func TestMarkdownOverflow(t *testing.T) {
 					f := findings.Finding{ID: id, Code: "test_skipped", Path: "test.go", Explanation: "Added skip"}
 					if kind == "findings" {
 						f.Explanation = long
+						f.Excerpt = strings.Repeat("x", 70) + `t.Skipf("later")` + strings.Repeat("y", 70)
 					}
 					r.Findings = append(r.Findings, f)
 					if kind == "dismissals" {
@@ -496,6 +498,140 @@ func TestWritePreservesFormattedQuotes(t *testing.T) {
 	for _, escaped := range []string{mdCode(r.Claims[0].Quote, 0), mdText(r.AdmittedGaps[0].Quote, 0)} {
 		if !strings.Contains(string(data), escaped) {
 			t.Fatal("saved Markdown lost original quote delimiters")
+		}
+	}
+}
+
+func TestSavedFindingExcerpts(t *testing.T) {
+	t.Setenv("HOME", "/home/fixture")
+	for _, tc := range []struct {
+		name, path, line, marker string
+		shortened                bool
+	}{
+		{"skip", "calc_test.go", `t.Skipf("later %s", reason)`, "t.Skipf(", false},
+		{"focus", "calc.test.ts", `test.only('pending', fn)`, "test.only(", false},
+		{"Unicode context", "calc_test.go", `fmt.Println("` + strings.Repeat("界", 300) + `"); t.Skipf("later") // ` + strings.Repeat("ä", 300), "t.Skipf(", true},
+		{"CI setting", ".github/workflows/check.yml", "continue-on-error: true", "continue-on-error: true", false},
+		{"CI command", ".github/workflows/check.yml", "- run: go test ./... || true", "|| true", false},
+		{"redacted suppression", "source.ts", "// API_TOKEN=privatefragment//nolint", "//nolint", false},
+		{"suppression", "source.ts", `// @ts-ignore <script>alert("x")</script> | ` + "` <!-- saidran:start --> <!-- saidran:end -->", "@ts-ignore", false},
+		{"private source", "calc_test.go", `t.Skipf("API_TOKEN='privatefragment with spaces' /home/fixture/file <img onerror='x'> | ` + "`" + `")`, "t.Skipf(", false},
+		// Selecting around the marker first would lose the assignment name or token
+		// prefix, leaving sensitive fragments the redactor could no longer recognize.
+		{"assignment before marker", "calc_test.go", `fmt.Println("` + strings.Repeat("padding ", 50) + `API_TOKEN='` + strings.Repeat("privatefragment ", 30) + `'"); t.Skipf("later") // ` + strings.Repeat("tail ", 50), "t.Skipf(", true},
+		{"token before marker", "calc_test.go", `fmt.Println("` + strings.Repeat("padding ", 50) + `ghp_` + strings.Repeat("privatefragment", 30) + `"); t.Skipf("later") // ` + strings.Repeat("tail ", 50), "t.Skipf(", true},
+		{"assignment after marker", "calc_test.go", `t.Skipf("` + strings.Repeat("padding ", 20) + ` API_TOKEN='` + strings.Repeat("privatefragment ", 30) + `'")`, "t.Skipf(", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f := gitstate.File{Path: tc.path, Group: gitstate.Group(tc.path, true), New: []byte(tc.line), Hunks: []gitstate.Hunk{{Lines: []gitstate.Line{{Kind: '+', Text: tc.line, New: 1}}}}}
+			raw := findings.Detect([]gitstate.File{f})
+			r := report.Build("test", time.Now(), gitstate.State{Files: []gitstate.File{f}}, nil, nil)
+			if len(r.Findings) != 1 {
+				t.Fatalf("findings: %+v", r.Findings)
+			}
+			excerpt := r.Findings[0].Excerpt
+			if !strings.Contains(excerpt, tc.marker) || utf8.RuneCountInString(excerpt) > 240 || strings.Contains(excerpt, "privatefragment") || strings.Contains(excerpt, "/home/fixture") {
+				t.Fatalf("unsafe or incomplete excerpt: %s", excerpt)
+			}
+			if tc.shortened && !strings.Contains(excerpt, "…") {
+				t.Fatal("missing omission indicator")
+			}
+			if r.Findings[0].ID != raw[0].ID || r.Findings[0].Context != raw[0].Context {
+				t.Fatal("presentation changed finding identity")
+			}
+			safe, err := r.SafeValue(redact.Redactor{Home: "/home/fixture"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err := json.Marshal(safe)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var decoded report.Report
+			if err := json.Unmarshal(b, &decoded); err != nil {
+				t.Fatal(err)
+			}
+			dir := t.TempDir()
+			if err := Write(dir, decoded); err != nil {
+				t.Fatal(err)
+			}
+			var saved report.Report
+			for _, name := range []string{"report.html", "report.md", "report.json"} {
+				data, err := os.ReadFile(filepath.Join(dir, name))
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, private := range []string{"privatefragment", "/home/fixture", "<script>alert", "<!-- saidran:start -->", "<!-- saidran:end -->"} {
+					if bytes.Contains(data, []byte(private)) {
+						t.Fatalf("%s leaked %s", name, private)
+					}
+				}
+				switch name {
+				case "report.html":
+					if !strings.Contains(html.UnescapeString(string(data)), excerpt) {
+						t.Fatal("HTML changed excerpt")
+					}
+				case "report.md":
+					if !strings.Contains(string(data), mdCode(excerpt, 0)) {
+						t.Fatal("Markdown changed excerpt")
+					}
+					rendered := pandoc(t, string(data))
+					if strings.Contains(rendered, "<script>") || strings.Contains(rendered, "<!-- saidran") {
+						t.Fatal("active source in Markdown")
+					}
+				case "report.json":
+					if err := json.Unmarshal(data, &saved); err != nil {
+						t.Fatal(err)
+					}
+					if saved.Findings[0].Excerpt != excerpt {
+						t.Fatal("JSON changed excerpt")
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestFindingExcerptsRespectMarkdownBudget(t *testing.T) {
+	r := documentReport()
+	for i := range 100 {
+		r.Findings = append(r.Findings, findings.Finding{
+			ID: fmt.Sprintf("F-%012x", i), Code: "test_skipped", Path: "calc_test.go", Line: i + 1,
+			Explanation: "A skip or focus marker was added to a test.",
+			Excerpt:     `t.Skipf("` + strings.Repeat("界 | ` <script> ", 12) + `")`,
+		})
+	}
+	var md bytes.Buffer
+	const budget = 4000
+	if err := MarkdownWithOptions(&md, r, MarkdownOptions{ByteBudget: budget, LocalEvidence: true}); err != nil {
+		t.Fatal(err)
+	}
+	if md.Len() > budget || !utf8.Valid(md.Bytes()) || !strings.Contains(md.String(), "omitted") {
+		t.Fatal("finding excerpts broke the Markdown budget or omission notice")
+	}
+	if strings.Contains(pandoc(t, md.String()), "<script>") {
+		t.Fatal("shortened findings contain active source text")
+	}
+}
+
+func TestFindingsWithoutTriggeringLines(t *testing.T) {
+	files := []gitstate.File{
+		{Path: "removed_test.go", Group: "tests", Status: "D"},
+		{Path: "package.json", Old: []byte(`{"scripts":{"test":"old"}}`), New: []byte(`{"scripts":{"test":"new"}}`)},
+	}
+	r := report.Build("test", time.Now(), gitstate.State{Files: files}, nil, nil)
+	if len(r.Findings) != 2 {
+		t.Fatal(r.Findings)
+	}
+	for _, f := range r.Findings {
+		if f.Excerpt != "" {
+			t.Fatal("invented excerpt", f)
+		}
+	}
+	h, m := documents(t, r)
+	for _, value := range []string{"A test file was deleted.", "old", "new"} {
+		if !strings.Contains(h, value) || !strings.Contains(m, value) {
+			t.Fatal("lost existing explanation", value)
 		}
 	}
 }
