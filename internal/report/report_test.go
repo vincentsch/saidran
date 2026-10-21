@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func TestSharedReportRedaction(t *testing.T) {

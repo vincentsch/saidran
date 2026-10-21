@@ -1,7 +1,7 @@
 # Findings in the diff
 
 Findings describe changes that deserve a look. A skip can be intentional;
-Gaugestone does not decide whether the change is justified.
+Saidran does not decide whether the change is justified.
 
 | Code | What changed |
 | --- | --- |
@@ -18,10 +18,10 @@ examples such as `claude-skip`. Skip findings include focus markers like
 `test.only` and `describe.only`. Deleting a test function from a retained file
 is not detected; `test_deleted` covers deleted test files and excludes renames.
 
-Record an intentional reason with `gaugestone dismiss <id> --reason "..."`.
+Record an intentional reason with `saidran dismiss <id> --reason "..."`.
 The reason is stored under the worktree's Git directory and appears in later
 reports while the same finding context matches. List reasons with
-`gaugestone dismissals`, and remove one with `--remove <id>`. Unknown or
+`saidran dismissals`, and remove one with `--remove <id>`. Unknown or
 ambiguous IDs fail. Claim verdicts cannot be dismissed.
 
 Use `--fail-on test_skipped` to request exit 10 for an active skip finding.

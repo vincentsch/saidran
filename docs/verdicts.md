@@ -14,7 +14,7 @@ They cannot say whether a bug was fixed. Session logs can be edited.
 | Can't tell | The synthetic unreliable-result example pipes `go test ./...` through `tail` without a readable summary. The pipe's exit does not prove the test result. Rerun with reliable evidence. |
 
 These examples live in [recorded fixtures](../testdata/sessions/README.md) and
-[synthetic examples](../testdata/synthetic/README.md). `gaugestone demo` shows
+[synthetic examples](../testdata/synthetic/README.md). `saidran demo` shows
 the recorded Stale example without needing agent history.
 
 A targeted passing rerun cannot erase an unresolved failure outside its coverage.

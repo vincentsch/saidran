@@ -357,5 +357,5 @@
     "version": "2.1.293"
   },
   "tool_version": "test-version",
-  "type": "gaugestone.report/v1"
+  "type": "saidran.report/v1"
 }

@@ -1,4 +1,4 @@
-name: Gaugestone
+name: Saidran
 description: Report Git changes and optional checkout-local agent evidence without invoking a model
 inputs:
   transcript:
@@ -19,12 +19,12 @@ runs:
     - name: Install verified release
       shell: bash
       env:
-        GAUGESTONE_VERSION: v0.1.0
+        SAIDRAN_VERSION: v0.1.0
       run: |
         set -euo pipefail
-        case "$RUNNER_OS" in Linux|macOS) ;; *) echo 'Gaugestone Action requires Linux or macOS.' >&2; exit 1 ;; esac
+        case "$RUNNER_OS" in Linux|macOS) ;; *) echo 'Saidran Action requires Linux or macOS.' >&2; exit 1 ;; esac
         export INSTALL_DIR
-        INSTALL_DIR=$(mktemp -d "$RUNNER_TEMP/gaugestone-bin.XXXXXX")
+        INSTALL_DIR=$(mktemp -d "$RUNNER_TEMP/saidran-bin.XXXXXX")
         bash "$GITHUB_ACTION_PATH/install.sh"
         printf '%s\n' "$INSTALL_DIR" >> "$GITHUB_PATH"
     - name: Generate reports
@@ -45,7 +45,7 @@ runs:
       if: ${{ success() && (steps.report.outputs.status == '0' || steps.report.outputs.status == '10') }}
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: gaugestone-report-${{ github.job }}-${{ github.run_attempt }}
+        name: saidran-report-${{ github.job }}-${{ github.run_attempt }}
         path: ${{ steps.report.outputs.report_dir }}/report.html
         if-no-files-found: error
     - name: Publish PR comment

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad/testutil"
+	"github.com/vincentsch/saidran/internal/report"
 )
 
 func TestCIDiffReportsAndPolicy(t *testing.T) {
@@ -17,7 +17,7 @@ func TestCIDiffReportsAndPolicy(t *testing.T) {
 		t.Fatal(err)
 	}
 	gitDir := gitPR(t, f.repo, "rev-parse", "--absolute-git-dir")
-	out := filepath.Join(gitDir, "gaugestone", "ci")
+	out := filepath.Join(gitDir, "saidran", "ci")
 	run := func(args ...string) testutil.Result {
 		return testutil.Run(New("test", Options{Dir: f.repo}), append([]string{"ci"}, args...)...)
 	}
@@ -134,7 +134,7 @@ func TestCIUsesWorktreeGitDirectory(t *testing.T) {
 	if r.Exit != 0 {
 		t.Fatal(r)
 	}
-	if _, err := os.Stat(filepath.Join(gitDir, "gaugestone", "ci")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(gitDir, "saidran", "ci")); !os.IsNotExist(err) {
 		t.Fatalf("dry run wrote: %v", err)
 	}
 	r = testutil.Run(New("test", Options{Dir: worktree}), "ci")
@@ -142,11 +142,11 @@ func TestCIUsesWorktreeGitDirectory(t *testing.T) {
 		t.Fatal(r)
 	}
 	for _, name := range []string{"report.html", "report.md", "report.json"} {
-		if _, err := os.Stat(filepath.Join(gitDir, "gaugestone", "ci", name)); err != nil {
+		if _, err := os.Stat(filepath.Join(gitDir, "saidran", "ci", name)); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if _, err := os.Stat(filepath.Join(f.repo, ".git", "gaugestone", "ci")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(f.repo, ".git", "saidran", "ci")); !os.IsNotExist(err) {
 		t.Fatalf("worktree wrote to main git directory: %v", err)
 	}
 }

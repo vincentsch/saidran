@@ -28,7 +28,7 @@ func Root(dir string) (string, error) {
 	if err != nil {
 		var exit *exec.ExitError
 		if errors.As(err, &exit) && strings.Contains(string(exit.Stderr), "not a git repository") {
-			return "", rungrad.NewError(rungrad.ExitNotFound, "This folder is outside a Git repository. Run gaugestone sessions inside your repository.")
+			return "", rungrad.NewError(rungrad.ExitNotFound, "This folder is outside a Git repository. Run saidran sessions inside your repository.")
 		}
 		return "", rungrad.NewError(rungrad.ExitAPI, "Could not read the Git repository. Check its permissions and Git configuration.")
 	}

@@ -10,15 +10,15 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/demo"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/render"
-	"github.com/vincentsch/gaugestone/internal/report"
-	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
 	"github.com/vincentsch/rungrad/output"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/demo"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/render"
+	"github.com/vincentsch/saidran/internal/report"
+	"github.com/vincentsch/saidran/internal/session"
 	"golang.org/x/term"
 )
 
@@ -152,13 +152,13 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		noWrite, _ := cmd.Flags().GetBool("no-write")
 		dir := get("out")
 		if dir == "" && isCI {
-			dir = filepath.Join(state.GitDir, "gaugestone", "ci")
+			dir = filepath.Join(state.GitDir, "saidran", "ci")
 		} else if dir == "" {
 			// Session IDs come from local recordings; keep them within one path component.
 			if s.ID == "" || s.ID == "." || s.ID == ".." || strings.ContainsAny(s.ID, "/\\") {
 				return rungrad.NewError(rungrad.ExitAPI, "The session has an invalid ID; choose another recording.")
 			}
-			dir = filepath.Join(state.GitDir, "gaugestone", s.Agent+"-"+s.ID)
+			dir = filepath.Join(state.GitDir, "saidran", s.Agent+"-"+s.ID)
 		} else if !filepath.IsAbs(dir) {
 			dir = filepath.Join(opts.Dir, dir)
 		}
@@ -228,7 +228,7 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		return policyResult(model, policy)
 	}
 	run := func(f *rungrad.Factory, cmd *cobra.Command, args []string) error { return execute(opts, f, cmd, args) }
-	app.AddCommand(&rungrad.Command{Use: "demo", Short: "Try a recorded session without agent history", Long: "Extract a recorded Go project to a temporary directory and write all three reports.\nThe example stays there until you delete it.", Examples: []string{"gaugestone demo", "gaugestone demo --json"}, Related: []string{"gaugestone check", "gaugestone doctor"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	app.AddCommand(&rungrad.Command{Use: "demo", Short: "Try a recorded session without agent history", Long: "Extract a recorded Go project to a temporary directory and write all three reports.\nThe example stays there until you delete it.", Examples: []string{"saidran demo", "saidran demo --json"}, Related: []string{"saidran check", "saidran doctor"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		if f.DryRun() {
 			return f.WritePreview(output.DryRunPreview{Method: "extract", Path: "temporary demo directory"})
 		}
@@ -246,13 +246,13 @@ func addCheck(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		demoOpts.Dir = repo
 		return execute(demoOpts, f, check, nil)
 	}})
-	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites local HTML, Markdown and JSON reports; --no-write only prints evidence.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"gaugestone check", "gaugestone check --transcript session.jsonl --json", "gaugestone check --base origin/main --no-write"}, Related: []string{"gaugestone sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
-	app.AddCommand(&rungrad.Command{Use: "ci", Short: "Write CI reports from a diff and optional checkout-local log", Long: "Write report.html, report.md and report.json to <git dir>/gaugestone/ci/.\nWithout --transcript, report only the diff without discovering sessions.\nExplicit --base compares directly with that commit; reports do not certify correctness.", Examples: []string{"gaugestone ci", "gaugestone ci --base origin/main --fail-on test_skipped", "gaugestone ci --transcript session.jsonl --out reports --json"}, Related: []string{"gaugestone check", "gaugestone pr"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
+	app.AddCommand(&rungrad.Command{Use: "check", Short: "Show session evidence and repository changes", Long: "Compare repository changes with recorded commands and edits.\nWrites local HTML, Markdown and JSON reports; --no-write only prints evidence.\nReports summarize local evidence and do not certify correctness.", Examples: []string{"saidran check", "saidran check --transcript session.jsonl --json", "saidran check --base origin/main --no-write"}, Related: []string{"saidran sessions"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
+	app.AddCommand(&rungrad.Command{Use: "ci", Short: "Write CI reports from a diff and optional checkout-local log", Long: "Write report.html, report.md and report.json to <git dir>/saidran/ci/.\nWithout --transcript, report only the diff without discovering sessions.\nExplicit --base compares directly with that commit; reports do not certify correctness.", Examples: []string{"saidran ci", "saidran ci --base origin/main --fail-on test_skipped", "saidran ci --transcript session.jsonl --out reports --json"}, Related: []string{"saidran check", "saidran pr"}, Args: cobra.NoArgs, Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Configure: configure, Run: run})
 	root := app.Root()
 	configure(root)
 	root.Args = func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
-			return rungrad.NewError(rungrad.ExitUsage, "Unknown command: "+args[0]+". Use gaugestone --help.")
+			return rungrad.NewError(rungrad.ExitUsage, "Unknown command: "+args[0]+". Use saidran --help.")
 		}
 		return nil
 	}

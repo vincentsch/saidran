@@ -1,21 +1,21 @@
-# gaugestone command reference
+# saidran command reference
 
 See what your coding agent checked
 
 ## Commands
 
-- [gaugestone check](gaugestone_check.md) - Show session evidence and repository changes
-- [gaugestone ci](gaugestone_ci.md) - Write CI reports from a diff and optional checkout-local log
-- [gaugestone demo](gaugestone_demo.md) - Try a recorded session without agent history
-- [gaugestone dismiss](gaugestone_dismiss.md) - Mark a finding as intentional
-- [gaugestone dismissals](gaugestone_dismissals.md) - List or remove intentional findings
-- [gaugestone doctor](gaugestone_doctor.md) - Check Git and agent log availability
-- [gaugestone hook](gaugestone_hook.md) - Write a report for an agent completion event
-- [gaugestone install](gaugestone_install.md) - Install a Claude hook or print Codex notify configuration
-- [gaugestone pr](gaugestone_pr.md) - Preview and update a report section in this branch's pull request
-- [gaugestone sessions](gaugestone_sessions.md) - List agent sessions for this repository
-- [gaugestone snippet](gaugestone_snippet.md) - Print agent self-check instructions
-- [gaugestone uninstall](gaugestone_uninstall.md) - Remove the Gaugestone Claude hook
+- [saidran check](saidran_check.md) - Show session evidence and repository changes
+- [saidran ci](saidran_ci.md) - Write CI reports from a diff and optional checkout-local log
+- [saidran demo](saidran_demo.md) - Try a recorded session without agent history
+- [saidran dismiss](saidran_dismiss.md) - Mark a finding as intentional
+- [saidran dismissals](saidran_dismissals.md) - List or remove intentional findings
+- [saidran doctor](saidran_doctor.md) - Check Git and agent log availability
+- [saidran hook](saidran_hook.md) - Write a report for an agent completion event
+- [saidran install](saidran_install.md) - Install a Claude hook or print Codex notify configuration
+- [saidran pr](saidran_pr.md) - Preview and update a report section in this branch's pull request
+- [saidran sessions](saidran_sessions.md) - List agent sessions for this repository
+- [saidran snippet](saidran_snippet.md) - Print agent self-check instructions
+- [saidran uninstall](saidran_uninstall.md) - Remove the Saidran Claude hook
 
 ## Global flags
 

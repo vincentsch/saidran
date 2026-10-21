@@ -1,18 +1,18 @@
-# gaugestone sessions
+# saidran sessions
 
 List agent sessions for this repository
 
 ## Usage
 
 ```
-gaugestone sessions
+saidran sessions
 ```
 
 ## Examples
 
 ```
-gaugestone sessions
-gaugestone sessions --json
+saidran sessions
+saidran sessions --json
 ```
 
 ## Output modes
@@ -21,4 +21,4 @@ human, json
 
 ## Related commands
 
-- gaugestone --help
+- saidran --help

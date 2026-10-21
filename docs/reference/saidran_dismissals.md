@@ -1,18 +1,18 @@
-# gaugestone dismissals
+# saidran dismissals
 
 List or remove intentional findings
 
 ## Usage
 
 ```
-gaugestone dismissals
+saidran dismissals
 ```
 
 ## Examples
 
 ```
-gaugestone dismissals --json
-gaugestone dismissals --remove F-012345
+saidran dismissals --json
+saidran dismissals --remove F-012345
 ```
 
 ## Flags
@@ -29,5 +29,5 @@ This command changes state and honors `--dry-run`.
 
 ## Related commands
 
-- gaugestone dismiss
-- gaugestone check
+- saidran dismiss
+- saidran check

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func analyze(line, output string, exit int) Command {

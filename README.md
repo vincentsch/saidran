@@ -1,32 +1,32 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/media/wordmark-dark.svg">
-    <img src="docs/media/wordmark-light.svg" alt="Gaugestone, a checked square beside the name" width="380">
+    <img src="docs/media/wordmark-light.svg" alt="Saidran, a checked square beside the name" width="380">
   </picture>
 </p>
 
 **See what your coding agent checked, and what changed afterwards.**
 
-Gaugestone reads your coding agent's local session log and Git changes. It
+Saidran reads your coding agent's local session log and Git changes. It
 compares claims about tests, builds, linters and type checks with recorded
 runs. If code changed after a passing test, the report shows it. It also
 points out skipped tests and disabled checks in the diff.
 
 [Quickstart](docs/quickstart.md) · [FAQ](docs/faq.md) ·
 [Commands](docs/commands.md) · [AGENTS.md](AGENTS.md) ·
-[Releases](https://github.com/vincentsch/gaugestone/releases)
+[Releases](https://github.com/vincentsch/saidran/releases)
 
 ## Ask your agent to check its work
 
 Copy this into the agent that worked on your repository:
 
 ```text
-Check what you just did with Gaugestone.
-Use https://github.com/vincentsch/gaugestone: read its AGENTS.md and
+Check what you just did with Saidran.
+Use https://github.com/vincentsch/saidran: read its AGENTS.md and
 follow the steps, then explain the report to me.
 ```
 
-The agent installs Gaugestone, checks its session and explains the evidence.
+The agent installs Saidran, checks its session and explains the evidence.
 It shows why checks need a rerun before offering to run them again.
 
 ## Install and try the demo
@@ -34,8 +34,8 @@ It shows why checks need a rerun before offering to run them again.
 Linux and macOS, on amd64 or arm64:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/vincentsch/gaugestone/main/install.sh -o /tmp/gaugestone-install.sh
-bash /tmp/gaugestone-install.sh
+curl -fsSL https://raw.githubusercontent.com/vincentsch/saidran/main/install.sh -o /tmp/saidran-install.sh
+bash /tmp/saidran-install.sh
 ```
 
 The installer verifies SHA-256 checksums and prints the absolute binary path.
@@ -44,7 +44,7 @@ See the [quickstart](docs/quickstart.md#install) for Windows, Go installation
 and installer overrides.
 
 ```sh
-gaugestone demo
+saidran demo
 ```
 
 The bundled Claude Code recording has a passing test followed by an edit.
@@ -60,10 +60,10 @@ folder. You can remove that folder afterwards.
 Run inside the repository your agent changed:
 
 ```sh
-gaugestone
+saidran
 ```
 
-Confirm the report names the session you intended to check. Gaugestone prints
+Confirm the report names the session you intended to check. Saidran prints
 command results, claims and changes, then saves HTML, Markdown and JSON reports.
 The terminal prints the HTML path. See the [first-check instructions](docs/quickstart.md#check-your-repository)
 for session selection, missing logs and opening the saved report.
@@ -86,7 +86,7 @@ See [verdict examples](docs/verdicts.md) and the [FAQ](docs/faq.md).
 
 ## Supported agents
 
-Gaugestone reads Claude Code, Codex, OpenCode and Pi recordings. The
+Saidran reads Claude Code, Codex, OpenCode and Pi recordings. The
 [version table and log guide](docs/agents.md) list tested versions and limits.
 It never runs the agents or executes commands from their logs.
 
@@ -112,4 +112,4 @@ files; PR publication uses GitHub. Read the [privacy guide](docs/privacy.md).
 
 The [command reference](docs/reference/index.md) lists all flags and examples.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for builds and checks.
-Gaugestone is available under the [MIT license](LICENSE).
+Saidran is available under the [MIT license](LICENSE).

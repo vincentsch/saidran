@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vincentsch/gaugestone/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/gitstate"
 )
 
 func added(p, content string) gitstate.File {

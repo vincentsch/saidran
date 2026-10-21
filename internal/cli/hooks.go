@@ -8,22 +8,22 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/render"
-	"github.com/vincentsch/gaugestone/internal/report"
-	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/render"
+	"github.com/vincentsch/saidran/internal/report"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
-const selfCheck = "Before your final response, run `gaugestone --json --no-write` for your\ncurrent session (use --session or --transcript when you know it) and\nconfirm it picked the right session. For every test, build, lint or type\ncheck you are about to call passing, look at its result and at the edits\nafter it, even when the report lists no claims yet. Run stale or failed\nchecks again, or say plainly what you could not check. Treat results\nmarked \"can't tell\" as unknown. Never change tests just to make this\nreport look better.\n"
+const selfCheck = "Before your final response, run `saidran --json --no-write` for your\ncurrent session (use --session or --transcript when you know it) and\nconfirm it picked the right session. For every test, build, lint or type\ncheck you are about to call passing, look at its result and at the edits\nafter it, even when the report lists no claims yet. Run stale or failed\nchecks again, or say plainly what you could not check. Treat results\nmarked \"can't tell\" as unknown. Never change tests just to make this\nreport look better.\n"
 
 func addHooks(app *rungrad.App, version string, opts Options, r redact.Redactor) {
-	app.AddCommand(&rungrad.Command{Use: "snippet", Short: "Print agent self-check instructions", Examples: []string{"gaugestone snippet"}, Related: []string{"gaugestone check"}, Args: cobra.NoArgs, OutputModes: []string{"human", "json"}, Run: func(f *rungrad.Factory, _ *cobra.Command, _ []string) error {
+	app.AddCommand(&rungrad.Command{Use: "snippet", Short: "Print agent self-check instructions", Examples: []string{"saidran snippet"}, Related: []string{"saidran check"}, Args: cobra.NoArgs, OutputModes: []string{"human", "json"}, Run: func(f *rungrad.Factory, _ *cobra.Command, _ []string) error {
 		return f.WriteResult(map[string]string{"snippet": selfCheck}, func(w io.Writer) { fmt.Fprint(w, selfCheck) })
 	}})
-	app.AddCommand(&rungrad.Command{Use: "hook <claude|codex> [json]", Short: "Write a report for an agent completion event", Long: "Claude reads Stop-hook JSON from stdin. Codex reads notify JSON from its argument.\nHooks never block completion; Codex emits no output.", Examples: []string{"gaugestone hook claude", `gaugestone hook codex '{"thread-id":"session-id","cwd":"/repo"}'`}, Related: []string{"gaugestone install"}, Mutates: true, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	app.AddCommand(&rungrad.Command{Use: "hook <claude|codex> [json]", Short: "Write a report for an agent completion event", Long: "Claude reads Stop-hook JSON from stdin. Codex reads notify JSON from its argument.\nHooks never block completion; Codex emits no output.", Examples: []string{"saidran hook claude", `saidran hook codex '{"thread-id":"session-id","cwd":"/repo"}'`}, Related: []string{"saidran install"}, Mutates: true, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		// Provider hooks must also stay nonblocking on malformed payloads.
 		if len(args) == 0 {
 			return nil
@@ -37,12 +37,12 @@ func addHooks(app *rungrad.App, version string, opts Options, r redact.Redactor)
 		if args[0] != "claude" {
 			return nil
 		}
-		message := "Gaugestone: expected Stop-hook JSON on stdin."
+		message := "Saidran: expected Stop-hook JSON on stdin."
 		if len(args) == 1 && !f.DryRun() {
 			var err error
 			message, err = hookReport(version, opts, "claude-code", f.Stdin, r)
 			if err != nil {
-				message = "Gaugestone: could not create report: " + r.Text(err.Error())
+				message = "Saidran: could not create report: " + r.Text(err.Error())
 			}
 		}
 		if message != "" {
@@ -150,7 +150,7 @@ func hookReport(version string, opts Options, agent string, input io.Reader, r r
 	if err = json.Unmarshal(b, &display); err != nil {
 		return "", err
 	}
-	dir := filepath.Join(state.GitDir, "gaugestone", s.Agent+"-"+s.ID)
+	dir := filepath.Join(state.GitDir, "saidran", s.Agent+"-"+s.ID)
 	if err = render.Write(dir, display); err != nil {
 		return "", err
 	}
@@ -164,5 +164,5 @@ func hookReport(version string, opts Options, agent string, input io.Reader, r r
 		}
 		summary += " (" + strings.Join(verdicts, ", ") + ")"
 	}
-	return "Gaugestone: " + summary + ". Report: " + r.Text(filepath.Join(dir, "report.html")), nil
+	return "Saidran: " + summary + ". Report: " + r.Text(filepath.Join(dir, "report.html")), nil
 }

@@ -14,12 +14,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/vincentsch/gaugestone/internal/claims"
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/findings"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/report"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/claims"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/findings"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/report"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func documentReport() report.Report {
@@ -62,7 +62,7 @@ func pandoc(t *testing.T, md string) string {
 }
 func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 	r := documentReport()
-	poison := "a | b\n``` ` <script>alert(1)</script> <!-- gaugestone:start --> <!-- gaugestone:end --> <!-- gaugestone -->"
+	poison := "a | b\n``` ` <script>alert(1)</script> <!-- saidran:start --> <!-- saidran:end --> <!-- saidran -->"
 	r.Claims[0].Quote = poison
 	r.AdmittedGaps = []claims.Gap{{Quote: "**<img src=https://example.org onerror=alert(1)>** `<script>alert(1)</script>`"}}
 	r.Claims[0].Explanation = poison
@@ -72,7 +72,7 @@ func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 	r.Findings = []findings.Finding{{ID: "F-0123456789ab", Path: poison, Code: "check_disabled", Explanation: poison}}
 	r.Dismissals = []report.Dismissal{{ID: r.Findings[0].ID, Reason: poison}}
 	h, m := documents(t, r)
-	for _, marker := range []string{"<!-- gaugestone:start -->", "<!-- gaugestone:end -->", "<!-- gaugestone -->", "<script>alert(1)</script>"} {
+	for _, marker := range []string{"<!-- saidran:start -->", "<!-- saidran:end -->", "<!-- saidran -->", "<script>alert(1)</script>"} {
 		if strings.Contains(h, marker) || strings.Contains(m, marker) {
 			t.Fatalf("unescaped %q", marker)
 		}
@@ -88,11 +88,11 @@ func TestDocumentsEscapeUntrustedEvidence(t *testing.T) {
 			t.Fatalf("missing %s", text)
 		}
 	}
-	if !strings.Contains(h, `gaugestone dismiss F-0123456789ab --reason`) {
+	if !strings.Contains(h, `saidran dismiss F-0123456789ab --reason`) {
 		t.Fatal("missing copy command")
 	}
 	rendered := pandoc(t, m)
-	if strings.Contains(rendered, "<script>") || strings.Contains(rendered, "<!-- gaugestone") {
+	if strings.Contains(rendered, "<script>") || strings.Contains(rendered, "<!-- saidran") {
 		t.Fatal("unsafe rendered Markdown")
 	}
 	// Network attributes and CSS must remain local. Untrusted text has no way to
@@ -314,7 +314,7 @@ func TestMarkdownBacktickDelimitersPreserveQuotes(t *testing.T) {
 
 func TestMarkdownByteBudgets(t *testing.T) {
 	r := documentReport()
-	r.Claims[0].Quote = strings.Repeat("界 | ` <!-- gaugestone:start -->\n", 200)
+	r.Claims[0].Quote = strings.Repeat("界 | ` <!-- saidran:start -->\n", 200)
 	var complete bytes.Buffer
 	opts := MarkdownOptions{ByteBudget: 60000, LocalEvidence: true}
 	if err := MarkdownWithOptions(&complete, r, opts); err != nil {
@@ -334,10 +334,10 @@ func TestMarkdownByteBudgets(t *testing.T) {
 			if err != nil || b.Len() > budget || !utf8.Valid(b.Bytes()) {
 				t.Fatalf("budget %d, bytes %d: %v", budget, b.Len(), err)
 			}
-			if strings.Contains(b.String(), "<!-- gaugestone:start -->") || strings.Contains(b.String(), "HTML/JSON contain") {
+			if strings.Contains(b.String(), "<!-- saidran:start -->") || strings.Contains(b.String(), "HTML/JSON contain") {
 				t.Fatal("unsafe marker or misleading notice")
 			}
-			for _, required := range []string{"**Verdicts**", completeness(r), disclaimer, "Gaugestone test", "Run `gaugestone check` locally"} {
+			for _, required := range []string{"**Verdicts**", completeness(r), disclaimer, "Saidran test", "Run `saidran check` locally"} {
 				if !strings.Contains(b.String(), required) {
 					t.Fatal("missing", required)
 				}

@@ -1,19 +1,19 @@
-# gaugestone pr
+# saidran pr
 
 Preview and update a report section in this branch's pull request
 
 ## Usage
 
 ```
-gaugestone pr
+saidran pr
 ```
 
 ## Examples
 
 ```
-gaugestone pr --dry-run
-gaugestone pr --confirm
-gaugestone pr --transcript session.jsonl --dry-run --json
+saidran pr --dry-run
+saidran pr --confirm
+saidran pr --transcript session.jsonl --dry-run --json
 ```
 
 ## Flags
@@ -33,5 +33,5 @@ This command changes state and honors `--dry-run`.
 
 ## Related commands
 
-- gaugestone check
-- gaugestone sessions
+- saidran check
+- saidran sessions

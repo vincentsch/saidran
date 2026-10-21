@@ -1,18 +1,18 @@
-# gaugestone install
+# saidran install
 
 Install a Claude hook or print Codex notify configuration
 
 ## Usage
 
 ```
-gaugestone install <claude|codex>
+saidran install <claude|codex>
 ```
 
 ## Examples
 
 ```
-gaugestone install claude --dry-run
-gaugestone install claude --user
+saidran install claude --dry-run
+saidran install claude --user
 ```
 
 ## Flags
@@ -30,5 +30,5 @@ This command changes state and honors `--dry-run`.
 
 ## Related commands
 
-- gaugestone hook
-- gaugestone snippet
+- saidran hook
+- saidran snippet

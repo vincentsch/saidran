@@ -1,6 +1,6 @@
 # Supported coding agents
 
-Gaugestone reads local recordings from four coding agents. It never runs the
+Saidran reads local recordings from four coding agents. It never runs the
 agents or sends their transcripts over the network.
 
 | Agent | Recorded version | Default log root | Override | Session reference |
@@ -10,15 +10,15 @@ agents or sends their transcripts over the network.
 | OpenCode | 1.1.4 | `~/.local/share/opencode/storage` | `XDG_DATA_HOME` (parent of `opencode`) | `opencode:<id>` |
 | Pi | 0.85.1 (journal version 3) | `~/.pi/agent/sessions` | `PI_CODING_AGENT_DIR` (parent of `sessions`) | `pi:<id>` |
 
-Run `gaugestone sessions` inside a Git repository to see its recordings, and
-`gaugestone doctor` to see all four roots, counts and format diagnostics. A
+Run `saidran sessions` inside a Git repository to see its recordings, and
+`saidran doctor` to see all four roots, counts and format diagnostics. A
 recording belongs to the repository when its recorded working directory is the
 repository root or a directory inside it. Symlinked log roots work too.
 
 ```sh
-gaugestone sessions
-gaugestone --session opencode:ses_example
-gaugestone --session pi:01a15b72
+saidran sessions
+saidran --session opencode:ses_example
+saidran --session pi:01a15b72
 ```
 
 Full IDs and unique ID prefixes work. Agent prefixes disambiguate IDs shared by
@@ -40,11 +40,11 @@ storage/
 Pass the session JSON, rather than a message, part or exported stream:
 
 ```sh
-gaugestone --transcript /path/to/storage/session/project/session.json
-gaugestone --transcript /path/to/pi-session.jsonl
+saidran --transcript /path/to/storage/session/project/session.json
+saidran --transcript /path/to/pi-session.jsonl
 ```
 
-Gaugestone detects the agent from the content. OpenCode's session file supplies
+Saidran detects the agent from the content. OpenCode's session file supplies
 the working directory and version; tool parts supply command times, output and
 `state.metadata.exit`. Pending tools and results without an exit remain unknown.
 OpenCode child sessions are not merged.

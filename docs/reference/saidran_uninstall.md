@@ -1,18 +1,18 @@
-# gaugestone uninstall
+# saidran uninstall
 
-Remove the Gaugestone Claude hook
+Remove the Saidran Claude hook
 
 ## Usage
 
 ```
-gaugestone uninstall <claude|codex>
+saidran uninstall <claude|codex>
 ```
 
 ## Examples
 
 ```
-gaugestone uninstall claude --dry-run
-gaugestone uninstall claude --user
+saidran uninstall claude --dry-run
+saidran uninstall claude --user
 ```
 
 ## Flags
@@ -30,5 +30,5 @@ This command changes state and honors `--dry-run`.
 
 ## Related commands
 
-- gaugestone hook
-- gaugestone snippet
+- saidran hook
+- saidran snippet

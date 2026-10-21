@@ -14,15 +14,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/agents/claude"
-	"github.com/vincentsch/gaugestone/internal/agents/codex"
-	"github.com/vincentsch/gaugestone/internal/agents/opencode"
-	"github.com/vincentsch/gaugestone/internal/agents/pi"
-	"github.com/vincentsch/gaugestone/internal/pathutil"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
 	"github.com/vincentsch/rungrad/choose"
+	"github.com/vincentsch/saidran/internal/agents/claude"
+	"github.com/vincentsch/saidran/internal/agents/codex"
+	"github.com/vincentsch/saidran/internal/agents/opencode"
+	"github.com/vincentsch/saidran/internal/agents/pi"
+	"github.com/vincentsch/saidran/internal/pathutil"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func Read(file string) (*session.Session, error) {
@@ -267,11 +267,11 @@ func Select(all []*session.Session, ref, transcript string, now time.Time, f *ru
 		if len(matches) == 1 {
 			return Selection{Session: matches[0]}, nil
 		}
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Run gaugestone doctor to check Claude Code, Codex, OpenCode or Pi log roots, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No matching session. Run saidran doctor to check Claude Code, Codex, OpenCode or Pi log roots, or use --transcript.")
 	}
 	picks := Automatic(all, now)
 	if len(picks) == 0 {
-		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Run gaugestone doctor to check Claude Code, Codex, OpenCode or Pi log roots, or use --transcript.")
+		return Selection{}, rungrad.NewError(rungrad.ExitNotFound, "No recent session with commands or edits. Run saidran doctor to check Claude Code, Codex, OpenCode or Pi log roots, or use --transcript.")
 	}
 	if len(picks) == 2 {
 		if f != nil && f.CanPrompt() {

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/pathutil"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/pathutil"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/session"
 	"mvdan.cc/sh/v3/syntax"
 )
 

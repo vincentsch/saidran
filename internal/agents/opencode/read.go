@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	j "github.com/vincentsch/gaugestone/internal/agents/logjson"
-	"github.com/vincentsch/gaugestone/internal/session"
+	j "github.com/vincentsch/saidran/internal/agents/logjson"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 type record struct {

@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/cli"
-	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/cli"
+	"github.com/vincentsch/saidran/internal/report"
 )
 
 func TestCompletionHookPayloads(t *testing.T) {
@@ -80,7 +80,7 @@ func TestCompletionHookPayloads(t *testing.T) {
 						t.Fatalf("%s %v", &stdout, err)
 					}
 				}
-				dir := filepath.Join(repo, ".git", "gaugestone", expectedAgent+"-"+s.ID)
+				dir := filepath.Join(repo, ".git", "saidran", expectedAgent+"-"+s.ID)
 				for _, file := range []string{"report.html", "report.md", "report.json"} {
 					if _, err = os.Stat(filepath.Join(dir, file)); err != nil {
 						t.Fatal(err)
@@ -157,7 +157,7 @@ func TestCompletionHooksStayNonblocking(t *testing.T) {
 			}
 		})
 	}
-	if _, err := os.Stat(filepath.Join(repo, ".git", "gaugestone")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(repo, ".git", "saidran")); !os.IsNotExist(err) {
 		t.Fatal("invalid payload wrote reports")
 	}
 }
@@ -170,7 +170,7 @@ func TestInstalledHookWorksWithoutBinaryOnPath(t *testing.T) {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		t.Fatal(err)
 	}
-	installed := filepath.Join(dir, "gaugestone")
+	installed := filepath.Join(dir, "saidran")
 	b, err := os.ReadFile(binary)
 	if err != nil {
 		t.Fatal(err)
@@ -211,7 +211,7 @@ func TestInstalledHookWorksWithoutBinaryOnPath(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	reportDir := filepath.Join(repo, ".git", "gaugestone", s.Agent+"-"+s.ID)
+	reportDir := filepath.Join(repo, ".git", "saidran", s.Agent+"-"+s.ID)
 	if err = os.Remove(filepath.Join(reportDir, "report.md")); err != nil {
 		t.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vincentsch/gaugestone/internal/agents"
+	"github.com/vincentsch/saidran/internal/agents"
 )
 
 func TestSymlinkedLogRootsAndProjectNames(t *testing.T) {

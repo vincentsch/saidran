@@ -1,18 +1,18 @@
 # Reports in GitHub Actions
 
-The Gaugestone composite Action runs on Linux and macOS hosted runners. It installs
+The Saidran composite Action runs on Linux and macOS hosted runners. It installs
 a checksum-verified release, writes HTML, Markdown and JSON locally, appends the
 Markdown to the job summary, uploads the HTML artifact, then creates or updates one
-`github-actions[bot]` PR comment marked `<!-- gaugestone -->`. The Action never
+`github-actions[bot]` PR comment marked `<!-- saidran -->`. The Action never
 invokes an agent or model. Direct Windows binary use remains supported; the Unix
 installer and this Action do not support Windows runners.
 
 ## Diff-only quickstart
 
-Save this as `.github/workflows/gaugestone.yml`:
+Save this as `.github/workflows/saidran.yml`:
 
 ```yaml
-name: Gaugestone report
+name: Saidran report
 on:
   pull_request:
 permissions:
@@ -25,25 +25,25 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - uses: vincentsch/gaugestone@v0.1.0
+      - uses: vincentsch/saidran@v0.1.0
         with:
           fail-on: test_skipped,check_disabled,ci_ignores_failure
 ```
 
-Choose a published release, or pin the Gaugestone reference to its reviewed commit
+Choose a published release, or pin the Saidran reference to its reviewed commit
 SHA. The binary version is embedded in that checkout's `action.yml`: this version
 installs **v0.1.0** from `download/v0.1.0/`, including its checksums. A SHA pin or
 local `uses: ./` uses that same embedded version; neither selects the latest
 release or builds the checkout's source. An unavailable pinned release fails
 installation without falling back. Development checkouts therefore need the
-embedded release to be available, or a matching `GAUGESTONE_DOWNLOAD_BASE` mirror.
+embedded release to be available, or a matching `SAIDRAN_DOWNLOAD_BASE` mirror.
 The Action's upload dependency is pinned by SHA.
 No agent or model credentials are needed for this example.
 
 The default `base` is the event's PR base SHA. Keep checkout's default merge-ref
 checkout and `fetch-depth: 0`: `--base` compares directly against that commit,
 without inferring a merge base. If you check out the head branch instead, choose
-the intended comparison commit explicitly. Gaugestone never fetches missing bases.
+the intended comparison commit explicitly. Saidran never fetches missing bases.
 For non-PR events supply an explicit locally available `base`; the Action skips
 comment calls and still saves the summary and artifact.
 
@@ -68,10 +68,10 @@ A transcript must come from a supported agent CLI run earlier in the same job,
 inside this checkout. This optional example replaces the quickstart's steps.
 The caller supplies Claude CLI installation, its authentication and any permission
 setup needed for its task. `ANTHROPIC_API_KEY` below is a caller-managed repository
-secret; it is not needed by Gaugestone. Pick the model and effort explicitly.
+secret; it is not needed by Saidran. Pick the model and effort explicitly.
 
 ```yaml
-name: Gaugestone with a CLI log
+name: Saidran with a CLI log
 on:
   workflow_dispatch:
     inputs:
@@ -111,14 +111,14 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('transcript=' + str(matches[0]) + '\n')
           PY
-      - uses: vincentsch/gaugestone@v0.1.0
+      - uses: vincentsch/saidran@v0.1.0
         with:
           transcript: ${{ steps.agent.outputs.transcript }}
           base: ${{ inputs.base }}
           fail-on: contradicted,stale
 ```
 
-Gaugestone accepts Claude Code, Codex, OpenCode and Pi CLI recordings, not arbitrary
+Saidran accepts Claude Code, Codex, OpenCode and Pi CLI recordings, not arbitrary
 agent output. The Claude Code GitHub Action's `execution_file` is a JSON array of
 SDK messages and is unsupported in this release; it is not the CLI JSONL log.
 Do not upload or pass a developer-machine transcript: recorded working directories
@@ -131,13 +131,13 @@ Preserve that complete layout when passing the session entry point.
 ## Run the command locally
 
 ```sh
-gaugestone ci
-gaugestone ci --base HEAD --out reports --fail-on test_skipped
-gaugestone ci --transcript /path/to/checkout-local-session.jsonl --json
+saidran ci
+saidran ci --base HEAD --out reports --fail-on test_skipped
+saidran ci --transcript /path/to/checkout-local-session.jsonl --json
 ```
 
 Without `--out`, both modes replace `report.html`, `report.md` and `report.json`
-under this worktree's absolute Git directory at `gaugestone/ci/`. Explicit `--out`
+under this worktree's absolute Git directory at `saidran/ci/`. Explicit `--out`
 writes directly into that directory. `--dry-run` creates no output paths. Shared
 `--json` and `--format text|json|markdown|html` conventions apply.
 Without a transcript no session discovery happens: JSON has `session: null` and

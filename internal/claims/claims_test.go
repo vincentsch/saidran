@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func TestExtractFinalAssertions(t *testing.T) {

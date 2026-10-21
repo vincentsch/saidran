@@ -28,7 +28,7 @@ jobs:
       - name: Attest each binary
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
-          subject-path: dist/gaugestone-*
+          subject-path: dist/saidran-*
       - name: Extract release notes
         env:
           RELEASE_VERSION: ${{ github.ref_name }}
@@ -37,4 +37,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_VERSION" --verify-tag --title "$RELEASE_VERSION" --notes-file "$RUNNER_TEMP/release-notes.md" dist/gaugestone-* dist/checksums.txt
+        run: gh release create "$RELEASE_VERSION" --verify-tag --title "$RELEASE_VERSION" --notes-file "$RUNNER_TEMP/release-notes.md" dist/saidran-* dist/checksums.txt

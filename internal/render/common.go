@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/report"
 )
 
 const disclaimer = "This report summarises the agent's session log and your git state. Session logs are local files and can be edited. It is not a certificate."

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/redact"
+	"github.com/vincentsch/saidran/internal/redact"
 )
 
 type Source struct {

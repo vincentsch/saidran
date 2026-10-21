@@ -1,6 +1,6 @@
 # Contributing
 
-Gaugestone is pre-1.0. Command names and JSON formats may change before 1.0.
+Saidran is pre-1.0. Command names and JSON formats may change before 1.0.
 Use the Go toolchain specified in go.mod and install git before running tests.
 
 ## Check a change
@@ -25,7 +25,7 @@ folder. `make docs-check` detects missing, stale and orphaned generated files.
 
 Prefer tests of observable behavior, including verdicts, reports and exit codes.
 Use sanitised fixtures and local fakes. Recorded commands must never execute
-while Gaugestone evaluates a session. Report generation must stay offline and
+while Saidran evaluates a session. Report generation must stay offline and
 must not call a model.
 
 Keep public text plain and specific. Do not commit credentials, private session

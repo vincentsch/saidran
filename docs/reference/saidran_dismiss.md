@@ -1,18 +1,18 @@
-# gaugestone dismiss
+# saidran dismiss
 
 Mark a finding as intentional
 
 ## Usage
 
 ```
-gaugestone dismiss <finding-id>
+saidran dismiss <finding-id>
 ```
 
 ## Examples
 
 ```
-gaugestone dismiss F-0123456789ab --reason "Intentional skip"
-gaugestone dismiss F-012345 --reason test --dry-run
+saidran dismiss F-0123456789ab --reason "Intentional skip"
+saidran dismiss F-012345 --reason test --dry-run
 ```
 
 ## Flags
@@ -30,5 +30,5 @@ This command changes state and honors `--dry-run`.
 
 ## Related commands
 
-- gaugestone dismissals
-- gaugestone check
+- saidran dismissals
+- saidran check

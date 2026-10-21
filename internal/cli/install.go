@@ -11,11 +11,11 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad"
 	"github.com/vincentsch/rungrad/output"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/report"
 	"mvdan.cc/sh/v3/syntax"
 )
 
@@ -23,9 +23,9 @@ func addInstall(app *rungrad.App, opts Options, r redact.Redactor) {
 	for _, remove := range []bool{false, true} {
 		name, short := "install", "Install a Claude hook or print Codex notify configuration"
 		if remove {
-			name, short = "uninstall", "Remove the Gaugestone Claude hook"
+			name, short = "uninstall", "Remove the Saidran Claude hook"
 		}
-		app.AddCommand(&rungrad.Command{Use: name + " <claude|codex>", Short: short, Long: "Project scope uses .claude/settings.local.json and Git-local backups.\nUser scope uses CLAUDE_CONFIG_DIR/settings.json. Codex configuration is printed only.", Examples: []string{"gaugestone " + name + " claude --dry-run", "gaugestone " + name + " claude --user"}, Related: []string{"gaugestone hook", "gaugestone snippet"}, Args: cobra.ExactArgs(1), Mutates: true, OutputModes: []string{"human", "json"}, Configure: func(cmd *cobra.Command) {
+		app.AddCommand(&rungrad.Command{Use: name + " <claude|codex>", Short: short, Long: "Project scope uses .claude/settings.local.json and Git-local backups.\nUser scope uses CLAUDE_CONFIG_DIR/settings.json. Codex configuration is printed only.", Examples: []string{"saidran " + name + " claude --dry-run", "saidran " + name + " claude --user"}, Related: []string{"saidran hook", "saidran snippet"}, Args: cobra.ExactArgs(1), Mutates: true, OutputModes: []string{"human", "json"}, Configure: func(cmd *cobra.Command) {
 			cmd.Flags().Bool("project", false, "Use repository-local Claude settings (default)")
 			cmd.Flags().Bool("user", false, "Use user Claude settings")
 			cmd.MarkFlagsMutuallyExclusive("project", "user")
@@ -38,7 +38,7 @@ func addInstall(app *rungrad.App, opts Options, r redact.Redactor) {
 				// JSON escaping also supplies valid TOML basic-string escapes.
 				quoted, _ := json.Marshal(executable)
 				config := "notify = [" + string(quoted) + ", \"hook\", \"codex\"]"
-				instructions := "Add this to config.toml. If notify already exists, use a wrapper that calls both notifiers and forwards the JSON argument. Remove this notify entry (or wrapper call) to uninstall. Gaugestone does not edit config.toml."
+				instructions := "Add this to config.toml. If notify already exists, use a wrapper that calls both notifiers and forwards the JSON argument. Remove this notify entry (or wrapper call) to uninstall. Saidran does not edit config.toml."
 				return f.WriteResult(map[string]string{"config": config, "instructions": instructions}, func(w io.Writer) { fmt.Fprintln(w, config); fmt.Fprintln(w, instructions) })
 			}
 			if args[0] != "claude" {
@@ -139,7 +139,7 @@ func settingsPaths(dir string, user bool) (target, backup, root string, err erro
 		return
 	}
 	target = filepath.Join(root, ".claude", "settings.local.json")
-	backup = filepath.Join(gitDir, "gaugestone")
+	backup = filepath.Join(gitDir, "saidran")
 	// Existing shared tracked settings must not gain machine-specific paths.
 	b, e := exec.Command("git", "-C", root, "ls-files", "--", ".claude/settings.local.json").Output()
 	if e != nil {
@@ -243,7 +243,7 @@ func ownedHook(command string) bool {
 	executable := words[0]
 	base := filepath.Base(strings.ReplaceAll(executable, "\\", "/"))
 	absolute := filepath.IsAbs(executable) || len(executable) > 2 && executable[1] == ':' && (executable[2] == '\\' || executable[2] == '/')
-	return absolute && (base == "gaugestone" || base == "gaugestone.exe") && words[1] == "hook" && words[2] == "claude"
+	return absolute && (base == "saidran" || base == "saidran.exe") && words[1] == "hook" && words[2] == "claude"
 }
 func mergeHook(settings map[string]json.RawMessage, executable string, remove bool) ([]byte, bool, error) {
 	hooks := map[string]json.RawMessage{}

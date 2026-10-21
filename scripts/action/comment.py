@@ -25,7 +25,7 @@ def main():
     repo = os.environ["GITHUB_REPOSITORY"]
     number = event["pull_request"]["number"]
     pages = require(api(f"repos/{repo}/issues/{number}/comments", "--paginate", "--slurp"))
-    marker = "<!-- gaugestone -->"
+    marker = "<!-- saidran -->"
     existing = next((comment for page in pages for comment in page
                      if comment.get("user", {}).get("login") == "github-actions[bot]"
                      and comment.get("user", {}).get("type") == "Bot"
@@ -34,7 +34,7 @@ def main():
     endpoint = (f"repos/{repo}/issues/comments/{existing['id']}" if existing
                 else f"repos/{repo}/issues/{number}/comments")
     # JSON files keep report content out of shell source and command arguments.
-    with tempfile.TemporaryDirectory(prefix="gaugestone-comment-") as temp:
+    with tempfile.TemporaryDirectory(prefix="saidran-comment-") as temp:
         payload = Path(temp, "body.json")
         payload.write_text(json.dumps({"body": body}))
         result = api(endpoint, "--method", "PATCH" if existing else "POST", "--input", str(payload))

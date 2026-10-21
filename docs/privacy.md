@@ -2,7 +2,7 @@
 
 Report generation reads local logs and Git state. It makes no network calls,
 uses no models and needs no account. Installation downloads release assets;
-`gaugestone pr` uses GitHub CLI to read or update a pull request.
+`saidran pr` uses GitHub CLI to read or update a pull request.
 
 Reports contain command evidence and output tails, changed paths, claims and
 shortened prompts. They never include full transcripts. Output tails keep the
@@ -15,7 +15,7 @@ text can remain. Review the exact preview before posting it to GitHub and
 review saved reports before sharing. PR publication asks for confirmation;
 `--confirm` authorizes publication without that question.
 
-Reports and dismissal reasons live under `<git dir>/gaugestone/`, separately
+Reports and dismissal reasons live under `<git dir>/saidran/`, separately
 for each worktree. Claude project hooks use ignored local settings; their
 backups stay under the Git directory. User-scope settings backups stay beside
 the user settings file. Delete report folders and obsolete backups locally

@@ -1,6 +1,6 @@
 # Add a report to a pull request
 
-`gaugestone pr` adds a report section to the current branch's pull request.
+`saidran pr` adds a report section to the current branch's pull request.
 Install [GitHub CLI](https://cli.github.com/) and run `gh auth login` first.
 The command reads local session evidence, then uses `gh` to read or update the PR.
 It never executes recorded commands or writes local report files or directories.
@@ -10,10 +10,10 @@ It never executes recorded commands or writes local report files or directories.
 Preview the section without changing the PR:
 
 ```sh
-gaugestone pr --dry-run
+saidran pr --dry-run
 ```
 
-Run `gaugestone pr` to see the final redacted section and answer the confirmation
+Run `saidran pr` to see the final redacted section and answer the confirmation
 question. The preview includes any shortening needed to fit the description.
 Use `--confirm` to publish without the question; the preview still appears.
 `--dry-run` always takes precedence, including with `--confirm`.
@@ -26,41 +26,41 @@ The section string includes its markers. Status is `previewed` for dry-run and
 stderr without a success document on stdout.
 
 ```sh
-gaugestone pr --dry-run --json
-gaugestone pr --confirm --json
+saidran pr --dry-run --json
+saidran pr --confirm --json
 ```
 
 Reports summarize local logs and Git changes. Logs can be edited, and a report
 is not a certificate. Check the preview before sharing it. Redaction masks common
-tokens and home paths, but it is not a secret scanner. Run `gaugestone check`
+tokens and home paths, but it is not a secret scanner. Run `saidran check`
 locally to obtain full HTML/JSON evidence within privacy limits.
 
 ## Choose the session and comparison
 
-Automatic session selection works like `gaugestone check`. Use `--session <id>`
+Automatic session selection works like `saidran check`. Use `--session <id>`
 for a discovered session or `--transcript <file>` for an explicit recording.
 These two flags cannot be combined. All four supported agents use the same
 report model and Markdown renderer.
 
 The default comparison uses the merge base of HEAD and the PR's target commit,
 reported by `gh pr view` as `baseRefOid`. This works with non-default branches
-and forks whose `origin/main` differs from the target repository. Gaugestone
+and forks whose `origin/main` differs from the target repository. Saidran
 never fetches implicitly. If that commit is missing locally, fetch the PR target
 repository's base branch and try again.
 
 `--base <revision>` overrides that default and compares directly against the
-given revision, just as `gaugestone check --base` does.
+given revision, just as `saidran check --base` does.
 
 ## Keep the rest of the description
 
 The report is wrapped in these comments:
 
 ```html
-<!-- gaugestone:start -->
-<!-- gaugestone:end -->
+<!-- saidran:start -->
+<!-- saidran:end -->
 ```
 
-When neither marker exists, Gaugestone appends the section with two separating
+When neither marker exists, Saidran appends the section with two separating
 newlines. One ordered pair is replaced on later runs. Text outside the marked
 section stays byte for byte unchanged, including whitespace and line endings.
 Malformed, duplicate, reversed or unbalanced markers stop the command before
@@ -79,7 +79,7 @@ and UTF-8 text.
 
 A 64,000-byte description can fit if the shortened summary fits in the remaining
 space. If even the shortest summary cannot fit, shorten the existing description
-and try again. Gaugestone exits 2 without editing the PR.
+and try again. Saidran exits 2 without editing the PR.
 
 Missing or unauthenticated `gh` exits 3 with a fix. No current PR exits 5.
 Usage and confirmation errors exit 1; other runtime failures exit 2.
@@ -90,13 +90,13 @@ The [GitHub Action](github-action.md) saves a summary and HTML artifact, then
 creates or updates its own marked bot comment. It supports diff-only reports or
 a CLI transcript recorded in the same checkout. The Action compares directly
 against the event's PR base SHA, assuming checkout's default merge ref and
-`fetch-depth: 0`; this differs from `gaugestone pr`'s inferred merge base.
+`fetch-depth: 0`; this differs from `saidran pr`'s inferred merge base.
 
 ```yaml
 - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
   with:
     fetch-depth: 0
-- uses: vincentsch/gaugestone@v0.1.0
+- uses: vincentsch/saidran@v0.1.0
   with:
     fail-on: contradicted,stale,test_skipped
 ```

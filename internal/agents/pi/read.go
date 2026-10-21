@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	j "github.com/vincentsch/gaugestone/internal/agents/logjson"
-	"github.com/vincentsch/gaugestone/internal/session"
+	j "github.com/vincentsch/saidran/internal/agents/logjson"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 var exitTrailer = regexp.MustCompile(`(?:^|\n)Command exited with code ([1-9][0-9]*)\s*$`)

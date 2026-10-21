@@ -18,7 +18,7 @@ import (
 var data embed.FS
 
 func Extract() (repo, transcript string, err error) {
-	parent, err := os.MkdirTemp("", "gaugestone-demo-*")
+	parent, err := os.MkdirTemp("", "saidran-demo-*")
 	if err != nil {
 		return "", "", err
 	}

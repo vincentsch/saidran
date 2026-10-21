@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/vincentsch/gaugestone/internal/cli"
-	"github.com/vincentsch/gaugestone/internal/version"
+	"github.com/vincentsch/saidran/internal/cli"
+	"github.com/vincentsch/saidran/internal/version"
 	"os"
 )
 

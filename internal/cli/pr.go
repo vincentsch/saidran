@@ -12,16 +12,16 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/render"
-	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/render"
+	"github.com/vincentsch/saidran/internal/report"
 )
 
-const sectionStart = "<!-- gaugestone:start -->"
-const sectionEnd = "<!-- gaugestone:end -->"
+const sectionStart = "<!-- saidran:start -->"
+const sectionEnd = "<!-- saidran:end -->"
 const prBodyLimit = 65536
 
 type pullRequest struct {
@@ -38,7 +38,7 @@ type prResult struct {
 }
 
 // Treat broken marker comments as errors too, rather than appending a second section.
-var sectionMarkers = regexp.MustCompile(`(?is)<!--\s*gaugestone\b.*?(?:-->|$)`)
+var sectionMarkers = regexp.MustCompile(`(?is)<!--\s*saidran\b.*?(?:-->|$)`)
 
 func preservedPRBody(body string) (before, after string, err error) {
 	markers := sectionMarkers.FindAllStringIndex(body, -1)
@@ -50,7 +50,7 @@ func preservedPRBody(body string) (before, after string, err error) {
 		return before, "", nil
 	}
 	if len(markers) != 2 || body[markers[0][0]:markers[0][1]] != sectionStart || body[markers[1][0]:markers[1][1]] != sectionEnd {
-		return "", "", rungrad.NewError(rungrad.ExitAPI, "The PR has malformed, duplicate or unbalanced Gaugestone markers. Keep one ordered start/end pair or remove both markers.")
+		return "", "", rungrad.NewError(rungrad.ExitAPI, "The PR has malformed, duplicate or unbalanced Saidran markers. Keep one ordered start/end pair or remove both markers.")
 	}
 	return body[:markers[0][0]], body[markers[1][1]:], nil
 }
@@ -103,8 +103,8 @@ func addPR(app *rungrad.App, version string, opts Options, r redact.Redactor) {
 	app.AddCommand(&rungrad.Command{
 		Use: "pr", Short: "Preview and update a report section in this branch's pull request",
 		Long:     "Build a report in memory and show the section before publication.\nUses the merge base with the PR target commit unless --base is given.\nRequires GitHub CLI (gh); never writes local report files or runs transcript commands.",
-		Examples: []string{"gaugestone pr --dry-run", "gaugestone pr --confirm", "gaugestone pr --transcript session.jsonl --dry-run --json"},
-		Related:  []string{"gaugestone check", "gaugestone sessions"}, Args: cobra.NoArgs,
+		Examples: []string{"saidran pr --dry-run", "saidran pr --confirm", "saidran pr --transcript session.jsonl --dry-run --json"},
+		Related:  []string{"saidran check", "saidran sessions"}, Args: cobra.NoArgs,
 		Mutates: true, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON},
 		Configure: func(cmd *cobra.Command) {
 			cmd.Flags().String("session", "", "Select an ID or claude:ID, codex:ID, opencode:ID, pi:ID")
@@ -204,7 +204,7 @@ func addPR(app *rungrad.App, version string, opts Options, r redact.Redactor) {
 					return err
 				}
 				// gh reads the entire body from a private disposable file, never shell source.
-				file, err := os.CreateTemp("", "gaugestone-pr-*")
+				file, err := os.CreateTemp("", "saidran-pr-*")
 				if err != nil {
 					return err
 				}

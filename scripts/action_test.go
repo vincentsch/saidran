@@ -61,11 +61,11 @@ func TestCompositeActionLocally(t *testing.T) {
 			t.Fatalf("policy failure would suppress outputs: %s", steps[i].If)
 		}
 	}
-	if steps[0].Env["GAUGESTONE_VERSION"] != releaseVersion {
+	if steps[0].Env["SAIDRAN_VERSION"] != releaseVersion {
 		t.Fatal("Action must pin its release binary")
 	}
-	binary := filepath.Join(t.TempDir(), "gaugestone")
-	cmd := exec.Command("go", "build", "-ldflags", "-X github.com/vincentsch/gaugestone/internal/version.Version="+releaseVersion, "-o", binary, "./cmd/gaugestone")
+	binary := filepath.Join(t.TempDir(), "saidran")
+	cmd := exec.Command("go", "build", "-ldflags", "-X github.com/vincentsch/saidran/internal/version.Version="+releaseVersion, "-o", binary, "./cmd/saidran")
 	cmd.Dir = root
 	if b, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("build %v %s", err, b)
@@ -74,7 +74,7 @@ func TestCompositeActionLocally(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	asset := "gaugestone-" + runtime.GOOS + "-" + runtime.GOARCH
+	asset := "saidran-" + runtime.GOOS + "-" + runtime.GOARCH
 	var downloadMu sync.Mutex
 	var downloads []string
 	release := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -129,12 +129,12 @@ func TestCompositeActionLocally(t *testing.T) {
 			baseSHA := git("rev-parse", "HEAD")
 			os.WriteFile(filepath.Join(repo, "sample_test.go"), []byte("package sample\nfunc TestSample(t *testing.T) { t.Skip(\"reason\") }\n"), 0600)
 			if tc.name == "create" {
-				if err := os.WriteFile(filepath.Join(repo, "<!-- gaugestone -->.txt"), []byte("untrusted filename\n"), 0600); err != nil {
+				if err := os.WriteFile(filepath.Join(repo, "<!-- saidran -->.txt"), []byte("untrusted filename\n"), 0600); err != nil {
 					t.Fatal(err)
 				}
 			}
 			// An old output tree must never become this invocation's artifact.
-			previous := filepath.Join(dir, "gaugestone-reports.previous")
+			previous := filepath.Join(dir, "saidran-reports.previous")
 			os.Mkdir(previous, 0700)
 			os.WriteFile(filepath.Join(previous, "report.html"), []byte("stale report"), 0600)
 			event := map[string]any{}
@@ -152,7 +152,7 @@ args=sys.argv[1:]
 root=pathlib.Path(os.environ['FAKE_ROOT'])
 with open(root/'calls','a') as f: f.write(json.dumps(args)+'\n')
 if '--paginate' in args:
- print(json.dumps([[{'id':1,'user':{'login':'human','type':'User'},'body':'<!-- gaugestone -->\nhuman'}, {'id':2,'user':{'login':'other[bot]','type':'Bot'},'body':'<!-- gaugestone -->\nother'}, {'id':3,'user':{'login':'github-actions[bot]','type':'Bot'},'body':'unrelated'}], [{'id':4,'user':{'login':'github-actions[bot]','type':'Bot'},'body':'<!-- gaugestone -->\nprevious'}] if os.environ['CASE_NAME']=='replace' else []]))
+ print(json.dumps([[{'id':1,'user':{'login':'human','type':'User'},'body':'<!-- saidran -->\nhuman'}, {'id':2,'user':{'login':'other[bot]','type':'Bot'},'body':'<!-- saidran -->\nother'}, {'id':3,'user':{'login':'github-actions[bot]','type':'Bot'},'body':'unrelated'}], [{'id':4,'user':{'login':'github-actions[bot]','type':'Bot'},'body':'<!-- saidran -->\nprevious'}] if os.environ['CASE_NAME']=='replace' else []]))
 else:
  (root/'posted').write_text(pathlib.Path(args[args.index('--input')+1]).read_text())
  if os.environ['PUBLICATION_ERROR']:
@@ -175,7 +175,7 @@ else:
 			if tc.installError {
 				downloadBase += "/missing"
 			}
-			env = append(env, "RUNNER_OS="+map[string]string{"linux": "Linux", "darwin": "macOS"}[runtime.GOOS], "RUNNER_TEMP="+dir, "GITHUB_ACTION_PATH="+root, "GITHUB_EVENT_PATH="+eventPath, "GITHUB_REPOSITORY=example/repo", "GITHUB_PATH="+filepath.Join(dir, "path"), "GITHUB_OUTPUT="+filepath.Join(dir, "output"), "GITHUB_STEP_SUMMARY="+filepath.Join(dir, "summary"), "INPUT_BASE="+base, "INPUT_TRANSCRIPT="+transcript, "INPUT_FAIL_ON="+tc.policy, "GAUGESTONE_DOWNLOAD_BASE="+downloadBase, "GAUGESTONE_VERSION="+steps[0].Env["GAUGESTONE_VERSION"], "GH_TOKEN=fake-local-only", "FAKE_ROOT="+dir, "CASE_NAME="+tc.name, "PUBLICATION_ERROR="+tc.publication)
+			env = append(env, "RUNNER_OS="+map[string]string{"linux": "Linux", "darwin": "macOS"}[runtime.GOOS], "RUNNER_TEMP="+dir, "GITHUB_ACTION_PATH="+root, "GITHUB_EVENT_PATH="+eventPath, "GITHUB_REPOSITORY=example/repo", "GITHUB_PATH="+filepath.Join(dir, "path"), "GITHUB_OUTPUT="+filepath.Join(dir, "output"), "GITHUB_STEP_SUMMARY="+filepath.Join(dir, "summary"), "INPUT_BASE="+base, "INPUT_TRANSCRIPT="+transcript, "INPUT_FAIL_ON="+tc.policy, "SAIDRAN_DOWNLOAD_BASE="+downloadBase, "SAIDRAN_VERSION="+steps[0].Env["SAIDRAN_VERSION"], "GH_TOKEN=fake-local-only", "FAKE_ROOT="+dir, "CASE_NAME="+tc.name, "PUBLICATION_ERROR="+tc.publication)
 			run := func(source string) (int, string) {
 				c := exec.Command("bash", "-e", "-o", "pipefail", "-c", source)
 				c.Dir = repo
@@ -205,7 +205,7 @@ else:
 			}
 			pathBytes, _ := os.ReadFile(filepath.Join(dir, "path"))
 			env = append(env, "PATH="+strings.TrimSpace(string(pathBytes))+string(os.PathListSeparator)+fakeDir+string(os.PathListSeparator)+os.Getenv("PATH"))
-			status, out = run("gaugestone --version")
+			status, out = run("saidran --version")
 			if status != 0 || !strings.Contains(out, "version "+releaseVersion) {
 				t.Fatalf("installed version: %d %s", status, out)
 			}
@@ -253,7 +253,7 @@ else:
 			// Stub the upload action at its actual input, before any publication call.
 			artifact := strings.ReplaceAll(steps[3].With["path"], "${{ steps.report.outputs.report_dir }}", reportDir)
 			artifactBytes, e := os.ReadFile(artifact)
-			if e != nil || !strings.Contains(string(artifactBytes), "Gaugestone") {
+			if e != nil || !strings.Contains(string(artifactBytes), "Saidran") {
 				t.Fatal("missing new artifact")
 			}
 			summary, _ := os.ReadFile(filepath.Join(dir, "summary"))
@@ -291,7 +291,7 @@ else:
 			posted, _ := os.ReadFile(filepath.Join(dir, "posted"))
 			var body struct{ Body string }
 			json.Unmarshal(posted, &body)
-			if !strings.HasPrefix(body.Body, "<!-- gaugestone -->\n") || strings.Count(body.Body, "<!-- gaugestone -->") != 1 {
+			if !strings.HasPrefix(body.Body, "<!-- saidran -->\n") || strings.Count(body.Body, "<!-- saidran -->") != 1 {
 				t.Fatal("wrong marker")
 			}
 		})

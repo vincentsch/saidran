@@ -63,7 +63,7 @@ esac
 	gitPR(t, f.repo, "update-ref", "refs/remotes/origin/main", "HEAD")
 	log := []map[string]any{
 		{"type": "user", "sessionId": "pr-session", "cwd": f.repo, "timestamp": "2026-10-20T12:00:00Z", "message": map[string]any{"content": "Review changes"}},
-		{"type": "assistant", "cwd": f.repo, "timestamp": "2026-10-20T12:01:00Z", "message": map[string]any{"content": []any{map[string]any{"type": "tool_use", "id": "cmd", "name": "Bash", "input": map[string]any{"command": "go test ./... # | `untrusted` <!-- gaugestone:start --> TOKEN_KEY=private " + strings.Repeat("界", 1000) + "\ntouch " + filepath.Join(f.repo, "executed")}}}}},
+		{"type": "assistant", "cwd": f.repo, "timestamp": "2026-10-20T12:01:00Z", "message": map[string]any{"content": []any{map[string]any{"type": "tool_use", "id": "cmd", "name": "Bash", "input": map[string]any{"command": "go test ./... # | `untrusted` <!-- saidran:start --> TOKEN_KEY=private " + strings.Repeat("界", 1000) + "\ntouch " + filepath.Join(f.repo, "executed")}}}}},
 		{"type": "user", "cwd": f.repo, "timestamp": "2026-10-20T12:02:00Z", "message": map[string]any{"content": []any{map[string]any{"type": "tool_result", "tool_use_id": "cmd", "content": "ok example 0.1s"}}}},
 	}
 	var data bytes.Buffer
@@ -102,7 +102,7 @@ func (f prFixture) run(args ...string) testutil.Result {
 }
 func assertNoReports(t *testing.T, f prFixture) {
 	t.Helper()
-	for _, p := range []string{filepath.Join(f.repo, ".git", "gaugestone"), filepath.Join(f.repo, "executed"), filepath.Join(f.repo, "report.html")} {
+	for _, p := range []string{filepath.Join(f.repo, ".git", "saidran"), filepath.Join(f.repo, "executed"), filepath.Join(f.repo, "report.html")} {
 		if _, err := os.Stat(p); !os.IsNotExist(err) {
 			t.Fatalf("unexpected output %s: %v", p, err)
 		}
@@ -140,7 +140,7 @@ func TestPRPublicationAndPreview(t *testing.T) {
 	if !strings.Contains(preview.Section, "feature.txt") || strings.Contains(preview.Section, "target.txt") {
 		t.Fatal("did not use target merge base", preview.Section)
 	}
-	for _, s := range []string{"Run `gaugestone check` locally", "&#124;", "&#96;", "&lt;!-- gaugestone:start --&gt;", "&#91;redacted&#93;"} {
+	for _, s := range []string{"Run `saidran check` locally", "&#124;", "&#96;", "&lt;!-- saidran:start --&gt;", "&#91;redacted&#93;"} {
 		if !strings.Contains(preview.Section, s) {
 			t.Fatalf("missing %q: %s", s, preview.Section)
 		}
@@ -179,8 +179,8 @@ func TestPRRefusalsAndFailures(t *testing.T) {
 		{name: "unbalanced", body: sectionStart, code: 2, wantText: "markers"},
 		{name: "reversed", body: sectionEnd + sectionStart, code: 2, wantText: "markers"},
 		{name: "duplicate", body: sectionStart + sectionEnd + sectionStart + sectionEnd, code: 2, wantText: "markers"},
-		{name: "malformed", body: "<!-- gaugestone:start --> x <!-- gaugestone:end-->", code: 2, wantText: "markers"},
-		{name: "unterminated", body: "<!-- gaugestone:start", code: 2, wantText: "markers"},
+		{name: "malformed", body: "<!-- saidran:start --> x <!-- saidran:end-->", code: 2, wantText: "markers"},
+		{name: "unterminated", body: "<!-- saidran:start", code: 2, wantText: "markers"},
 		{name: "authentication exit code", marker: "auth-required", code: 3, wantText: "gh auth login"},
 		{name: "runtime failure", marker: "runtime-fail", code: 2, wantText: "Could not read"},
 		{name: "authentication", marker: "auth-fail", code: 3, wantText: "gh auth login"},
@@ -288,8 +288,8 @@ func TestPRLongDescriptions(t *testing.T) {
 	assertNoReports(t, f)
 }
 func TestPRBuiltBinary(t *testing.T) {
-	binary := filepath.Join(t.TempDir(), "gaugestone")
-	build := exec.Command("go", "build", "-o", binary, "../../cmd/gaugestone")
+	binary := filepath.Join(t.TempDir(), "saidran")
+	build := exec.Command("go", "build", "-o", binary, "../../cmd/saidran")
 	if b, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build: %s %v", b, err)
 	}

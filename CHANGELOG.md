@@ -2,7 +2,7 @@
 
 ## 0.1.0 (unreleased)
 
-Gaugestone reads Claude Code, Codex, OpenCode and Pi sessions and checks what
+Saidran reads Claude Code, Codex, OpenCode and Pi sessions and checks what
 the coding agent claimed against recorded commands and repository changes.
 
 - Show matching runs, later edits and missing evidence for each claim.

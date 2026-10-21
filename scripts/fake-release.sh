@@ -11,6 +11,6 @@ version=${2:-v0.1.0}
 make -C "$project_root" build-all VERSION="$version"
 for layout in latest/download "download/$version"; do
     mkdir -p -- "$output/$layout"
-    cp "$project_root"/dist/gaugestone-* "$project_root/dist/checksums.txt" "$output/$layout/"
+    cp "$project_root"/dist/saidran-* "$project_root/dist/checksums.txt" "$output/$layout/"
 done
 printf 'Release tree: %s\n' "$output"

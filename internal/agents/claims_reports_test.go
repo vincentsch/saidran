@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/cli"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/cli"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func TestSyntheticEvidenceReports(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/vincentsch/gaugestone/internal/cli"
 	"github.com/vincentsch/rungrad/docsgen"
+	"github.com/vincentsch/saidran/internal/cli"
 )
 
 func main() {

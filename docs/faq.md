@@ -4,7 +4,7 @@
 
 Verified means a matching recorded check passed with sufficient coverage and
 no later relevant edits. A test may miss the bug or assert the wrong behavior.
-Gaugestone does not inspect test quality or establish bug correctness.
+Saidran does not inspect test quality or establish bug correctness.
 See the [verdict guide](verdicts.md) for coverage rules and examples.
 
 ## Why are there no claims?
@@ -27,12 +27,12 @@ then read the [verdicts](verdicts.md) and [agent format limits](agents.md).
 
 ## Can a report certify the logs?
 
-Local logs can be edited. Gaugestone compares their recorded execution with
+Local logs can be edited. Saidran compares their recorded execution with
 claims and Git changes, but cannot authenticate that history. Findings describe
 patterns in the diff and may have intentional reasons. See [findings](findings.md)
 and [privacy](privacy.md) before sharing evidence.
 
-## Does Gaugestone send my code or session to a service?
+## Does Saidran send my code or session to a service?
 
 Local report generation makes no network or model calls. Reports contain
 command evidence, output tails and shortened prompts, never full transcripts.

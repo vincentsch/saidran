@@ -1,17 +1,17 @@
-# gaugestone snippet
+# saidran snippet
 
 Print agent self-check instructions
 
 ## Usage
 
 ```
-gaugestone snippet
+saidran snippet
 ```
 
 ## Examples
 
 ```
-gaugestone snippet
+saidran snippet
 ```
 
 ## Output modes
@@ -20,4 +20,4 @@ human, json
 
 ## Related commands
 
-- gaugestone check
+- saidran check

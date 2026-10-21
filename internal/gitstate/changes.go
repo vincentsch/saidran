@@ -122,7 +122,7 @@ func Inspect(root, base string, ended time.Time) (State, error) {
 	}
 	var env []string
 	if len(untrackedPaths) > 0 {
-		dir, err := os.MkdirTemp("", "gaugestone-index-")
+		dir, err := os.MkdirTemp("", "saidran-index-")
 		if err != nil {
 			return s, err
 		}

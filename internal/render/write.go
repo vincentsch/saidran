@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/saidran/internal/report"
 )
 
 // Write renders all documents before saving any of them. Each file replacement

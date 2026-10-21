@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vincentsch/gaugestone/internal/cli"
+	"github.com/vincentsch/saidran/internal/cli"
 )
 
 func TestDocumentOutputsAndOpen(t *testing.T) {
@@ -68,7 +68,7 @@ func TestDocumentOutputsAndOpen(t *testing.T) {
 					t.Fatal("HTML stream has extra text")
 				}
 			} else if strings.Contains(strings.Join(tc.args, " "), "--format markdown") {
-				if !strings.HasPrefix(out.String(), "### Gaugestone\n") || strings.Contains(out.String(), "Report:") {
+				if !strings.HasPrefix(out.String(), "### Saidran\n") || strings.Contains(out.String(), "Report:") {
 					t.Fatal("Markdown stream has extra text")
 				}
 			} else if tc.written && !strings.Contains(out.String(), filepath.Join(dir, "report.html")) {

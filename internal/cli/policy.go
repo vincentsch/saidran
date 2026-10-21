@@ -3,8 +3,8 @@ package cli
 import (
 	"strings"
 
-	"github.com/vincentsch/gaugestone/internal/report"
 	"github.com/vincentsch/rungrad"
+	"github.com/vincentsch/saidran/internal/report"
 )
 
 func parsePolicy(value string) (map[string]bool, error) {

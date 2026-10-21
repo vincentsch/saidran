@@ -8,9 +8,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/vincentsch/gaugestone/internal/report"
-	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad/output"
+	"github.com/vincentsch/saidran/internal/report"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 var labels = map[string]string{"verified": "Verified", "stale": "Stale", "contradicted": "Contradicted", "partial": "Partial", "no_matching_run": "No matching run", "cant_tell": "Can't tell"}
@@ -26,7 +26,7 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 	}
 	line := func(prefix, text string) { wrap(w, prefix, text, width) }
 	if r.Session == nil {
-		line("Gaugestone  ", "Diff-only report")
+		line("Saidran  ", "Diff-only report")
 		line("", "No session log was available; recorded checks cannot be verified.")
 	} else {
 		agent := session.AgentLabel(r.Session.Agent)
@@ -34,7 +34,7 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 		if r.Session.Started.Truncate(time.Minute).Equal(r.Session.Ended.Truncate(time.Minute)) {
 			startLayout, endLayout = "2006-01-02 15:04:05", "15:04:05"
 		}
-		line("Gaugestone  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format(startLayout), r.Session.Ended.Local().Format(endLayout), r.Repo.Branch, r.Repo.Baseline.Ref))
+		line("Saidran  ", fmt.Sprintf("%s session %s  %s–%s  %s vs %s", agent, displayID, r.Session.Started.Local().Format(startLayout), r.Session.Ended.Local().Format(endLayout), r.Repo.Branch, r.Repo.Baseline.Ref))
 	}
 	line("Baseline  ", shortCommit(r.Repo.Baseline.Commit)+" ("+r.Repo.Baseline.Ref+", "+r.Repo.Baseline.Reason+")")
 	fmt.Fprintln(w)

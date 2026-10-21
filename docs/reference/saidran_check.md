@@ -1,19 +1,19 @@
-# gaugestone check
+# saidran check
 
 Show session evidence and repository changes
 
 ## Usage
 
 ```
-gaugestone check
+saidran check
 ```
 
 ## Examples
 
 ```
-gaugestone check
-gaugestone check --transcript session.jsonl --json
-gaugestone check --base origin/main --no-write
+saidran check
+saidran check --transcript session.jsonl --json
+saidran check --base origin/main --no-write
 ```
 
 ## Flags
@@ -37,4 +37,4 @@ This command changes state and honors `--dry-run`.
 
 ## Related commands
 
-- gaugestone sessions
+- saidran sessions

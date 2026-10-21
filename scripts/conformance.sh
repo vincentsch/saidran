@@ -5,7 +5,7 @@ project_root="$(cd "$(dirname "$0")/.." && pwd)"
 task_temp="$(mktemp -d)"
 trap 'rm -rf -- "$task_temp"' EXIT
 cd "$project_root"
-CGO_ENABLED=0 go build -o "$task_temp/gaugestone" ./cmd/gaugestone
+CGO_ENABLED=0 go build -o "$task_temp/saidran" ./cmd/saidran
 go build -o "$task_temp/rungrad" github.com/vincentsch/rungrad/cmd/rungrad
 export HOME="$task_temp/home" CLAUDE_CONFIG_DIR="$task_temp/claude" CODEX_HOME="$task_temp/codex" XDG_DATA_HOME="$task_temp/xdg" PI_CODING_AGENT_DIR="$task_temp/pi"
 mkdir -p "$HOME"
@@ -23,7 +23,7 @@ remapped = transcript.replace('/fixtures/claude-verified/repo', str(repo))
 (root / 'session.jsonl').write_text(remapped)
 PY
 cd "$task_temp/repo"
-"$task_temp/rungrad" score "$task_temp/gaugestone" --manifest auto --strict --read sessions \
+"$task_temp/rungrad" score "$task_temp/saidran" --manifest auto --strict --read sessions \
   --mutate "check --transcript $task_temp/session.jsonl" \
   --not-found "check --session absent" \
   --api-error "check --transcript $task_temp/session.jsonl --base missing-revision"

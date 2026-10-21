@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/pathutil"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/pathutil"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 type coverage struct {

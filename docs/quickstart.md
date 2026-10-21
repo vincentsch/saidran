@@ -1,4 +1,4 @@
-# Install Gaugestone and check a session
+# Install Saidran and check a session
 
 Release binaries need Git. They do not need Go, Node or an agent installation
 to read existing logs. Report generation runs locally without network or model
@@ -9,36 +9,36 @@ calls. Installation downloads release files.
 On Linux or macOS, with amd64 or arm64:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/vincentsch/gaugestone/main/install.sh -o /tmp/gaugestone-install.sh
-bash /tmp/gaugestone-install.sh
+curl -fsSL https://raw.githubusercontent.com/vincentsch/saidran/main/install.sh -o /tmp/saidran-install.sh
+bash /tmp/saidran-install.sh
 ```
 
 The installer verifies SHA-256 checksums and defaults to `~/.local/bin`.
-It prints `Installed: /absolute/path/to/gaugestone`. Keep that path: if the
+It prints `Installed: /absolute/path/to/saidran`. Keep that path: if the
 folder is not on PATH, use the absolute binary path for the commands below.
 
-Set `INSTALL_DIR` to choose another folder, `GAUGESTONE_VERSION` to pin a
-release, or `GAUGESTONE_DOWNLOAD_BASE` to use a release mirror. For example:
+Set `INSTALL_DIR` to choose another folder, `SAIDRAN_VERSION` to pin a
+release, or `SAIDRAN_DOWNLOAD_BASE` to use a release mirror. For example:
 
 ```sh
-INSTALL_DIR="$HOME/.local/bin" GAUGESTONE_VERSION=v0.1.0 bash /tmp/gaugestone-install.sh
+INSTALL_DIR="$HOME/.local/bin" SAIDRAN_VERSION=v0.1.0 bash /tmp/saidran-install.sh
 ```
 
 ### Windows
 
-Download the matching `gaugestone-windows-amd64.exe` or
-`gaugestone-windows-arm64.exe` and `checksums.txt` from the same
-[release](https://github.com/vincentsch/gaugestone/releases).
+Download the matching `saidran-windows-amd64.exe` or
+`saidran-windows-arm64.exe` and `checksums.txt` from the same
+[release](https://github.com/vincentsch/saidran/releases).
 Before running the binary, use PowerShell to compute its checksum:
 
 ```powershell
-Get-FileHash .\gaugestone-windows-amd64.exe -Algorithm SHA256
-Select-String -Path .\checksums.txt -Pattern 'gaugestone-windows-amd64.exe'
+Get-FileHash .\saidran-windows-amd64.exe -Algorithm SHA256
+Select-String -Path .\checksums.txt -Pattern 'saidran-windows-amd64.exe'
 ```
 
 Use the arm64 filename in both commands on arm64. Compare the full hash with
 the matching entry, ignoring letter case. Stop if they differ. Rename the
-verified binary to `gaugestone.exe` and put it in a folder on PATH, or invoke
+verified binary to `saidran.exe` and put it in a folder on PATH, or invoke
 its absolute path. Git must also be available on PATH.
 
 ### Install with Go
@@ -46,7 +46,7 @@ its absolute path. Git must also be available on PATH.
 With a Go toolchain, you can install from source:
 
 ```sh
-go install github.com/vincentsch/gaugestone/cmd/gaugestone@latest
+go install github.com/vincentsch/saidran/cmd/saidran@latest
 ```
 
 The binary goes into `go env GOBIN`, or `$(go env GOPATH)/bin` when GOBIN is
@@ -57,7 +57,7 @@ path if that directory is not on PATH.
 ## Try the bundled demo
 
 ```sh
-gaugestone demo
+saidran demo
 ```
 
 The demo needs no agent history. It extracts a sanitised Claude Code recording
@@ -71,7 +71,7 @@ The [README screenshots](../README.md#install-and-try-the-demo) show this exampl
 Run inside the Git repository your agent changed:
 
 ```sh
-gaugestone
+saidran
 ```
 
 The default picks the latest active session from the last seven days. Confirm
@@ -83,33 +83,33 @@ asks which one to read. Scripts pick the newest and explain the choice.
 List recordings or select one explicitly when the default is not yours:
 
 ```sh
-gaugestone sessions
-gaugestone --session claude:session-id
-gaugestone --transcript /absolute/path/to/session.jsonl
+saidran sessions
+saidran --session claude:session-id
+saidran --transcript /absolute/path/to/session.jsonl
 ```
 
 Replace the example ID or path with your recording. Session references accept
 full IDs or unique prefixes; explicit transcripts bypass the seven-day limit.
 Do not combine `--session` and `--transcript`. See [supported log locations](agents.md)
-and the [selection flags](reference/gaugestone_check.md).
+and the [selection flags](reference/saidran_check.md).
 If logs are missing or unsupported, run:
 
 ```sh
-gaugestone doctor
+saidran doctor
 ```
 
-The [doctor reference](reference/gaugestone_doctor.md) explains its diagnostics.
-Gaugestone never runs the agent or executes commands from its log.
+The [doctor reference](reference/saidran_doctor.md) explains its diagnostics.
+Saidran never runs the agent or executes commands from its log.
 
 ## Open the report
 
 A successful check saves `report.html`, `report.md` and `report.json` under
-`<git dir>/gaugestone/<agent>-<full-session-id>/`. Get the absolute Git directory
+`<git dir>/saidran/<agent>-<full-session-id>/`. Get the absolute Git directory
 with `git rev-parse --absolute-git-dir`; linked worktrees have separate reports.
 The terminal prints the saved HTML path. Open that file in your browser, or run:
 
 ```sh
-gaugestone --open
+saidran --open
 ```
 
 Use the same explicit session flag again if you selected one earlier.

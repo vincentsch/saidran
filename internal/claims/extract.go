@@ -8,8 +8,8 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 type Run struct {

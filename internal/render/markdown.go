@@ -7,9 +7,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/report"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/report"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 const markdownLimit = 60000
@@ -59,7 +59,7 @@ func MarkdownWithOptions(w io.Writer, r report.Report, opts MarkdownOptions) err
 			continue
 		}
 		if lists == 0 {
-			return fmt.Errorf("The shortest Markdown summary exceeds the %d-byte budget. Shorten the existing PR description or run gaugestone check locally.", opts.ByteBudget)
+			return fmt.Errorf("The shortest Markdown summary exceeds the %d-byte budget. Shorten the existing PR description or run saidran check locally.", opts.ByteBudget)
 		}
 		// Halving list sizes keeps very large sessions cheap to shorten.
 		lists /= 2
@@ -107,7 +107,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 	notice := "HTML/JSON contain the complete evidence."
 	closing := "HTML/JSON contain the complete evidence within privacy limits."
 	if localEvidence {
-		notice = "Run `gaugestone check` locally to obtain full HTML/JSON evidence."
+		notice = "Run `saidran check` locally to obtain full HTML/JSON evidence."
 		closing = notice
 	}
 	text := func(s string) string { return mdText(s, cap) }
@@ -120,7 +120,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 	if r.Session == nil {
 		b.WriteString("### Diff-only report\n\nNo session log was available; recorded checks cannot be verified.\n\n")
 	} else {
-		b.WriteString("### Gaugestone\n\n")
+		b.WriteString("### Saidran\n\n")
 	}
 	fmt.Fprintf(&b, "**Verdicts**: %s\n\n", verdictTotals(r))
 	b.WriteString("| Claim | Verdict | Evidence |\n| --- | --- | --- |\n")
@@ -212,7 +212,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 		}
 	}
 	omitted(len(r.Findings)-min(lists, len(r.Findings)), "findings")
-	fmt.Fprintf(&b, "\nGaugestone %s · generated %s", text(r.Version), stamp(r.Generated))
+	fmt.Fprintf(&b, "\nSaidran %s · generated %s", text(r.Version), stamp(r.Generated))
 	if r.Session != nil {
 		fmt.Fprintf(&b, " · %s session %s", text(session.AgentLabel(r.Session.Agent)), code(r.Session.ID))
 	}

@@ -13,17 +13,17 @@ import (
 )
 
 func TestHookCommandOwnership(t *testing.T) {
-	for _, path := range []string{"/opt/gaugestone", "/a path/gaugestone", `/a 'quoted' path/gaugestone`} {
+	for _, path := range []string{"/opt/saidran", "/a path/saidran", `/a 'quoted' path/saidran`} {
 		if !ownedHook(hookCommand(path)) {
 			t.Fatal(hookCommand(path))
 		}
 	}
-	for _, command := range []string{`"/old path/gaugestone" hook claude`, `/old\ path/gaugestone hook claude`, `"C:\Program Files\gaugestone.exe" hook claude`} {
+	for _, command := range []string{`"/old path/saidran" hook claude`, `/old\ path/saidran hook claude`, `"C:\Program Files\saidran.exe" hook claude`} {
 		if !ownedHook(command) {
 			t.Fatal(command)
 		}
 	}
-	for _, command := range []string{`gaugestone hook claude`, `/opt/other hook claude`, `/opt/gaugestone hook claude extra`, `/opt/gaugestone hook claude && echo done`, `$(which gaugestone) hook claude`, `/opt/gaugestone hook claude > /tmp/output`, `/opt/gaugestone hook codex`} {
+	for _, command := range []string{`saidran hook claude`, `/opt/other hook claude`, `/opt/saidran hook claude extra`, `/opt/saidran hook claude && echo done`, `$(which saidran) hook claude`, `/opt/saidran hook claude > /tmp/output`, `/opt/saidran hook codex`} {
 		if ownedHook(command) {
 			t.Fatal(command)
 		}
@@ -41,7 +41,7 @@ func TestClaudeSettingsLifecycle(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			original := []byte(`{"theme":"light","hooks":{"Stop":[{"hooks":[{"type":"command","command":"echo keep"},{"type":"command","command":"/old/gaugestone hook claude extra"}]}],"PreToolUse":[]}}`)
+			original := []byte(`{"theme":"light","hooks":{"Stop":[{"hooks":[{"type":"command","command":"echo keep"},{"type":"command","command":"/old/saidran hook claude extra"}]}],"PreToolUse":[]}}`)
 			if err = os.MkdirAll(filepath.Dir(target), 0700); err != nil {
 				t.Fatal(err)
 			}
@@ -96,12 +96,12 @@ func TestClaudeSettingsLifecycle(t *testing.T) {
 			// Simulate a binary moved since installation.
 			var settings map[string]json.RawMessage
 			_ = json.Unmarshal(installed, &settings)
-			b, _, e := mergeHook(settings, "/old location/gaugestone", true)
+			b, _, e := mergeHook(settings, "/old location/saidran", true)
 			if e != nil {
 				t.Fatal(e)
 			}
 			_ = json.Unmarshal(b, &settings)
-			b, _, e = mergeHook(settings, "/old location/gaugestone", false)
+			b, _, e = mergeHook(settings, "/old location/saidran", false)
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -188,7 +188,7 @@ func TestTrackedLocalSettingsAreProtected(t *testing.T) {
 	if !bytes.Equal(after, original) {
 		t.Fatal("tracked settings changed")
 	}
-	if _, err := os.Stat(filepath.Join(base, ".git", "gaugestone")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(base, ".git", "saidran")); !os.IsNotExist(err) {
 		t.Fatal("created backup")
 	}
 }

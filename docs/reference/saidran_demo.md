@@ -1,18 +1,18 @@
-# gaugestone demo
+# saidran demo
 
 Try a recorded session without agent history
 
 ## Usage
 
 ```
-gaugestone demo
+saidran demo
 ```
 
 ## Examples
 
 ```
-gaugestone demo
-gaugestone demo --json
+saidran demo
+saidran demo --json
 ```
 
 ## Output modes
@@ -25,5 +25,5 @@ This command changes state and honors `--dry-run`.
 
 ## Related commands
 
-- gaugestone check
-- gaugestone doctor
+- saidran check
+- saidran doctor

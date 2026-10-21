@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/cli"
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad/testutil"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/cli"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func TestPiBashResults(t *testing.T) {

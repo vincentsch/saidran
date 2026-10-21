@@ -8,13 +8,13 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/vincentsch/gaugestone/internal/claims"
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/findings"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/report"
-	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad/output"
+	"github.com/vincentsch/saidran/internal/claims"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/findings"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/report"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 func TestTextEvidenceAndWrapping(t *testing.T) {

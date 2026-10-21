@@ -13,7 +13,7 @@ import (
 )
 
 func TestInstallerVerifiesBeforeReplacingBinary(t *testing.T) {
-	asset := "gaugestone-linux-amd64"
+	asset := "saidran-linux-amd64"
 	payload := []byte("#!/bin/sh\nprintf 'installed test binary\\n'\n")
 	sum := fmt.Sprintf("%x  %s\n", sha256.Sum256(payload), asset)
 	for _, tc := range []struct {
@@ -42,9 +42,9 @@ func TestInstallerVerifiesBeforeReplacingBinary(t *testing.T) {
 			}
 			asset := asset
 			if tc.osName == "Darwin" {
-				asset = "gaugestone-darwin-arm64"
+				asset = "saidran-darwin-arm64"
 			}
-			checksum := strings.ReplaceAll(tc.checksum, "gaugestone-linux-amd64", asset)
+			checksum := strings.ReplaceAll(tc.checksum, "saidran-linux-amd64", asset)
 			dir := filepath.Join(tree, filepath.FromSlash(layout))
 			if err := os.MkdirAll(dir, 0700); err != nil {
 				t.Fatal(err)
@@ -66,7 +66,7 @@ func TestInstallerVerifiesBeforeReplacingBinary(t *testing.T) {
 			if err := os.MkdirAll(installDir, 0700); err != nil {
 				t.Fatal(err)
 			}
-			binary := filepath.Join(installDir, "gaugestone")
+			binary := filepath.Join(installDir, "saidran")
 			previous := []byte("existing installation")
 			if err := os.WriteFile(binary, previous, 0755); err != nil {
 				t.Fatal(err)
@@ -80,8 +80,8 @@ func TestInstallerVerifiesBeforeReplacingBinary(t *testing.T) {
 				t.Fatal(err)
 			}
 			t.Setenv("PATH", shims+string(os.PathListSeparator)+os.Getenv("PATH"))
-			t.Setenv("GAUGESTONE_DOWNLOAD_BASE", server.URL)
-			t.Setenv("GAUGESTONE_VERSION", tc.version)
+			t.Setenv("SAIDRAN_DOWNLOAD_BASE", server.URL)
+			t.Setenv("SAIDRAN_VERSION", tc.version)
 			t.Setenv("HOME", filepath.Join(base, "home"))
 			t.Setenv("INSTALL_DIR", installDir)
 			if tc.name == "default directory" {

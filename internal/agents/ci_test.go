@@ -26,7 +26,7 @@ func TestBuiltCIReports(t *testing.T) {
 				t.Fatal("missing transcript evidence")
 			}
 			for _, name := range []string{"report.html", "report.md", "report.json"} {
-				if _, err := os.Stat(filepath.Join(repo, ".git", "gaugestone", "ci", name)); err != nil {
+				if _, err := os.Stat(filepath.Join(repo, ".git", "saidran", "ci", name)); err != nil {
 					t.Fatal(err)
 				}
 			}

@@ -1,4 +1,4 @@
-module github.com/vincentsch/gaugestone
+module github.com/vincentsch/saidran
 
 go 1.27.2
 

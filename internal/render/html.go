@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentsch/gaugestone/internal/commands"
-	"github.com/vincentsch/gaugestone/internal/findings"
-	"github.com/vincentsch/gaugestone/internal/report"
-	"github.com/vincentsch/gaugestone/internal/session"
+	"github.com/vincentsch/saidran/internal/commands"
+	"github.com/vincentsch/saidran/internal/findings"
+	"github.com/vincentsch/saidran/internal/report"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 //go:embed report.html
@@ -120,7 +120,7 @@ func HTML(w io.Writer, r report.Report) error {
 		if ok {
 			v.DismissedCount++
 		}
-		v.FindingRows = append(v.FindingRows, findingView{Finding: f, Reason: reason, Dismissed: ok, Copy: fmt.Sprintf("gaugestone dismiss %s --reason \"…\"", f.ID)})
+		v.FindingRows = append(v.FindingRows, findingView{Finding: f, Reason: reason, Dismissed: ok, Copy: fmt.Sprintf("saidran dismiss %s --reason \"…\"", f.ID)})
 	}
 	for _, g := range groupOrder {
 		group := groupView{Label: groupLabel(g)}

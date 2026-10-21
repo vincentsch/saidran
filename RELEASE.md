@@ -1,11 +1,11 @@
-# Releasing Gaugestone
+# Releasing Saidran
 
 Release binaries include the version and commit from the source being built.
 Report generation runs offline. Installation and GitHub publication use the network.
 
 ## Before tagging
 
-1. Set the install step's `GAUGESTONE_VERSION` in action.yml to the release tag.
+1. Set the install step's `SAIDRAN_VERSION` in action.yml to the release tag.
    Update the simulation's expected release version and the Action guide's version
    examples together. The Action installs that embedded version even from a SHA
    pin or local checkout; never replace it with an implicit latest download.
@@ -27,7 +27,7 @@ Report generation runs offline. Installation and GitHub publication use the netw
 4. Run the Linux asset's `--version` and `demo` commands. Inspect all six assets and
    verify checksums.txt. Check a local fake release with `scripts/fake-release.sh`
    before testing the installer. Keep temporary release trees outside tracked source.
-5. Require native `gaugestone demo` runs on macOS and Windows before tagging.
+5. Require native `saidran demo` runs on macOS and Windows before tagging.
    Confirm the report files exist and the example shows Stale. Cross-builds alone
    do not establish native success. Windows CI runs build and vet because the current
    tests assume Unix paths; macOS CI runs the Go tests.
@@ -57,7 +57,7 @@ pinned installation in a clean environment without repository access. Run the
 installed binary's `--version` and `demo` commands. On Windows, download the matching
 `.exe`, verify its checksum and run `demo` natively.
 
-Check `go install github.com/vincentsch/gaugestone/cmd/gaugestone@latest`
+Check `go install github.com/vincentsch/saidran/cmd/saidran@latest`
 without private repository access, then run the installed binary's `--version`
 and `demo` commands.
 

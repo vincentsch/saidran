@@ -1,29 +1,29 @@
 # Commands
 
-Gaugestone checks recorded agent sessions against commands and repository changes.
+Saidran checks recorded agent sessions against commands and repository changes.
 The [command reference](reference/index.md) lists the flags and examples generated
 from the current CLI.
 
 | Command | What it does |
 | --- | --- |
-| `gaugestone check` | Prints a terminal summary and saves HTML, Markdown and JSON reports. This is the default command. |
-| `gaugestone ci` | Writes CI reports from the diff and an optional checkout-local CLI transcript. See [GitHub Action](github-action.md). |
-| `gaugestone pr` | Previews or updates a report section in the current pull request. See [pull requests](pull-requests.md). |
-| `gaugestone install claude` / `uninstall claude` | Add or remove the local Claude Stop hook; `--user` selects user settings. |
-| `gaugestone install codex` | Print an absolute-path notify entry for manual configuration. |
-| `gaugestone hook claude` / `hook codex <json>` | Handle completion payloads without blocking. See [hooks](hooks.md). |
-| `gaugestone snippet` | Print agent self-check instructions. |
-| `gaugestone sessions` | Lists sessions for the current repository. |
-| `gaugestone demo` | Checks an embedded example without needing your own agent logs. |
-| `gaugestone doctor` | Checks git, session folders and supported log formats. |
-| `gaugestone dismiss` | Records a reason for an intentional finding. |
-| `gaugestone dismissals` | Lists or removes recorded dismissals. |
+| `saidran check` | Prints a terminal summary and saves HTML, Markdown and JSON reports. This is the default command. |
+| `saidran ci` | Writes CI reports from the diff and an optional checkout-local CLI transcript. See [GitHub Action](github-action.md). |
+| `saidran pr` | Previews or updates a report section in the current pull request. See [pull requests](pull-requests.md). |
+| `saidran install claude` / `uninstall claude` | Add or remove the local Claude Stop hook; `--user` selects user settings. |
+| `saidran install codex` | Print an absolute-path notify entry for manual configuration. |
+| `saidran hook claude` / `hook codex <json>` | Handle completion payloads without blocking. See [hooks](hooks.md). |
+| `saidran snippet` | Print agent self-check instructions. |
+| `saidran sessions` | Lists sessions for the current repository. |
+| `saidran demo` | Checks an embedded example without needing your own agent logs. |
+| `saidran doctor` | Checks git, session folders and supported log formats. |
+| `saidran dismiss` | Records a reason for an intentional finding. |
+| `saidran dismissals` | Lists or removes recorded dismissals. |
 
 ## Choose the comparison
 
 For `check` and local `ci`, the default baseline is the merge base of HEAD
 with `origin/HEAD`, then `origin/main`, then `origin/master`, in that order.
-Without those refs, Gaugestone falls back to HEAD for uncommitted changes only.
+Without those refs, Saidran falls back to HEAD for uncommitted changes only.
 The report states the baseline and why it was chosen. `--base <revision>`
 compares directly against the supplied revision.
 
@@ -36,11 +36,11 @@ supplies the PR base SHA for a direct comparison with checkout's merge ref.
 | Command | Output flags and behavior |
 | --- | --- |
 | `check` | `--format text\|json\|markdown\|html` chooses stdout; `--json` aliases `--format json`. `--out <directory>` selects the saved-report directory. `--no-write` prints only; `--open` opens saved HTML. `--dry-run` previews writes without creating report paths. |
-| `ci` | Supports the same `--format`, `--json`, `--out` and `--dry-run` flags. It has neither `--no-write` nor `--open`. Its default output directory is `<git dir>/gaugestone/ci/`. |
+| `ci` | Supports the same `--format`, `--json`, `--out` and `--dry-run` flags. It has neither `--no-write` nor `--open`. Its default output directory is `<git dir>/saidran/ci/`. |
 | `pr` | `--dry-run` previews without editing. `--json` returns the section, URL and status. It saves no local reports and has no `--out`, `--no-write` or `--open`. See [PR output and confirmation](pull-requests.md#preview-and-publish). |
 
 Without `--out`, `check` saves all three report files under
-`<git dir>/gaugestone/<agent>-<full-session-id>/`. `--no-write` and `--dry-run`
+`<git dir>/saidran/<agent>-<full-session-id>/`. `--no-write` and `--dry-run`
 create no local report files. JSON stdout does not include the HTML path.
 See the [quickstart](quickstart.md#open-the-report) for locating it.
 Other commands' supported output flags appear in the [command reference](reference/index.md).
@@ -51,7 +51,7 @@ Reports normally exit 0 even when evidence needs attention. For `check` and
 `ci`, `--fail-on` takes comma-separated verdicts or active finding codes:
 
 ```sh
-gaugestone --fail-on stale,contradicted,test_skipped
+saidran --fail-on stale,contradicted,test_skipped
 ```
 
 A match requests exit 10 after reporting. Dismissed findings stay visible but

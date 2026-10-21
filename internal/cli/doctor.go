@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/gitstate"
-	"github.com/vincentsch/gaugestone/internal/redact"
-	"github.com/vincentsch/gaugestone/internal/session"
 	"github.com/vincentsch/rungrad"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/gitstate"
+	"github.com/vincentsch/saidran/internal/redact"
+	"github.com/vincentsch/saidran/internal/session"
 )
 
 type logHealth struct {
@@ -34,7 +34,7 @@ type health struct {
 }
 
 func addDoctor(app *rungrad.App, opts Options, r redact.Redactor) {
-	app.AddCommand(&rungrad.Command{Use: "doctor", Short: "Check Git and agent log availability", Long: "Show log roots, session counts and newest observed agent format versions.\nDiagnostics use metadata only and never print private session messages.", Examples: []string{"gaugestone doctor", "gaugestone doctor --json"}, Related: []string{"gaugestone sessions", "gaugestone check"}, Args: cobra.NoArgs, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
+	app.AddCommand(&rungrad.Command{Use: "doctor", Short: "Check Git and agent log availability", Long: "Show log roots, session counts and newest observed agent format versions.\nDiagnostics use metadata only and never print private session messages.", Examples: []string{"saidran doctor", "saidran doctor --json"}, Related: []string{"saidran sessions", "saidran check"}, Args: cobra.NoArgs, OutputModes: []string{rungrad.OutputModeHuman, rungrad.OutputModeJSON}, Run: func(f *rungrad.Factory, cmd *cobra.Command, args []string) error {
 		root, err := gitstate.Root(opts.Dir)
 		if err != nil {
 			return err
@@ -85,7 +85,7 @@ func addDoctor(app *rungrad.App, opts Options, r redact.Redactor) {
 					h.Fix = "Update Codex and record a new session; older logs lack completed-item events."
 				}
 			case h.UnsupportedEntries > 0:
-				h.Fix = "Update Gaugestone to read newer log entries; check report completeness notes."
+				h.Fix = "Update Saidran to read newer log entries; check report completeness notes."
 			case !h.Found:
 				location := "the agent's configuration folder"
 				if agent == "opencode" {
@@ -98,7 +98,7 @@ func addDoctor(app *rungrad.App, opts Options, r redact.Redactor) {
 			case h.Sessions == 0:
 				h.Fix = "Record a session inside this repository, or check " + env + "."
 			default:
-				h.Fix = "No change needed. Use gaugestone sessions to select a recording."
+				h.Fix = "No change needed. Use saidran sessions to select a recording."
 			}
 			result.Logs = append(result.Logs, h)
 		}

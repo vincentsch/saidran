@@ -11,14 +11,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vincentsch/gaugestone/internal/agents"
-	"github.com/vincentsch/gaugestone/internal/report"
+	"github.com/vincentsch/saidran/internal/agents"
+	"github.com/vincentsch/saidran/internal/report"
 )
 
 func buildBinary(t *testing.T) string {
 	t.Helper()
-	binary := filepath.Join(t.TempDir(), "gaugestone")
-	cmd := exec.Command("go", "build", "-o", binary, "../../cmd/gaugestone")
+	binary := filepath.Join(t.TempDir(), "saidran")
+	cmd := exec.Command("go", "build", "-o", binary, "../../cmd/saidran")
 	if b, e := cmd.CombinedOutput(); e != nil {
 		t.Fatalf("build: %s %v", b, e)
 	}
@@ -103,7 +103,7 @@ func TestRecordedReports(t *testing.T) {
 					}
 				}
 
-				if r.Type != "gaugestone.report/v1" || r.Session == nil || r.Session.ID != s.ID || r.Repo.Baseline.Ref != "HEAD" || r.Repo.Baseline.Reason != "uncommitted changes only" || len(r.Commands) == 0 || len(r.Ledger) == 0 {
+				if r.Type != "saidran.report/v1" || r.Session == nil || r.Session.ID != s.ID || r.Repo.Baseline.Ref != "HEAD" || r.Repo.Baseline.Reason != "uncommitted changes only" || len(r.Commands) == 0 || len(r.Ledger) == 0 {
 					t.Fatalf("report facts: %+v", r)
 				}
 				if r.Repo.Baseline.Commit != r.Repo.Head || len(r.Repo.Head) != 40 {
@@ -139,7 +139,7 @@ func TestRecordedReports(t *testing.T) {
 					t.Fatal(r.Findings)
 				}
 			}
-			if _, e = os.Stat(filepath.Join(repo, ".git", "gaugestone")); !os.IsNotExist(e) {
+			if _, e = os.Stat(filepath.Join(repo, ".git", "saidran")); !os.IsNotExist(e) {
 				t.Fatal("no-write created report storage", e)
 			}
 			outDir := filepath.Join(base, "reports")
@@ -231,7 +231,7 @@ func TestFullSessionReportPaths(t *testing.T) {
 		}
 		r := decodeReport(t, out)
 		ids[r.Session.ID] = true
-		saved, e := os.ReadFile(filepath.Join(repo, ".git", "gaugestone", "codex-"+r.Session.ID, "report.json"))
+		saved, e := os.ReadFile(filepath.Join(repo, ".git", "saidran", "codex-"+r.Session.ID, "report.json"))
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -242,7 +242,7 @@ func TestFullSessionReportPaths(t *testing.T) {
 	if len(ids) != 2 {
 		t.Fatal(ids)
 	}
-	entries, e := os.ReadDir(filepath.Join(repo, ".git", "gaugestone"))
+	entries, e := os.ReadDir(filepath.Join(repo, ".git", "saidran"))
 	if e != nil || len(entries) != 2 {
 		t.Fatal(entries, e)
 	}

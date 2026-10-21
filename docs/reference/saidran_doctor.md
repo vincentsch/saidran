@@ -1,18 +1,18 @@
-# gaugestone doctor
+# saidran doctor
 
 Check Git and agent log availability
 
 ## Usage
 
 ```
-gaugestone doctor
+saidran doctor
 ```
 
 ## Examples
 
 ```
-gaugestone doctor
-gaugestone doctor --json
+saidran doctor
+saidran doctor --json
 ```
 
 ## Output modes
@@ -21,5 +21,5 @@ human, json
 
 ## Related commands
 
-- gaugestone sessions
-- gaugestone check
+- saidran sessions
+- saidran check
