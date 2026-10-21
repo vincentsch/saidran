@@ -5,8 +5,8 @@ Gaugestone does not decide whether the change is justified.
 
 | Code | What changed |
 | --- | --- |
-| `test_skipped` | A recognized test skip was added. |
-| `test_deleted` | A recognized test was removed. |
+| `test_skipped` | A recognized skip or focus marker was added. |
+| `test_deleted` | A test file was deleted. |
 | `test_command_changed` | The package test command changed; old and new values are shown. |
 | `check_disabled` | A recognized lint or type-check suppression was added. |
 | `ci_ignores_failure` | A recognized CI setting or command began ignoring failures. |
@@ -14,7 +14,9 @@ Gaugestone does not decide whether the change is justified.
 The report shows the path, line and evidence. The baseline determines which
 diff is inspected. These are pattern checks for supported syntax, not a full
 language analysis or a judgment about test quality. See the fixtures for
-examples such as `claude-skip`.
+examples such as `claude-skip`. Skip findings include focus markers like
+`test.only` and `describe.only`. Deleting a test function from a retained file
+is not detected; `test_deleted` covers deleted test files and excludes renames.
 
 Record an intentional reason with `gaugestone dismiss <id> --reason "..."`.
 The reason is stored under the worktree's Git directory and appears in later

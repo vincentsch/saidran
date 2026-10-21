@@ -62,7 +62,17 @@ timing. Without it, the transcript supplies both. Codex hooks write reports
 silently, including on malformed input or failure. Run an explicit
 `gaugestone --session codex:<id>` to diagnose missing reports.
 
-Hooks and self-checks serve different purposes. A hook reports after completion.
-`gaugestone snippet` asks the agent to inspect checks and later edits before
-claiming success, including when no claims have been extracted yet. Add its
-text to AGENTS.md or CLAUDE.md if you want that behavior.
+## Ask the agent to check before finishing
+
+A hook writes reports after completion. A self-check asks the agent to read
+its evidence before claiming success. Print the instructions with:
+
+```sh
+gaugestone snippet
+```
+
+Add the printed text to AGENTS.md or CLAUDE.md if you want that behavior.
+It tells the agent to select its current session, inspect recorded results
+and later edits, and rerun stale or failed checks. This applies even when no
+claims have been extracted yet. Unknown results stay unknown; the agent must
+say what it could not check. Never change tests to improve a report.

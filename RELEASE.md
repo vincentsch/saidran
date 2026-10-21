@@ -57,6 +57,10 @@ pinned installation in a clean environment without repository access. Run the
 installed binary's `--version` and `demo` commands. On Windows, download the matching
 `.exe`, verify its checksum and run `demo` natively.
 
+Check `go install github.com/vincentsch/gaugestone/cmd/gaugestone@latest`
+without private repository access, then run the installed binary's `--version`
+and `demo` commands.
+
 Run the README's agent prompt from the public source with each documented agent.
 Confirm its install and first report work without private files. Public install
 and public agent-prompt checks happen after publication; record those results then.
