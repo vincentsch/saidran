@@ -1,9 +1,9 @@
 # Reports after an agent finishes
 
-Hooks read completion payloads and the existing log readers supply execution
-facts. They write HTML, Markdown and JSON reports under the worktree's Git
-directory. Both handlers exit 0, never block completion and never request
-another turn. They make no network calls.
+A hook writes a report when your agent finishes. It reads that session's log
+and saves HTML, Markdown and JSON under the worktree's Git directory.
+Both handlers exit 0 even if reporting fails. They never block completion or
+request another turn. They make no network calls.
 
 ## Claude Code
 
@@ -13,7 +13,7 @@ saidran install claude
 saidran uninstall claude
 ```
 
-Project scope is the default. It merges a Stop command into
+By default, installation adds a Stop command to
 `.claude/settings.local.json` and adds `/.claude/settings.local.json` to the
 repository-local `info/exclude` when needed. It does not edit `.gitignore` or
 shared `.claude/settings.json`. If local settings are tracked, untrack them
@@ -26,8 +26,8 @@ hooks are kept. Invalid JSON fails without overwriting it. Repeat installation
 does not rewrite settings or create backups. Dry-run writes nothing.
 Restart Claude after changing hooks.
 
-The command uses `os.Executable`, quoted as an absolute path, so the binary's
-folder does not need to be on PATH. Uninstall also recognizes an old absolute
+The hook uses the installed binary's absolute path, so its folder does not
+need to be on PATH. Uninstall also recognizes an old absolute
 path ending in `saidran` or `saidran.exe`, followed by exactly
 `hook claude`. Commands with extra arguments are preserved. Reinstall after
 moving the binary: uninstall first, then install from the new location.
@@ -48,8 +48,8 @@ saidran install codex
 ```
 
 Copy the printed `notify = ["/absolute/path/to/saidran", "hook", "codex"]`
-into your user `config.toml`. The printed executable comes from
-`os.Executable` and is escaped for TOML. Saidran never edits the file.
+into your user `config.toml`. The path points to the binary you ran and is
+escaped for TOML. Saidran never edits the file.
 If you already have a notifier, configure a wrapper that calls both commands
 and forwards the JSON argument unchanged. To uninstall, remove this notify
 entry or its call in your wrapper. Keep your other notifier.

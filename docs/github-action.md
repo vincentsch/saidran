@@ -1,11 +1,12 @@
 # Reports in GitHub Actions
 
-The Saidran composite Action runs on Linux and macOS hosted runners. It installs
-a checksum-verified release, writes HTML, Markdown and JSON locally, appends the
-Markdown to the job summary, uploads the HTML artifact, then creates or updates one
-`github-actions[bot]` PR comment marked `<!-- saidran -->`. The Action never
-invokes an agent or model. Direct Windows binary use remains supported; the Unix
-installer and this Action do not support Windows runners.
+The Saidran Action writes a report during a GitHub Actions job. It runs on
+Linux and macOS hosted runners. It verifies the release checksum and saves
+HTML, Markdown and JSON reports locally. The Markdown appears in the job
+summary; the HTML is uploaded as an artifact. It also creates or updates one
+`github-actions[bot]` PR comment marked `<!-- saidran -->`.
+The Action never invokes an agent or model. You can run the binary directly
+on Windows, but this Action and the Unix installer do not support Windows runners.
 
 Both the Action and local `saidran ci` need a repository with at least one
 commit. Immediately after `git init`, review and stage your files and make the

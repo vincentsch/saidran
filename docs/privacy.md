@@ -4,12 +4,12 @@ Report generation reads local logs and Git state. It makes no network calls,
 uses no models and needs no account. Installation downloads release assets;
 `saidran pr` uses GitHub CLI to read or update a pull request.
 
-Reports contain command evidence and output tails, changed paths, claims and
-shortened prompts. Findings also include bounded excerpts of triggering diff
-lines, redacted before shortening. Reports never include full transcripts or
-complete source files. Output tails keep the last 40 lines per command.
-Common token shapes, secret assignments and home
-directory paths pass through redaction in every format. JSON retains complete
+Reports show recorded checks and changed paths. They include the agent's
+claims and shortened prompts. Command output keeps the last 40 lines per command.
+Findings include short excerpts from the diff. These are redacted before they
+are shortened. Reports never include full transcripts or complete source files.
+Saidran redacts common token shapes and secret assignments in every format.
+It also redacts home directory paths. JSON retains complete
 timestamps and commit identities.
 
 Redaction is not a secret scanner. Unusual credentials and sensitive project
@@ -23,6 +23,6 @@ backups stay under the Git directory. User-scope settings backups stay beside
 the user settings file. Delete report folders and obsolete backups locally
 when you no longer need them.
 
-Local logs can be edited. A report summarizes recorded tests, builds, linters
-and type checks; it cannot certify logs or establish whether a bug is fixed.
+Local logs can be edited. A report summarizes recorded checks.
+It cannot authenticate logs or confirm that a bug is fixed.
 Unknown or missing evidence stays unknown.

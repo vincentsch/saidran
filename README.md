@@ -1,16 +1,16 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/media/wordmark-dark.svg">
-    <img src="docs/media/wordmark-light.svg" alt="Saidran, a checked square beside the name" width="238">
+    <img src="docs/media/wordmark-light.svg" alt="Saidran" width="238">
   </picture>
 </p>
 
 **See what your coding agent checked, and what changed afterwards.**
 
 Saidran reads your coding agent's local session log and Git changes. It
-compares claims about tests, builds, linters and type checks with recorded
-runs. If code changed after a passing test, the report shows it. It also
-points out skipped tests and disabled checks in the diff.
+compares claims about tests and builds with recorded runs. It also checks
+claims about linters and type checks. If code changed after a passing test,
+the report shows it. It flags skipped tests and disabled checks in the diff.
 
 [Website](https://www.saidran.com) · [Quickstart](docs/quickstart.md) · [FAQ](docs/faq.md) ·
 [Commands](docs/commands.md) · [AGENTS.md](AGENTS.md) ·
@@ -51,9 +51,9 @@ The bundled Claude Code recording has a passing test followed by an edit.
 It produces a Stale verdict and leaves an example repository in a temporary
 folder. You can remove that folder afterwards.
 
-![Light HTML demo report showing a Stale test claim and the later edit](docs/media/demo-html.png)
+[![The demo's Stale claim, with the passing test and later edit](docs/media/demo-claim.png)](docs/media/demo-html.png)
 
-![Terminal output from the same demo, with passing test and later edit times](docs/media/demo-terminal.png)
+[Full HTML report](docs/media/demo-html.png) · [Terminal output](docs/media/demo-terminal.png)
 
 ## Check your repository
 
@@ -65,8 +65,8 @@ before checking changes:
 saidran
 ```
 
-Confirm the report names the session you intended to check. Saidran prints
-command results, claims and changes, then saves HTML, Markdown and JSON reports.
+Confirm the report names the session you intended to check. Saidran shows the
+recorded checks and later changes. It saves HTML, Markdown and JSON reports.
 The terminal prints the HTML path. See the [first-check instructions](docs/quickstart.md#check-your-repository)
 for session selection, missing logs and opening the saved report.
 
@@ -74,15 +74,15 @@ for session selection, missing logs and opening the saved report.
 
 | Verdict | What the evidence says |
 | --- | --- |
-| Verified | A matching check passed with sufficient coverage and no later relevant edits. |
+| Verified | A matching check covered the claim and passed. No relevant files changed afterwards. |
 | Stale | A matching check passed, then relevant files changed. Run it again. |
-| Contradicted | A matching failure remains unresolved in the claimed scope. |
-| Partial | A run succeeded but covered less than the claim, only listed tests, or found none. |
+| Contradicted | A matching check failed, and no later passing run covers that failure. |
+| Partial | The run succeeded but covered less than the claim. It may have only listed tests or found none. |
 | No matching run | No supporting run was found in the selected log. |
-| Can't tell | A result, runner or scope is unknown, or edits overlapped the check. |
+| Can't tell | There isn't enough reliable evidence to judge the check. |
 
-A report checks recorded execution. It cannot establish bug correctness or
-certify editable local logs. An empty claim list still has commands and edits
+A report can't confirm that a bug is fixed or authenticate local logs.
+An empty claim list still has commands and edits
 worth reading. Files changed after the session ended are marked separately.
 See [verdict examples](docs/verdicts.md) and the [FAQ](docs/faq.md).
 

@@ -1,7 +1,8 @@
 # What a verdict means
 
-Verdicts compare a claim in the final response with recorded execution and
-edits before that response. They cover tests, builds, linters and type checks.
+Verdicts compare a claim in the final response with recorded checks and
+edits before that response. They cover tests and builds, as well as linters
+and type checks.
 They cannot say whether a bug was fixed. Session logs can be edited.
 
 | Verdict | What happened | What to do |
@@ -23,10 +24,14 @@ Unknown runners, uncertain edits and missing results stay unknown. Edits during
 a check prevent Verified. Documentation-only edits do not make checks stale.
 The report preserves complete timestamps and commit identities in JSON.
 
+## When no claims appear
+
 An empty claim list means the selected final response contained no recognized
 claims. Inspect the command results and later edits anyway. New progress text
 can replace an earlier claim without changing the execution history. Changes
 after the recorded session end are marked separately and are not covered.
+
+## How commands and directories match
 
 Every quoted command gets its own claim. For example, in
 “`go test ./other` passed; `go test ./calc` passed” or “`go test ./other` and
@@ -43,9 +48,12 @@ so they give Partial for explicit recursive assertions.
 
 Quoted TypeScript commands must match the same project configuration. Relative
 `-p` and `--project` paths are resolved against each run's working directory
-and the session directory for claims. Omitting the selector matches only
-another omitted selector in the same directory. Generic prose keeps its usual
-coverage rules; Saidran does not discover configuration inheritance.
+and the session directory for claims. Without `-p` or `--project`, a claim
+only matches a run from the same directory that also omits those flags.
+Claims that don't quote a command follow the usual coverage rules.
+Saidran does not discover configuration inheritance.
+
+## Go results and package coverage
 
 Go text and JSON output retain package counts and no-tests results. A run
 where all packages have no tests gives Partial. Unreadable or incomplete Go
@@ -53,9 +61,12 @@ JSON without completion evidence gives Can't tell even with a recorded exit 0.
 A later passing package rerun can resolve an identified earlier package failure,
 while still giving Partial for a broader suite assertion.
 
+## Edits made by shell commands
+
 Recognized shell writes include `cp` destinations, `eslint --fix`,
 `ruff check --fix` and `git apply`. Known relevant writes after a passing
-check make it Stale; unresolved patch or fix destinations give Can't tell.
+check make it Stale. If Saidran cannot tell which files a patch or fix changed,
+it gives Can't tell.
 Read-only lint and `git apply --check` create no edit evidence. Explicit
 `--apply` re-enables patch writing even alongside `--check` or `--stat`. A fresh check
 after the write can provide current evidence. Recorded commands are never run,

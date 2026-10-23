@@ -4,13 +4,13 @@
 
 Verified means a matching recorded check passed with sufficient coverage and
 no later relevant edits. A test may miss the bug or assert the wrong behavior.
-Saidran does not inspect test quality or establish bug correctness.
+Saidran does not judge test quality or confirm that a bug is fixed.
 See the [verdict guide](verdicts.md) for coverage rules and examples.
 
 ## Why are there no claims?
 
-The selected final response may contain no recognized claim about tests,
-builds, linters or type checks. New progress text can replace an earlier claim
+The selected final response may contain no recognized claim about checks.
+New progress text can replace an earlier claim
 without changing the recorded commands. Read command results and later edits
 before deciding what needs a rerun. An empty claim list is not a clean result.
 A [diff-only CI report](github-action.md#run-the-command-locally) has no session
@@ -18,9 +18,10 @@ or claims because no transcript was supplied.
 
 ## Why is a result unknown or missing?
 
-An incomplete log may omit an exit result. An unknown runner or scope, a pipe
-with no reliable test summary, or edits during a check can prevent a verdict
-of Verified. “Can't tell” means the evidence is uncertain. “No matching run”
+An incomplete log may omit a command's result. Saidran may not recognize the
+test runner or know which files it covered. Edits during a check can also
+prevent Verified, as can a pipe with no reliable test summary.
+“Can't tell” means the evidence is uncertain. “No matching run”
 means no supporting run was found in that log; it does not prove none happened.
 Check the selected session using the [quickstart](quickstart.md#check-your-repository),
 then read the [verdicts](verdicts.md) and [agent format limits](agents.md).
