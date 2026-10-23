@@ -123,3 +123,5 @@ files; PR publication uses GitHub. Read the [privacy guide](docs/privacy.md).
 The [command reference](docs/reference/index.md) lists all flags and examples.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for builds and checks.
 Saidran is available under the [MIT license](LICENSE).
+
+Built with [rungrad](https://rungrad.com).

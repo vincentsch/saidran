@@ -24,6 +24,8 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go test ./...
+      - name: Native demo smoke check
+        run: python3 scripts/smoke-demo.py
   windows:
     runs-on: windows-latest
     steps:
@@ -33,3 +35,5 @@ jobs:
           go-version-file: go.mod
       - run: go build ./...
       - run: go vet ./...
+      - name: Native demo smoke check
+        run: python3 scripts/smoke-demo.py

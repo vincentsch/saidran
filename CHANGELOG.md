@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## Unreleased
+
+## 0.1.0 - 2026-10-23
 
 Saidran reads Claude Code, Codex, OpenCode and Pi sessions and checks what
 the coding agent claimed against recorded commands and repository changes.
