@@ -71,14 +71,14 @@ Published [saidran v0.1.0](https://github.com/vincentsch/saidran/releases/tag/v0
 from `248f823ec97f1912a60f74febc3532d12f2e6c56`. The [release workflow](https://github.com/vincentsch/saidran/actions/runs/39947454548)
 passed Linux, macOS and Windows CI before the publishing job started. The release
 contains six platform executables and `checksums.txt`. All six downloaded SHA-256
-hashes matched. All six GitHub build attestations verified with `gh attestation
-verify`, the release workflow identity, tag ref and source digest pinned, and
+hashes matched. All six GitHub build attestations verified with `gh attestation verify`, the release workflow identity, tag ref and source digest pinned, and
 `--deny-self-hosted-runners`.
 
 On Linux amd64, latest and pinned (`v0.1.0`) public installers succeeded in fresh
 temporary folders. The installed CLI's version and bundled demo were checked.
 `go install github.com/vincentsch/saidran/cmd/saidran@v0.1.0` succeeded with an
-initially empty module cache, the public Go proxy and checksum database. The
+initially empty module cache, the public Go proxy and checksum database. A separate
+empty-cache `go install` with `@latest` also resolved v0.1.0 successfully. The
 README agent prompt and `AGENTS.md` were fetched anonymously from GitHub and
 matched the published source. Fetching the prompt does not establish a trial
 with every supported coding agent.
