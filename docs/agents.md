@@ -21,8 +21,8 @@ saidran --session opencode:ses_example
 saidran --session pi:01a15b72
 ```
 
-Full IDs and unique ID prefixes work. Agent prefixes disambiguate IDs shared by
-different agents; `claude-code:<id>` also works. Automatic selection uses the
+You can use a full ID or a unique prefix. Add the agent name when different
+agents share the same ID; `claude-code:<id>` also works. Automatic selection uses the
 most recent session with commands or edits that ended within seven days. When
 two different agents finish less than ten minutes apart, interactive use asks
 which to select; noninteractive use picks the newest and explains the choice.
@@ -44,9 +44,9 @@ saidran --transcript /path/to/storage/session/project/session.json
 saidran --transcript /path/to/pi-session.jsonl
 ```
 
-Saidran detects the agent from the content. OpenCode's session file supplies
-the working directory and version; tool parts supply command times, output and
-`state.metadata.exit`. Pending tools and results without an exit remain unknown.
+Saidran detects the agent from the file's content. OpenCode's session file gives
+the working directory and version. Tool parts contain command times and output,
+with exit codes in `state.metadata.exit`. Pending tools and results without an exit remain unknown.
 OpenCode child sessions are not merged.
 
 Pi calls and results are paired by tool-call ID. A completed built-in bash
@@ -60,8 +60,7 @@ the Pi CLI version, so doctor reports the CLI version as not recorded.
 Older Codex logs without completed-item events and unsupported OpenCode or Pi
 formats produce an error, with instructions to record a supported session. They
 cannot supply Verified evidence. Unknown entries and incomplete recordings are
-reported through completeness notes. All reports apply the same redaction and
-verdict rules regardless of agent.
+reported through completeness notes. The same redaction and verdict rules apply to all four agents.
 
 Claude Stop and Codex notify integrations select the payload's exact transcript
 or full thread ID. See [hooks](hooks.md) for installation and final-message

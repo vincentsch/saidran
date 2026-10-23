@@ -7,10 +7,10 @@
 
 **See what your coding agent checked, and what changed afterwards.**
 
-Saidran reads your coding agent's local session log and Git changes. It
-compares claims about tests and builds with recorded runs. It also checks
-claims about linters and type checks. If code changed after a passing test,
-the report shows it. It flags skipped tests and disabled checks in the diff.
+Saidran compares your coding agent's claims about tests and builds with its
+local session log. It also checks claims about linters and type checks.
+When code changes after a passing check, the report shows what needs a rerun.
+It flags skipped tests and disabled checks in the Git diff.
 
 [Website](https://www.saidran.com) · [Quickstart](docs/quickstart.md) · [FAQ](docs/faq.md) ·
 [Commands](docs/commands.md) · [AGENTS.md](AGENTS.md) ·
@@ -39,7 +39,8 @@ bash /tmp/saidran-install.sh
 ```
 
 The installer verifies SHA-256 checksums and prints the absolute binary path.
-Release binaries need Git. If the install folder is not on PATH, use the installer's printed absolute path for the commands below.
+Release binaries need Git. If the install folder is not on PATH, use the
+installer's printed absolute path for the commands below.
 See the [quickstart](docs/quickstart.md#install) for Windows, Go installation
 and installer overrides.
 
@@ -47,9 +48,9 @@ and installer overrides.
 saidran demo
 ```
 
-The bundled Claude Code recording has a passing test followed by an edit.
-It produces a Stale verdict and leaves an example repository in a temporary
-folder. You can remove that folder afterwards.
+The demo checks a bundled Claude Code recording. A test passed, then the agent
+edited the code. That gives the claim a Stale verdict. The example repository
+stays in a temporary folder, which you can remove afterwards.
 
 [![The demo's Stale claim, with the passing test and later edit](docs/media/demo-claim.png)](docs/media/demo-html.png)
 
@@ -66,7 +67,8 @@ saidran
 ```
 
 Confirm the report names the session you intended to check. Saidran shows the
-recorded checks and later changes. It saves HTML, Markdown and JSON reports.
+recorded checks and later changes. It saves an HTML report alongside Markdown
+and JSON versions.
 The terminal prints the HTML path. See the [first-check instructions](docs/quickstart.md#check-your-repository)
 for session selection, missing logs and opening the saved report.
 
@@ -82,14 +84,19 @@ for session selection, missing logs and opening the saved report.
 | Can't tell | There isn't enough reliable evidence to judge the check. |
 
 A report can't confirm that a bug is fixed or authenticate local logs.
-An empty claim list still has commands and edits
-worth reading. Files changed after the session ended are marked separately.
+Even when no claims appear, read the recorded commands and later edits. Files changed after the session ended are marked separately.
 See [verdict examples](docs/verdicts.md) and the [FAQ](docs/faq.md).
 
 ## Supported agents
 
-Saidran reads Claude Code, Codex, OpenCode and Pi recordings. The
-[version table and log guide](docs/agents.md) list tested versions and limits.
+Saidran reads recordings from these agents:
+
+- Claude Code
+- Codex
+- OpenCode
+- Pi
+
+The [version table and log guide](docs/agents.md) list tested versions and limits.
 It never runs the agents or executes commands from their logs.
 
 ## Use it with your agent or in CI

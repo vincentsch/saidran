@@ -1,8 +1,8 @@
 # Install Saidran and check a session
 
-Release binaries need Git. They do not need Go, Node or an agent installation
-to read existing logs. Report generation runs locally without network or model
-calls. Installation downloads release files.
+Release binaries need Git. They do not need Go or Node. You can read existing
+logs without installing the agent. Reports are made locally without network or
+model calls. Installation downloads release files.
 
 ## Install
 
@@ -17,8 +17,15 @@ The installer verifies SHA-256 checksums and defaults to `~/.local/bin`.
 It prints `Installed: /absolute/path/to/saidran`. Keep that path: if the
 folder is not on PATH, use the absolute binary path for the commands below.
 
-Set `INSTALL_DIR` to choose another folder, `SAIDRAN_VERSION` to pin a
-release, or `SAIDRAN_DOWNLOAD_BASE` to use a release mirror. For example:
+You can change the install settings with environment variables:
+
+| Variable | What it changes |
+| --- | --- |
+| `INSTALL_DIR` | Folder for the binary |
+| `SAIDRAN_VERSION` | Release to install |
+| `SAIDRAN_DOWNLOAD_BASE` | Release mirror to download from |
+
+For example:
 
 ```sh
 INSTALL_DIR="$HOME/.local/bin" SAIDRAN_VERSION=v0.1.0 bash /tmp/saidran-install.sh
@@ -77,9 +84,9 @@ committed history and does not create that commit for you:
 saidran
 ```
 
-The default picks the latest active session from the last seven days. Confirm
-the agent, session ID, repository and times belong to the conversation you
-intended. Read its command results and later edits even if no claims appear.
+By default, Saidran picks the latest active session from the last seven days.
+Check its session ID and repository. The agent name and times should also match
+the conversation you intended. Read its command results and later edits even if no claims appear.
 When different agents finished less than ten minutes apart, interactive use
 asks which one to read. Scripts pick the newest and explain the choice.
 
@@ -106,8 +113,9 @@ Saidran never runs the agent or executes commands from its log.
 
 ## Open the report
 
-A successful check saves `report.html`, `report.md` and `report.json` under
-`<git dir>/saidran/<agent>-<full-session-id>/`. Get the absolute Git directory
+A successful check saves reports under
+`<git dir>/saidran/<agent>-<full-session-id>/`. The HTML file is `report.html`;
+Markdown and JSON versions are saved as `report.md` and `report.json`. Get the absolute Git directory
 with `git rev-parse --absolute-git-dir`; linked worktrees have separate reports.
 The terminal prints the saved HTML path. Open that file in your browser, or run:
 
@@ -118,8 +126,8 @@ saidran --open
 Use the same explicit session flag again if you selected one earlier.
 JSON stdout does not include the HTML path. Use the report's `session.agent`
 and full `session.id` with the directory pattern above, and verify the file
-exists. [Output flags](commands.md#choose-the-output) explain alternate formats,
-custom directories and previews without writes.
+exists. [Output flags](commands.md#choose-the-output) let you choose another format or
+folder. They also support previews without saving files.
 
 [Verdicts](verdicts.md) explain coverage and later edits. The [FAQ](faq.md)
 explains missing claims and unknown results. Reports summarize editable logs;

@@ -1,9 +1,9 @@
 # What a verdict means
 
-Verdicts compare a claim in the final response with recorded checks and
-edits before that response. They cover tests and builds, as well as linters
-and type checks.
-They cannot say whether a bug was fixed. Session logs can be edited.
+A verdict shows whether recorded checks support a claim in the agent's final
+response. Saidran looks at tests and builds, as well as linters and type checks.
+It includes edits made before that response. It cannot say whether a bug was
+fixed. Session logs can be edited.
 
 | Verdict | What happened | What to do |
 | --- | --- | --- |
@@ -19,23 +19,26 @@ The Verified, Stale and Contradicted rows match the `codex-verified`,
 the others are [synthetic examples](../testdata/synthetic/README.md).
 `saidran demo` shows the Stale example without needing agent history.
 
-A targeted passing rerun cannot erase an unresolved failure outside its coverage.
-Unknown runners, uncertain edits and missing results stay unknown. Edits during
-a check prevent Verified. Documentation-only edits do not make checks stale.
-The report preserves complete timestamps and commit identities in JSON.
+If tests in `other` still fail, a passing run in `calc` does not clear that
+failure. Edits during a check prevent Verified. Documentation-only edits do not
+make checks stale.
+
+Saidran leaves a result unknown if it cannot recognize the runner or tell what
+changed. Missing results also stay unknown. JSON reports keep complete timestamps
+and commit identities.
 
 ## When no claims appear
 
-An empty claim list means the selected final response contained no recognized
-claims. Inspect the command results and later edits anyway. New progress text
-can replace an earlier claim without changing the execution history. Changes
-after the recorded session end are marked separately and are not covered.
+If no claims appear, Saidran found none it recognizes in the selected final
+response. Read the command results and later edits anyway. A newer progress
+message can replace an earlier claim while the recorded commands stay the same.
+Changes after the session ended are marked separately and fall outside its checks.
 
 ## How commands and directories match
 
 Every quoted command gets its own claim. For example, in
 “`go test ./other` passed; `go test ./calc` passed” or “`go test ./other` and
-`go test ./calc` passed”, the calc run cannot verify the other package.
+`go test ./calc` passed”, a run in `calc` cannot verify tests in `other`.
 “All tests pass, but I did not run lint” keeps the test assertion and a
 separate admitted lint gap.
 
@@ -44,7 +47,7 @@ Generic suite claims use the session's starting directory. Running
 tests pass”; a session starting in calc can verify that claim within calc.
 A quoted `go test ./...` assertion describes that command at its recorded
 working directory. Bare `go build` and `go vet` cover the current package,
-so they give Partial for explicit recursive assertions.
+so they give Partial if the claim says all packages were checked.
 
 Quoted TypeScript commands must match the same project configuration. Relative
 `-p` and `--project` paths are resolved against each run's working directory
@@ -69,5 +72,5 @@ check make it Stale. If Saidran cannot tell which files a patch or fix changed,
 it gives Can't tell.
 Read-only lint and `git apply --check` create no edit evidence. Explicit
 `--apply` re-enables patch writing even alongside `--check` or `--stat`. A fresh check
-after the write can provide current evidence. Recorded commands are never run,
-and current patch contents are never used to infer historical targets.
+after the write can provide current evidence. Saidran never runs recorded commands. It does not use a patch's current contents
+to guess which files an earlier run changed.

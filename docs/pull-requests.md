@@ -2,8 +2,8 @@
 
 `saidran pr` adds a report section to the current branch's pull request.
 Install [GitHub CLI](https://cli.github.com/) and run `gh auth login` first.
-The command reads local session evidence, then uses `gh` to read or update the PR.
-It never executes recorded commands or writes local report files or directories.
+The command reads your local session log, then uses `gh` to read or update the PR.
+It never runs recorded commands. It creates no local report files or directories.
 
 ## Preview and publish
 
@@ -30,8 +30,8 @@ saidran pr --dry-run --json
 saidran pr --confirm --json
 ```
 
-Reports summarize local logs and Git changes. Logs can be edited, and a report
-is not a certificate. Check the preview before sharing it. Redaction masks common
+Reports summarize local logs and Git changes. Saidran cannot tell whether
+someone changed the log. Check the preview before sharing it. Redaction masks common
 tokens and home paths, but it is not a secret scanner. Run `saidran check`
 locally to obtain full HTML/JSON evidence within privacy limits.
 
@@ -48,8 +48,8 @@ and forks whose `origin/main` differs from the target repository. Saidran
 never fetches implicitly. If that commit is missing locally, fetch the PR target
 repository's base branch and try again.
 
-`--base <revision>` overrides that default and compares directly against the
-given revision, just as `saidran check --base` does.
+`--base <revision>` compares directly against the given revision, as
+`saidran check --base` does.
 
 ## Keep the rest of the description
 
@@ -70,12 +70,12 @@ which is removed afterwards.
 
 ## Description size and errors
 
-The complete PR body is capped at 65,536 UTF-8 bytes. The renderer gets the space
-left after preserved text, markers and separators, up to 60,000 bytes. It removes
+The complete PR body is capped at 65,536 UTF-8 bytes. Your text and the comment
+markers count toward that limit, including their separating newlines. Saidran
+uses up to 60,000 bytes of the remaining space for the report. It removes
 command details first, shortens long fields next, then summarizes overflowing
 lists. It keeps verdict totals, completeness counts, the local-log disclaimer,
-footer and omission notices. Escaping and shortening preserve balanced markup
-and UTF-8 text.
+footer and omission notices. Shortened reports keep valid markup and UTF-8 text.
 
 A 64,000-byte description can fit if the shortened summary fits in the remaining
 space. If even the shortest summary cannot fit, shorten the existing description

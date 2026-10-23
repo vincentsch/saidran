@@ -1,7 +1,8 @@
 # Reports after an agent finishes
 
 A hook writes a report when your agent finishes. It reads that session's log
-and saves HTML, Markdown and JSON under the worktree's Git directory.
+and saves an HTML report under the worktree's Git directory. Markdown and JSON
+versions are saved alongside it.
 Both handlers exit 0 even if reporting fails. They never block completion or
 request another turn. They make no network calls.
 
@@ -22,7 +23,7 @@ before installation. Backups of changed existing settings go under
 
 `--user` selects `${CLAUDE_CONFIG_DIR:-~/.claude}/settings.json`; backups go
 beside it. Use the same scope to uninstall. Existing unrelated settings and
-hooks are kept. Invalid JSON fails without overwriting it. Repeat installation
+hooks are kept. Invalid JSON fails without overwriting it. Installing again
 does not rewrite settings or create backups. Dry-run writes nothing.
 Restart Claude after changing hooks.
 
@@ -72,7 +73,7 @@ saidran snippet
 ```
 
 Add the printed text to AGENTS.md or CLAUDE.md if you want that behavior.
-It tells the agent to select its current session, inspect recorded results
-and later edits, and rerun stale or failed checks. This applies even when no
+The instructions tell the agent to check its current session. It reads recorded
+results and later edits, then reruns stale or failed checks. This applies even when no
 claims have been extracted yet. Unknown results stay unknown; the agent must
 say what it could not check. Never change tests to improve a report.

@@ -6,7 +6,7 @@ from the current CLI.
 
 | Command | What it does |
 | --- | --- |
-| `saidran check` | Prints a terminal summary and saves HTML, Markdown and JSON reports. This is the default command. |
+| `saidran check` | Prints a terminal summary. Saves an HTML report alongside Markdown and JSON versions. This is the default command. |
 | `saidran ci` | Writes CI reports from the diff and an optional checkout-local CLI transcript. See [GitHub Action](github-action.md). |
 | `saidran pr` | Previews or updates a report section in the current pull request. See [pull requests](pull-requests.md). |
 | `saidran install claude` / `uninstall claude` | Add or remove the local Claude Stop hook; `--user` selects user settings. |
@@ -66,5 +66,5 @@ do not trigger the policy. See [findings](findings.md) for local dismissals.
 | 5 | No repository, session or current PR; also a foreign session rejected by `ci`. |
 | 10 | A requested `--fail-on` policy matched. |
 
-Start with the [quickstart](quickstart.md), read the [verdict guide](verdicts.md),
-or use the [exit-code table](#choose-an-exit-policy) when calling from a script.
+The [quickstart](quickstart.md) walks through a first check. See the
+[verdict guide](verdicts.md) for examples of matching checks.

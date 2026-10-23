@@ -71,9 +71,9 @@ Git, curl and GitHub CLI, which the Action uses.
 ## Include a log from the same checkout
 
 A transcript must come from a supported agent CLI run earlier in the same job,
-inside this checkout. This optional example replaces the quickstart's steps.
-The caller supplies Claude CLI installation, its authentication and any permission
-setup needed for its task. `ANTHROPIC_API_KEY` below is a caller-managed repository
+inside this checkout. This example replaces the quickstart's steps. Install
+Claude CLI and set up its authentication before running it. Give it the
+permissions it needs for the task. `ANTHROPIC_API_KEY` below is a caller-managed repository
 secret; it is not needed by Saidran. Pick the model and effort explicitly.
 
 ```yaml
@@ -144,12 +144,11 @@ saidran ci --transcript /path/to/checkout-local-session.jsonl --json
 
 Without `--out`, both modes replace `report.html`, `report.md` and `report.json`
 under this worktree's absolute Git directory at `saidran/ci/`. Explicit `--out`
-writes directly into that directory. `--dry-run` creates no output paths. Shared
-`--json` and `--format text|json|markdown|html` conventions apply.
+writes directly into that directory. `--dry-run` creates no output paths. Use `--json` or `--format text|json|markdown|html` to choose what prints to stdout.
 Without a transcript no session discovery happens: JSON has `session: null` and
 empty claims. Human views say “Diff-only report” and explain the missing log.
 Changed files, findings, dismissals and evidence limits remain visible. No checks
 are verified by a diff-only report. Reports summarize editable local evidence;
 they do not certify correctness. Existing `--fail-on` values and dismissal rules
-apply. Usage errors exit 1, runtime failures 2, missing repository or foreign
-session 5, policy matches 10, and successful reports without matches 0.
+apply. Exit codes match the [command guide](commands.md#choose-an-exit-policy). A successful report
+without a policy match exits 0. A policy match exits 10 after saving the reports.

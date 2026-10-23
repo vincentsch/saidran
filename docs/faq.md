@@ -10,8 +10,8 @@ See the [verdict guide](verdicts.md) for coverage rules and examples.
 ## Why are there no claims?
 
 The selected final response may contain no recognized claim about checks.
-New progress text can replace an earlier claim
-without changing the recorded commands. Read command results and later edits
+A newer progress message can replace an earlier claim
+while the recorded commands stay the same. Read command results and later edits
 before deciding what needs a rerun. An empty claim list is not a clean result.
 A [diff-only CI report](github-action.md#run-the-command-locally) has no session
 or claims because no transcript was supplied.
@@ -28,15 +28,16 @@ then read the [verdicts](verdicts.md) and [agent format limits](agents.md).
 
 ## Can a report certify the logs?
 
-Local logs can be edited. Saidran compares their recorded execution with
-claims and Git changes, but cannot authenticate that history. Findings describe
+Local logs can be edited. Saidran compares the commands they record with
+claims and Git changes. It cannot tell whether someone changed the log. Findings describe
 patterns in the diff and may have intentional reasons. See [findings](findings.md)
 and [privacy](privacy.md) before sharing evidence.
 
 ## Does Saidran send my code or session to a service?
 
 Local report generation makes no network or model calls. Reports contain
-command evidence, output tails and shortened prompts, never full transcripts.
+recorded commands and their results. They keep the end of each command's output
+and shortened prompts. They never contain full transcripts.
 Installation downloads release files. [PR publication](pull-requests.md) uses
 GitHub CLI and requires confirmation after a preview; the [GitHub Action](github-action.md)
 can publish a report comment. Redaction can miss sensitive text and unusual
