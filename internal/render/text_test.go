@@ -60,7 +60,7 @@ func TestLineCountsAndVerdictColor(t *testing.T) {
 		var b bytes.Buffer
 		Text(&b, r, r.Session.ID, 60, mode)
 		got := b.String()
-		if !strings.Contains(got, "1 run · 1 failed · 0 result unreliable") {
+		if !strings.Contains(got, "1 run · 1 failed · 0 results unreliable") {
 			t.Fatal(got)
 		}
 		if strings.Contains(got, "\x1b[") != (mode.ANSI && mode.Color) || !strings.Contains(got, "Contradicted") {

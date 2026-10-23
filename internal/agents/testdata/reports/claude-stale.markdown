@@ -10,7 +10,7 @@ Admitted gap: As you asked, I did not run the tests again after the rename, so t
 
 Completeness: 0 unsupported entries, 0 missing exit codes.
 
-**Commands**: 2 run · 0 failed · 0 result unreliable
+**Commands**: 2 run · 0 failed · 0 results unreliable
 
 <details><summary>Checks and failed commands (1 shown)</summary>
 
@@ -26,7 +26,7 @@ Source (1):
 
 - ` calc/stats.go ` +5/−5
 
-1 changed files in total.
+1 changed file in total.
 
 **Findings** (0)
 

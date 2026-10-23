@@ -4,7 +4,7 @@ go 1.27.2
 
 require (
 	github.com/spf13/cobra v1.10.2
-	github.com/vincentsch/rungrad v0.3.2
+	github.com/vincentsch/rungrad v0.3.3
 	golang.org/x/term v0.45.0
 	mvdan.cc/sh/v3 v3.14.1
 )

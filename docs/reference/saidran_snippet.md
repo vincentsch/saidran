@@ -14,9 +14,11 @@ saidran snippet
 saidran snippet
 ```
 
-## Output modes
+## Output
 
-human, json
+Shows text you can read in your terminal.
+
+Use --json to get JSON for scripts and other programs.
 
 ## Related commands
 

@@ -72,7 +72,7 @@ func TestSyntheticEvidenceReports(t *testing.T) {
 			if code != 0 || errout != "" || !strings.Contains(out, "1 run ·") {
 				t.Fatalf("%d %s %s", code, out, errout)
 			}
-			if tc.Name == "mixed-results" && !strings.Contains(out, "1 failed · 0 result unreliable") {
+			if tc.Name == "mixed-results" && !strings.Contains(out, "1 failed · 0 results unreliable") {
 				t.Fatal(out)
 			}
 			if tc.Name == "unreliable-result" && !strings.Contains(out, "0 failed · 1 result unreliable") {

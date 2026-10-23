@@ -85,7 +85,7 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 		}
 	}
 	fmt.Fprintln(w)
-	line("Commands  ", fmt.Sprintf("%d run · %d failed · %d result unreliable", len(r.Commands), failed, unreliable))
+	line("Commands  ", fmt.Sprintf("%d run · %d failed · %s unreliable", len(r.Commands), failed, counted(unreliable, "result", "results")))
 	total := 0
 	groups := []string{}
 	for _, group := range []string{"source", "tests", "config", "ci", "lockfiles", "docs", "other"} {
@@ -148,7 +148,7 @@ func Text(w io.Writer, r report.Report, displayID string, width int, mode output
 		line("Note  ", note)
 	}
 	if r.Completeness.Unsupported > 0 || r.Completeness.MissingExits > 0 {
-		line("Incomplete evidence  ", fmt.Sprintf("%d unsupported entries, %d missing exit codes.", r.Completeness.Unsupported, r.Completeness.MissingExits))
+		line("Incomplete evidence  ", incompleteEvidence(r))
 	}
 }
 func wrap(w io.Writer, prefix, text string, width int) {

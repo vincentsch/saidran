@@ -15,9 +15,9 @@ saidran hook claude
 saidran hook codex '{"thread-id":"session-id","cwd":"/repo"}'
 ```
 
-## Changes state
+## Preview changes
 
-This command changes state and honors `--dry-run`.
+This command makes changes. Use `--dry-run` to see what would change without changing anything.
 
 ## Related commands
 

@@ -20,7 +20,7 @@ var htmlSource string
 var htmlTemplate = template.Must(template.New("report").Funcs(template.FuncMap{
 	"agentLabel": session.AgentLabel, "label": func(v string) string { return labels[v] }, "clock": clock, "stamp": stamp, "join": strings.Join,
 	"preview": func(s string) string { return shorten(s, 200) }, "side": side,
-	"quote": quoteView, "folder": filepath.Base, "shortCommit": shortCommit, "duration": htmlDuration,
+	"quote": quoteView, "folder": filepath.Base, "shortCommit": shortCommit, "duration": htmlDuration, "counted": counted,
 }).Parse(htmlSource))
 
 type commandView struct {

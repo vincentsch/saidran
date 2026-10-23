@@ -60,7 +60,7 @@ func verdictTotals(r report.Report) string {
 	return strings.Join(totals, " · ")
 }
 func completeness(r report.Report) string {
-	return fmt.Sprintf("Completeness: %d unsupported entries, %d missing exit codes.", r.Completeness.Unsupported, r.Completeness.MissingExits)
+	return "Completeness: " + incompleteEvidence(r)
 }
 func dismissal(r report.Report, id string) (string, bool) {
 	for _, d := range r.Dismissals {
@@ -69,4 +69,16 @@ func dismissal(r report.Report, id string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func counted(n int, singular, plural string) string {
+	if n == 1 {
+		return fmt.Sprintf("%d %s", n, singular)
+	}
+	return fmt.Sprintf("%d %s", n, plural)
+}
+
+func incompleteEvidence(r report.Report) string {
+	return counted(r.Completeness.Unsupported, "unsupported entry", "unsupported entries") + ", " +
+		counted(r.Completeness.MissingExits, "missing exit code", "missing exit codes") + "."
 }

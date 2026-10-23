@@ -112,9 +112,9 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 	}
 	text := func(s string) string { return mdText(s, cap) }
 	code := func(s string) string { return mdCode(s, cap) }
-	omitted := func(count int, what string) {
+	omitted := func(count int, singular, plural string) {
 		if count > 0 {
-			fmt.Fprintf(&b, "\n%d %s omitted. %s\n", count, what, notice)
+			fmt.Fprintf(&b, "\n%s omitted. %s\n", counted(count, singular, plural), notice)
 		}
 	}
 	if r.Session == nil {
@@ -147,16 +147,16 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 			b.WriteString("\nClaims: none found in the agent's final message.\n")
 		}
 	}
-	omitted(len(r.Claims)-min(lists, len(r.Claims)), "claims")
+	omitted(len(r.Claims)-min(lists, len(r.Claims)), "claim", "claims")
 	for _, g := range r.AdmittedGaps[:min(lists, len(r.AdmittedGaps))] {
 		fmt.Fprintf(&b, "\nAdmitted gap: %s\n", text(g.Quote))
 	}
-	omitted(len(r.AdmittedGaps)-min(lists, len(r.AdmittedGaps)), "admitted gaps")
+	omitted(len(r.AdmittedGaps)-min(lists, len(r.AdmittedGaps)), "admitted gap", "admitted gaps")
 	fmt.Fprintf(&b, "\n%s\n", completeness(r))
 	for _, note := range r.Completeness.Notes[:min(lists, len(r.Completeness.Notes))] {
 		fmt.Fprintf(&b, "\n%s\n", text(note))
 	}
-	omitted(len(r.Completeness.Notes)-min(lists, len(r.Completeness.Notes)), "completeness notes")
+	omitted(len(r.Completeness.Notes)-min(lists, len(r.Completeness.Notes)), "completeness note", "completeness notes")
 	failed, unknown := 0, 0
 	for _, c := range r.Commands {
 		f, u := commandResult(c)
@@ -167,14 +167,14 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 			unknown++
 		}
 	}
-	fmt.Fprintf(&b, "\n**Commands**: %d run · %d failed · %d result unreliable\n\n<details><summary>Checks and failed commands (%d shown)</summary>\n\n", len(r.Commands), failed, unknown, n)
+	fmt.Fprintf(&b, "\n**Commands**: %d run · %d failed · %s unreliable\n\n<details><summary>Checks and failed commands (%d shown)</summary>\n\n", len(r.Commands), failed, counted(unknown, "result", "results"), n)
 	b.WriteString("| Time | Command | Exit / result |\n| --- | --- | --- |\n")
 	for _, c := range selected[:n] {
 		row := commandRow(c, r)
 		fmt.Fprintf(&b, "| %s | %s | %s |\n", row.Time, code(row.Line), text(row.Exit))
 	}
 	b.WriteString("\n</details>\n")
-	omitted(len(selected)-n, "check or failed command lines")
+	omitted(len(selected)-n, "check or failed command line", "check or failed command lines")
 	b.WriteString("\n**Changes**\n")
 	total := 0
 	for _, g := range groupOrder {
@@ -191,9 +191,9 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 			}
 			b.WriteByte('\n')
 		}
-		omitted(len(files)-min(lists, len(files)), g+" files")
+		omitted(len(files)-min(lists, len(files)), g+" file", g+" files")
 	}
-	fmt.Fprintf(&b, "\n%d changed files in total.\n\n**Findings** (%d)\n\n", total, len(r.Findings))
+	fmt.Fprintf(&b, "\n%s in total.\n\n**Findings** (%d)\n\n", counted(total, "changed file", "changed files"), len(r.Findings))
 	for _, f := range r.Findings[:min(lists, len(r.Findings))] {
 		reason, dismissed := dismissal(r, f.ID)
 		if dismissed {
@@ -214,7 +214,7 @@ func markdownDocument(r report.Report, selected []commands.Command, n, cap, list
 			b.WriteString("\n</details>\n\n")
 		}
 	}
-	omitted(len(r.Findings)-min(lists, len(r.Findings)), "findings")
+	omitted(len(r.Findings)-min(lists, len(r.Findings)), "finding", "findings")
 	fmt.Fprintf(&b, "\nSaidran %s · generated %s", text(r.Version), stamp(r.Generated))
 	if r.Session != nil {
 		fmt.Fprintf(&b, " · %s session %s", text(session.AgentLabel(r.Session.Agent)), code(r.Session.ID))

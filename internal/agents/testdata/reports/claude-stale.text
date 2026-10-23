@@ -7,6 +7,6 @@ Claims
                  Run go test ./... again.
 Gap  As you asked, I did not run the tests again after the rename, so the renamed code is untested.
 
-Commands  2 run · 0 failed · 0 result unreliable
+Commands  2 run · 0 failed · 0 results unreliable
 Changes   1 file · 1 source
 Findings  0

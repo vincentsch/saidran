@@ -432,7 +432,7 @@ footer {
         <div class="tile">
           <h3>Commands</h3>
           <strong>{{len .Commands}} run</strong>
-          <p>{{.Failed}} failed · {{.Unreliable}} result unreliable</p>
+          <p>{{.Failed}} failed · {{counted .Unreliable "result" "results"}} unreliable</p>
         </div>
         <div class="tile">
           <h3>Changes</h3>
@@ -480,7 +480,7 @@ footer {
           <button data-filter="checks" aria-pressed="false">Checks only</button>
           <button data-filter="failed" aria-pressed="false">Failed</button>
         </div>
-        <p id="command-count" class="muted" aria-live="polite">{{len .Rows}} command lines shown</p>
+        <p id="command-count" class="muted" aria-live="polite">{{counted (len .Rows) "command line" "command lines"}} shown</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -619,7 +619,7 @@ footer {
       document.querySelectorAll('[data-filter]').forEach(b => {
         b.setAttribute('aria-pressed', String(b === button));
       });
-      document.querySelector('#command-count').textContent = count + ' command lines shown';
+      document.querySelector('#command-count').textContent = count + (count === 1 ? ' command line shown' : ' command lines shown');
     });
   });
   document.querySelectorAll('[data-copy]').forEach(button => {

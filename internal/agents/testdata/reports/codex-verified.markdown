@@ -8,7 +8,7 @@
 
 Completeness: 0 unsupported entries, 0 missing exit codes.
 
-**Commands**: 5 run · 1 failed · 0 result unreliable
+**Commands**: 5 run · 1 failed · 0 results unreliable
 
 <details><summary>Checks and failed commands (2 shown)</summary>
 
@@ -25,7 +25,7 @@ Source (1):
 
 - ` calc/stats.go ` +3/−3
 
-1 changed files in total.
+1 changed file in total.
 
 **Findings** (0)
 

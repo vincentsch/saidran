@@ -14,6 +14,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/vincentsch/rungrad/output"
 	"github.com/vincentsch/saidran/internal/claims"
 	"github.com/vincentsch/saidran/internal/commands"
 	"github.com/vincentsch/saidran/internal/findings"
@@ -22,6 +23,55 @@ import (
 	"github.com/vincentsch/saidran/internal/report"
 	"github.com/vincentsch/saidran/internal/session"
 )
+
+func TestReportCountsUseSingularOnlyForOne(t *testing.T) {
+	for _, n := range []int{0, 1, 2} {
+		t.Run(fmt.Sprint(n), func(t *testing.T) {
+			r := documentReport()
+			r.Groups["source"] = make([]gitstate.File, n)
+			r.Commands = make([]commands.Command, n)
+			for i := range r.Commands {
+				r.Commands[i] = commands.Analyze(&session.Command{Line: "go test ./...", Shell: true})
+			}
+			r.Completeness.Unsupported = n
+			r.Completeness.MissingExits = n
+			h, m := documents(t, r)
+			var text bytes.Buffer
+			Text(&text, r, "example", 100, output.TerminalMode{})
+			file, entry, exit, result, line := "files", "entries", "codes", "results", "lines"
+			if n == 1 {
+				file, entry, exit, result, line = "file", "entry", "code", "result", "line"
+			}
+			if want := fmt.Sprintf("%d changed %s in total.", n, file); !strings.Contains(m, want) {
+				t.Fatalf("Markdown missing %q: %s", want, m)
+			}
+			if want := fmt.Sprintf("%d command %s shown", n, line); !strings.Contains(h, want) {
+				t.Errorf("HTML missing %q", want)
+			}
+			for format, rendered := range map[string]string{"HTML": h, "Markdown": m, "text": text.String()} {
+				if want := fmt.Sprintf("%d %s unreliable", n, result); !strings.Contains(rendered, want) {
+					t.Errorf("%s missing %q", format, want)
+				}
+				want := fmt.Sprintf("%d unsupported %s, %d missing exit %s.", n, entry, n, exit)
+				if n == 0 && format == "text" {
+					continue // The terminal omits a zero-count incompleteness notice.
+				}
+				if !strings.Contains(rendered, want) {
+					t.Errorf("%s missing %q", format, want)
+				}
+			}
+		})
+	}
+}
+
+func TestMarkdownOmissionUsesSingular(t *testing.T) {
+	r := documentReport()
+	r.Claims = r.Claims[:1]
+	m := markdownDocument(r, nil, 0, 0, 0, false)
+	if !strings.Contains(m, "1 claim omitted.") || strings.Contains(m, "1 claims omitted.") {
+		t.Fatalf("wrong omitted claim count: %s", m)
+	}
+}
 
 func documentReport() report.Report {
 	now := time.Date(2026, 10, 20, 18, 0, 0, 0, time.UTC)
@@ -195,7 +245,7 @@ func TestMarkdownNotesAndCheckSelection(t *testing.T) {
 	// A formatter before the check must not hide that original command line.
 	r.Commands = append(r.Commands, commands.Analyze(&session.Command{Line: "echo hello", Shell: true}))
 	_, m := documents(t, r)
-	for _, text := range []string{"none found in the agent&#39;s final message", "I couldn&#39;t run the tests.", "2 unsupported entries, 1 missing exit codes", "incomplete final line", "gofmt -w . && go test", "changed after the session ended", disclaimer} {
+	for _, text := range []string{"none found in the agent&#39;s final message", "I couldn&#39;t run the tests.", "2 unsupported entries, 1 missing exit code", "incomplete final line", "gofmt -w . && go test", "changed after the session ended", disclaimer} {
 		if text == "none found in the agent&#39;s final message" {
 			text = "none found in the agent's final message"
 		}
