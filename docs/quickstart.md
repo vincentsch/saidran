@@ -1,5 +1,10 @@
 # Install Saidran and check a session
 
+Saidran is a free tool for people who write code with AI assistants like
+Claude Code or Codex. You run it in your terminal to compare the assistant's
+claims about tests with recorded results. Its report shows which checks need
+to run again after code changes.
+
 Release binaries need Git. They do not need Go or Node. You can read existing
 logs without installing the agent. Reports are made locally without network or
 model calls. Installation downloads release files.

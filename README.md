@@ -5,11 +5,12 @@
   </picture>
 </p>
 
-**See what your coding agent checked, and what changed afterwards.**
+Saidran is a free tool for people who write code with AI assistants like
+Claude Code or Codex. You run it in your terminal to compare the assistant's
+claims about tests with recorded results. Its report shows which checks need
+to run again after code changes.
 
-Saidran compares your coding agent's claims about tests and builds with its
-local session log. It also checks claims about linters and type checks.
-When code changes after a passing check, the report shows what needs a rerun.
+It also checks claims about builds and tools that look for code errors.
 It flags skipped tests and disabled checks in the Git diff.
 
 [Website](https://www.saidran.com) · [Quickstart](docs/quickstart.md) · [FAQ](docs/faq.md) ·
