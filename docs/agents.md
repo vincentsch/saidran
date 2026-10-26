@@ -1,7 +1,12 @@
 # Supported coding agents
 
-Saidran reads local recordings from four coding agents. It never runs the
-agents or sends their transcripts over the network.
+Saidran is a free, open-source CLI for developers who use coding agents. It
+reads the session logs of Claude Code, Codex, OpenCode and Pi and checks what
+the agent claimed about tests, builds, linters and type checks against the
+recorded runs and your Git changes. This page lists the tested versions, where
+each agent keeps its logs and what each log format can and cannot tell
+Saidran. Saidran never runs the agents and never sends their transcripts over
+the network.
 
 | Agent | Recorded version | Default log root | Override | Session reference |
 | --- | --- | --- | --- | --- |
@@ -10,10 +15,11 @@ agents or sends their transcripts over the network.
 | OpenCode | 1.1.4 | `~/.local/share/opencode/storage` | `XDG_DATA_HOME` (parent of `opencode`) | `opencode:<id>` |
 | Pi | 0.85.1 (journal version 3) | `~/.pi/agent/sessions` | `PI_CODING_AGENT_DIR` (parent of `sessions`) | `pi:<id>` |
 
-Run `saidran sessions` inside a Git repository to see its recordings, and
-`saidran doctor` to see all four roots, counts and format diagnostics. A
-recording belongs to the repository when its recorded working directory is the
-repository root or a directory inside it. Symlinked log roots work too.
+Run `saidran sessions` inside a Git repository to list its recordings.
+`saidran doctor` shows all four log roots with their session counts and format
+diagnostics. A recording belongs to a repository when its recorded working
+directory is the repository root or a folder inside it. A log root behind a
+symlink also works.
 
 ```sh
 saidran sessions
@@ -21,14 +27,14 @@ saidran --session opencode:ses_example
 saidran --session pi:01a15b72
 ```
 
-You can use a full ID or a unique prefix. Add the agent name when different
-agents share the same ID; `claude-code:<id>` also works. Automatic selection uses the
-most recent session with commands or edits that ended within seven days. When
-two different agents finish less than ten minutes apart, interactive use asks
-which to select; noninteractive use picks the newest and explains the choice.
-Explicit transcripts bypass the seven-day limit.
+Use the full ID or a unique prefix of it. Add the agent name when two agents
+share an ID; `claude-code:<id>` also works. The automatic pick is the newest
+session with commands or edits that ended in the last seven days. When two
+different agents finished less than ten minutes apart, Saidran asks you which
+one to read. In a script it picks the newest one and says so. An explicit
+transcript is not limited to the last seven days.
 
-For OpenCode, keep the complete storage layout:
+For OpenCode, keep the whole storage layout together:
 
 ```text
 storage/
@@ -37,31 +43,37 @@ storage/
   part/<message-id>/*.json
 ```
 
-Pass the session JSON, rather than a message, part or exported stream:
+Pass the session JSON. A message file, a part file or an exported stream does
+not work:
 
 ```sh
 saidran --transcript /path/to/storage/session/project/session.json
 saidran --transcript /path/to/pi-session.jsonl
 ```
 
-Saidran detects the agent from the file's content. OpenCode's session file gives
-the working directory and version. Tool parts contain command times and output,
-with exit codes in `state.metadata.exit`. Pending tools and results without an exit remain unknown.
-OpenCode child sessions are not merged.
+Saidran detects the agent from the content of the file. OpenCode's session
+file gives the working directory and the version. Its tool parts hold the
+command times and output, with the exit code in `state.metadata.exit`. A tool
+that is still pending, or a result without an exit code, stays unknown. OpenCode
+child sessions are not merged.
 
-Pi calls and results are paired by tool-call ID. A completed built-in bash
-result with `isError: false` supplies exit 0, even without `details`. On an
-error, only an appended `Command exited with code N` trailer supplies a nonzero
-exit. Successful output containing that text is ordinary output. Aborted,
-timed-out and missing results remain unknown. Pi's `details` describes output
-truncation, not exit status. Its journal records the format version, rather than
-the Pi CLI version, so doctor reports the CLI version as not recorded.
+For Pi, Saidran pairs each tool call with its result by the tool-call ID. A
+completed built-in bash result with `isError: false` counts as exit 0, even
+without `details`. On an error, only the appended `Command exited with code N`
+trailer gives Saidran a nonzero exit; the same text inside successful output is
+ordinary output. Aborted, timed-out and missing results stay unknown. Pi's
+`details` field describes output truncation, not the exit status. Pi's journal
+records the journal format version and not the CLI version, so doctor reports
+the CLI version as not recorded.
 
-Older Codex logs without completed-item events and unsupported OpenCode or Pi
-formats produce an error, with instructions to record a supported session. They
-cannot supply Verified evidence. Unknown entries and incomplete recordings are
-reported through completeness notes. The same redaction and verdict rules apply to all four agents.
+Older Codex logs without completed-item events, and OpenCode or Pi formats
+Saidran does not support, produce an error that tells you how to record a
+supported session. Such logs cannot give Verified evidence. Entries Saidran
+does not understand, and recordings that end mid-line, show up in the
+completeness notes. Redaction and the verdict rules are the same for all four
+agents.
 
-Claude Stop and Codex notify integrations select the payload's exact transcript
-or full thread ID. See [hooks](hooks.md) for installation and final-message
-overrides. OpenCode and Pi use manual reports or the self-check snippet.
+The Claude Stop hook and the Codex notify hook read the exact transcript path
+or the full thread ID from the hook payload. See [hooks](hooks.md) for
+installing them and for the final-message override. For OpenCode and Pi, run a
+report by hand or use the self-check snippet.

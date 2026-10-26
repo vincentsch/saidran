@@ -1,10 +1,16 @@
 # Reports after an agent finishes
 
-A hook writes a report when your agent finishes. It reads that session's log
-and saves an HTML report under the worktree's Git directory. Markdown and JSON
-versions are saved alongside it.
-Both handlers exit 0 even if reporting fails. They never block completion or
-request another turn. They make no network calls.
+Saidran is a free, open-source CLI for developers who use coding agents like
+Claude Code or Codex. It checks what the agent claimed about tests, builds,
+linters and type checks against the session log and your Git changes. This
+page shows how to get a report automatically after each session, and how to
+make the agent check itself before it answers.
+
+A hook writes a report when the agent finishes. It reads the log of that
+session and saves an HTML report under the Git directory of the worktree, with
+Markdown and JSON versions next to it. Both hook handlers exit 0 even when the
+report fails. They never block the agent, never ask for another turn and make
+no network calls.
 
 ## Claude Code
 
@@ -14,33 +20,35 @@ saidran install claude
 saidran uninstall claude
 ```
 
-By default, installation adds a Stop command to
-`.claude/settings.local.json` and adds `/.claude/settings.local.json` to the
-repository-local `info/exclude` when needed. It does not edit `.gitignore` or
-shared `.claude/settings.json`. If local settings are tracked, untrack them
-before installation. Backups of changed existing settings go under
+By default the install adds a Stop command to `.claude/settings.local.json`
+and, if needed, adds `/.claude/settings.local.json` to the repository's
+`info/exclude`. It does not touch `.gitignore` or the shared
+`.claude/settings.json`. If the local settings file is tracked in Git, untrack
+it before you install. When an existing settings file changes, a backup goes to
 `<git dir>/saidran/settings-*.bak`.
 
-`--user` selects `${CLAUDE_CONFIG_DIR:-~/.claude}/settings.json`; backups go
-beside it. Use the same scope to uninstall. Existing unrelated settings and
-hooks are kept. Invalid JSON fails without overwriting it. Installing again
-does not rewrite settings or create backups. Dry-run writes nothing.
-Restart Claude after changing hooks.
+`--user` installs into `${CLAUDE_CONFIG_DIR:-~/.claude}/settings.json`
+instead, with the backup next to it. Uninstall with the same scope. Other
+settings and hooks in the file stay as they are. Invalid JSON is an error, and
+the file is not overwritten. Installing a second time changes nothing and
+makes no backup. `--dry-run` writes nothing. Restart Claude Code after you
+change hooks.
 
-The hook uses the installed binary's absolute path, so its folder does not
-need to be on PATH. Uninstall also recognizes an old absolute
-path ending in `saidran` or `saidran.exe`, followed by exactly
-`hook claude`. Commands with extra arguments are preserved. Reinstall after
-moving the binary: uninstall first, then install from the new location.
+The hook calls the binary by its absolute path, so its folder does not need to
+be on PATH. Uninstall also recognizes an older absolute path that ends in
+`saidran` or `saidran.exe`, followed by `hook claude` and nothing else. A
+command with extra arguments is left alone. If you move the binary, uninstall first and
+then install again from the new location.
 
-The [Claude Stop contract](https://code.claude.com/docs/en/hooks#stop) supplies
-`transcript_path`, `cwd` and optionally `last_assistant_message` on stdin.
-Saidran reads that exact transcript. A supplied final message uses the hook
-start time; without it, the transcript's final response and time remain.
-It returns `{"systemMessage":"Saidran: ... Report: ..."}` on success.
-Reporting errors return an explanatory message without a success path.
-Outside a Git repository, or with a transcript from another repository,
-it exits silently. Malformed input returns an explanation and exit 0.
+The [Claude Stop hook](https://code.claude.com/docs/en/hooks#stop) sends
+`transcript_path`, `cwd` and, optionally, `last_assistant_message` on stdin.
+Saidran reads that transcript and no other. If the payload has a final message,
+Saidran uses it together with the start time of the hook. Otherwise it takes
+the final response and its time from the transcript. On success the hook
+returns `{"systemMessage":"Saidran: ... Report: ..."}`. If the report fails,
+the message explains why and has no report path. Outside a Git repository, or
+with a transcript that belongs to another repository, the hook exits silently.
+On malformed input it returns an explanation and exits 0.
 
 ## Codex
 
@@ -49,31 +57,33 @@ saidran install codex
 ```
 
 Copy the printed `notify = ["/absolute/path/to/saidran", "hook", "codex"]`
-into your user `config.toml`. The path points to the binary you ran and is
-escaped for TOML. Saidran never edits the file.
-If you already have a notifier, configure a wrapper that calls both commands
-and forwards the JSON argument unchanged. To uninstall, remove this notify
-entry or its call in your wrapper. Keep your other notifier.
+into your user `config.toml`. The path is the binary you ran, escaped for
+TOML. Saidran never edits that file. If you already have a notifier, write a
+wrapper that calls both and passes the JSON argument through unchanged. To
+uninstall, remove the notify entry or the call in your wrapper, and keep your
+other notifier.
 
-The [Codex notify setting](https://developers.openai.com/codex/config-reference/)
-passes a JSON argument. `thread-id` must match the full Codex session ID;
-`cwd` selects the repository. Saidran never substitutes the latest session.
-Optional `last-assistant-message` replaces the final response with hook-start
-timing. Without it, the transcript supplies both. Codex hooks write reports
-silently, including on malformed input or failure. Run an explicit
-`saidran --session codex:<id>` to diagnose missing reports.
+Codex's [notify setting](https://developers.openai.com/codex/config-reference/)
+passes one JSON argument. Its `thread-id` has to be the full Codex session ID,
+and `cwd` selects the repository. Saidran never falls back to the latest
+session. An optional `last-assistant-message` replaces the final response and
+uses the start time of the hook; without it, both come from the transcript. The
+Codex hook writes its reports silently, also when the input is malformed or the
+report fails. If a report is missing, run `saidran --session codex:<id>` to see
+the error.
 
 ## Ask the agent to check before finishing
 
-A hook writes reports after completion. A self-check asks the agent to read
-its evidence before claiming success. Print the instructions with:
+A hook writes the report after the agent is done. A self-check makes the agent
+read its evidence before it claims success. Print the instructions with:
 
 ```sh
 saidran snippet
 ```
 
-Add the printed text to AGENTS.md or CLAUDE.md if you want that behavior.
-The instructions tell the agent to check its current session. It reads recorded
-results and later edits, then reruns stale or failed checks. This applies even when no
-claims have been extracted yet. Unknown results stay unknown; the agent must
-say what it could not check. Never change tests to improve a report.
+Add the printed text to AGENTS.md or CLAUDE.md. It tells the agent to run
+Saidran on its current session, read the recorded results and the edits after
+them, and rerun stale or failed checks. That applies even when the report
+lists no claims yet. Unknown results stay unknown, and the agent has to say
+what it could not check. It must never change tests to make the report look
+better.

@@ -1,96 +1,108 @@
 # Add a report to a pull request
 
-`saidran pr` adds a report section to the current branch's pull request.
+Saidran is a free, open-source CLI for developers who use coding agents like
+Claude Code or Codex. It checks what the agent claimed about tests, builds,
+linters and type checks against the session log and your Git changes.
+`saidran pr` puts that report into the description of the pull request for
+your current branch, so a reviewer sees it first.
+
 Install [GitHub CLI](https://cli.github.com/) and run `gh auth login` first.
-The command reads your local session log, then uses `gh` to read or update the PR.
-It never runs recorded commands. It creates no local report files or directories.
+The command reads your local session log and uses `gh` to read and edit the
+pull request. It never runs recorded commands, and it writes no report files
+on your machine.
 
 ## Preview and publish
 
-Preview the section without changing the PR:
+See the section without touching the pull request:
 
 ```sh
 saidran pr --dry-run
 ```
 
-Run `saidran pr` to see the final redacted section and answer the confirmation
-question. The preview includes any shortening needed to fit the description.
-Use `--confirm` to publish without the question; the preview still appears.
-`--dry-run` always takes precedence, including with `--confirm`.
-`--no-prompt` refuses publication unless you also give `--confirm`.
+`saidran pr` without `--dry-run` shows the final redacted section and asks
+whether to publish it. The preview already includes any shortening needed to
+fit the description. `--confirm` publishes without the question, and you still
+see the preview. `--dry-run` always wins, also together with `--confirm`.
+`--no-prompt` refuses to publish unless you also pass `--confirm`.
 
 For scripts, `--json` returns one document with `section`, `url` and `status`.
-The section string includes its markers. Status is `previewed` for dry-run and
-`updated` after a successful edit. JSON mode suppresses questions and requires
-`--confirm` for publication. Failed commands return the usual JSON error on
-stderr without a success document on stdout.
+The section string includes its markers. The status is `previewed` for a dry
+run and `updated` after a successful edit. JSON mode asks no questions and
+needs `--confirm` to publish. A failed command returns the usual JSON error on
+stderr and no document on stdout.
 
 ```sh
 saidran pr --dry-run --json
 saidran pr --confirm --json
 ```
 
-Reports summarize local logs and Git changes. Saidran cannot tell whether
-someone changed the log. Check the preview before sharing it. Redaction masks common
-tokens and home paths, but it is not a secret scanner. Run `saidran check`
-locally to obtain full HTML/JSON evidence within privacy limits.
+A report summarizes a local log and your Git changes. Saidran cannot tell
+whether someone edited the log. Read the preview before you share it.
+Redaction masks common tokens and home paths, but it is not a secret scanner.
+For the full HTML and JSON evidence, within the privacy limits, run
+`saidran check` on your machine.
 
 ## Choose the session and comparison
 
-Automatic session selection works like `saidran check`. Use `--session <id>`
-for a discovered session or `--transcript <file>` for an explicit recording.
-These two flags cannot be combined. All four supported agents use the same
-report model and Markdown renderer.
+The session is picked the same way as for `saidran check`. `--session <id>`
+picks a discovered session, and `--transcript <file>` an explicit recording.
+You cannot use both. All four supported agents go through the same report
+model and the same Markdown renderer.
 
-The default comparison uses the merge base of HEAD and the PR's target commit,
-reported by `gh pr view` as `baseRefOid`. This works with non-default branches
-and forks whose `origin/main` differs from the target repository. Saidran
-never fetches implicitly. If that commit is missing locally, fetch the PR target
-repository's base branch and try again.
+The default comparison is the merge base of HEAD and the target commit of the
+pull request, which `gh pr view` reports as `baseRefOid`. That works for a
+non-default target branch and for a fork whose `origin/main` differs from the
+target repository. Saidran never fetches on its own. If that commit is missing
+on your machine, fetch the base branch of the target repository and run the
+command again.
 
-`--base <revision>` compares directly against the given revision, as
-`saidran check --base` does.
+`--base <revision>` compares directly against that revision, like
+`saidran check --base`.
 
 ## Keep the rest of the description
 
-The report is wrapped in these comments:
+The report sits between these two comments:
 
 ```html
 <!-- saidran:start -->
 <!-- saidran:end -->
 ```
 
-When neither marker exists, Saidran appends the section with two separating
-newlines. One ordered pair is replaced on later runs. Text outside the marked
-section stays byte for byte unchanged, including whitespace and line endings.
-Malformed, duplicate, reversed or unbalanced markers stop the command before
-editing. Remove both markers or keep one ordered pair to repair the description.
-The complete body is passed to `gh pr edit --body-file` through a temporary file,
-which is removed afterwards.
+If the description has no markers, Saidran appends the section after two
+newlines. On later runs it replaces the text between one ordered pair of
+markers. Everything outside stays byte for byte as it was, including
+whitespace and line endings. Markers that are malformed, duplicated, reversed
+or unbalanced stop the command before it edits anything. To repair a
+description, remove both markers or leave one ordered pair. Saidran writes the
+whole body to a temporary file, passes it to `gh pr edit --body-file` and
+deletes the file afterwards.
 
 ## Description size and errors
 
-The complete PR body is capped at 65,536 UTF-8 bytes. Your text and the comment
-markers count toward that limit, including their separating newlines. Saidran
-uses up to 60,000 bytes of the remaining space for the report. It removes
-command details first, shortens long fields next, then summarizes overflowing
-lists. It keeps verdict totals, completeness counts, the local-log disclaimer,
-footer and omission notices. Shortened reports keep valid markup and UTF-8 text.
+GitHub caps the body of a pull request at 65,536 UTF-8 bytes. Your own text
+and the markers count, with the newlines between them. Saidran uses at most
+60,000 bytes of what is left for the report. If that is not enough, it drops
+the command details first, then shortens long fields, then summarizes lists
+that overflow. It keeps the verdict totals, the completeness counts, the note
+about local logs, the footer and the notices about what was left out. A
+shortened report is still valid Markdown and valid UTF-8.
 
-A 64,000-byte description can fit if the shortened summary fits in the remaining
-space. If even the shortest summary cannot fit, shorten the existing description
-and try again. Saidran exits 2 without editing the PR.
+A description of 64,000 bytes can still get a report if the shortest summary
+fits in the remaining space. If even that does not fit, Saidran exits 2
+without editing the pull request. Shorten the description and try again.
 
-Missing or unauthenticated `gh` exits 3 with a fix. No current PR exits 5.
-Usage and confirmation errors exit 1; other runtime failures exit 2.
+Missing or unauthenticated `gh` exits 3 with a hint. No current pull request
+exits 5. Usage and confirmation errors exit 1, and other runtime failures
+exit 2.
 
 ## GitHub Action
 
-The [GitHub Action](github-action.md) saves a summary and HTML artifact, then
-creates or updates its own marked bot comment. It supports diff-only reports or
-a CLI transcript recorded in the same checkout. The Action compares directly
-against the event's PR base SHA, assuming checkout's default merge ref and
-`fetch-depth: 0`; this differs from `saidran pr`'s inferred merge base.
+The [GitHub Action](github-action.md) saves the summary and the HTML artifact
+and then creates or updates its own marked bot comment. It works from the diff
+alone, or with a CLI transcript recorded in the same checkout. The Action
+compares directly against the base SHA of the pull request event and expects
+checkout's default merge ref with `fetch-depth: 0`. That differs from the
+merge base that `saidran pr` infers.
 
 ```yaml
 - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -101,9 +113,10 @@ against the event's PR base SHA, assuming checkout's default merge ref and
     fail-on: contradicted,stale,test_skipped
 ```
 
-The Action installs its embedded binary version (v0.1.0 here), including with a
-SHA pin or local checkout. It never selects the latest release implicitly.
+The Action installs the binary version embedded in it (v0.1.0 here), also with
+a SHA pin or a local checkout. It never picks the latest release on its own.
 
-Use `pull_request` with `contents: read` and `pull-requests: write`. Fork runs
-may be unable to comment; summary and artifact remain available. See the guide
-for a complete workflow, permissions and transcript restrictions.
+Use `pull_request` with `contents: read` and `pull-requests: write`. A run
+from a fork may not be able to comment, and the summary and the artifact are
+still there. The [guide](github-action.md) has a complete workflow with
+permissions and the rules for transcripts.

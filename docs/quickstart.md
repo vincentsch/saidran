@@ -1,32 +1,35 @@
 # Install Saidran and check a session
 
-Saidran is a free, open-source CLI for developers using coding agents.
-It checks test claims against session logs and later code changes.
+Saidran is a free, open-source CLI for developers who use coding agents like
+Claude Code or Codex. It reads the agent's session log and your Git changes
+and shows whether a recorded test, build, lint or type-check run backs up what
+the agent claimed. This page takes you from the install to your first report.
 
-Release binaries require Git, but no Go or Node runtime. Reading existing logs
-does not require the agent to be installed. Reports use no network or model calls.
-Installation downloads release files.
+The release binaries need Git. They need no Go or Node, and the agent itself
+does not have to be installed, because Saidran only reads the logs it left
+behind. Making a report uses no network and no model. Installing downloads the
+release files.
 
 ## Install
 
-On Linux or macOS, with amd64 or arm64:
+On Linux or macOS, amd64 or arm64:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/vincentsch/saidran/main/install.sh -o /tmp/saidran-install.sh
 bash /tmp/saidran-install.sh
 ```
 
-The installer verifies SHA-256 checksums and defaults to `~/.local/bin`.
-It prints `Installed: /absolute/path/to/saidran`. Use that absolute path if
-the install directory is not on PATH.
+The installer verifies the SHA-256 checksum and puts the binary in
+`~/.local/bin`. It prints `Installed: /absolute/path/to/saidran`. If that
+folder is not on your PATH, run Saidran by the printed path.
 
-Installer environment variables:
+These environment variables change what the installer does:
 
 | Variable | What it changes |
 | --- | --- |
-| `INSTALL_DIR` | Folder for the binary |
-| `SAIDRAN_VERSION` | Release to install |
-| `SAIDRAN_DOWNLOAD_BASE` | Release mirror to download from |
+| `INSTALL_DIR` | The folder the binary goes into |
+| `SAIDRAN_VERSION` | The release to install |
+| `SAIDRAN_DOWNLOAD_BASE` | The mirror to download from |
 
 For example:
 
@@ -36,31 +39,28 @@ INSTALL_DIR="$HOME/.local/bin" SAIDRAN_VERSION=v0.1.0 bash /tmp/saidran-install.
 
 ### Windows
 
-Download the matching `saidran-windows-amd64.exe` or
-`saidran-windows-arm64.exe` and `checksums.txt` from the same
-[release](https://github.com/vincentsch/saidran/releases).
-Before running the binary, use PowerShell to compute its checksum:
+Download `saidran-windows-amd64.exe` or `saidran-windows-arm64.exe` and
+`checksums.txt` from the [releases page](https://github.com/vincentsch/saidran/releases).
+Before you run the file, check its hash in PowerShell:
 
 ```powershell
 Get-FileHash .\saidran-windows-amd64.exe -Algorithm SHA256
 Select-String -Path .\checksums.txt -Pattern 'saidran-windows-amd64.exe'
 ```
 
-Use the arm64 filename in both commands on arm64. Compare the full hash with
-the matching entry, ignoring letter case. Stop if they differ. Rename the
-verified binary to `saidran.exe` and put it in a folder on PATH, or invoke
-its absolute path. Git must also be available on PATH.
+On arm64, use the arm64 file name in both commands. The two hashes must match,
+letter case aside. If they differ, do not run the file. Then rename the file
+to `saidran.exe` and put it in a folder on your PATH, or run it by its absolute
+path. Git also has to be on PATH.
 
 ### Install with Go
-
-Install from source with Go:
 
 ```sh
 go install github.com/vincentsch/saidran/cmd/saidran@latest
 ```
 
 The binary goes into `go env GOBIN`, or `$(go env GOPATH)/bin` when GOBIN is
-empty. Use its absolute path if that directory is not on PATH.
+empty. If that folder is not on your PATH, run Saidran by its absolute path.
 
 ## Try the bundled demo
 
@@ -68,28 +68,31 @@ empty. Use its absolute path if that directory is not on PATH.
 saidran demo
 ```
 
-The demo needs no agent history. It extracts a sanitised Claude Code recording
-and repository into a temporary folder. Its test passed before a later edit,
-which gives the claim a Stale verdict. The terminal prints the HTML report path
-and the temporary folder, which remains until you delete it.
-The [README screenshots](../README.md#install-and-try-the-demo) show this example.
+The demo needs no agent history. It unpacks a sanitized Claude Code recording
+and its small Go repository into a temporary folder and checks them. In that
+session the test passed, then the agent edited the code, so the claim gets the
+Stale verdict. The terminal prints the path of the HTML report and the path of
+the temporary folder. The folder stays until you delete it. The
+[README](../README.md#install-and-try-the-demo) has screenshots of this report.
 
 ## Check your repository
 
-Run in the Git repository your agent changed. Saidran compares against Git
-history, so the repository needs at least one commit:
+Run Saidran in the Git repository your agent worked on. It compares your
+changes with the Git history, so the repository needs at least one commit:
 
 ```sh
 saidran
 ```
 
-By default, Saidran picks the latest active session from the last seven days.
-Check its session ID and repository. The agent name and times should also match
-the conversation you intended. Read its command results and later edits even if no claims appear.
-When different agents finished less than ten minutes apart, interactive use
-asks which one to read. Scripts pick the newest and explain the choice.
+Saidran picks the newest session for this repository that ran commands or made
+edits and ended in the last seven days. Check the session ID, the agent name
+and the times in the summary against the conversation you meant. Read the
+recorded commands and the edits after them even when the report lists no
+claims. When two different agents finished less than ten minutes apart, Saidran
+asks you which one to read. In a script it takes the newest one and says so.
 
-List recordings or select one explicitly when the default is not yours:
+If the automatic pick is not the session you want, list the sessions or name
+one:
 
 ```sh
 saidran sessions
@@ -97,37 +100,39 @@ saidran --session claude:session-id
 saidran --transcript /absolute/path/to/session.jsonl
 ```
 
-Session references accept full IDs or unique prefixes. Explicit transcripts
-bypass the seven-day limit.
-Do not combine `--session` and `--transcript`. See [supported log locations](agents.md)
-and the [selection flags](reference/saidran_check.md).
-If logs are missing or unsupported, run:
+A session reference is the full ID or a unique prefix of it. An explicit
+transcript is not limited to the last seven days. `--session` and
+`--transcript` cannot be combined. The [agent guide](agents.md) lists where
+each agent keeps its logs, and the [check reference](reference/saidran_check.md)
+lists the selection flags.
+
+If Saidran finds no logs, or does not support their format, run:
 
 ```sh
 saidran doctor
 ```
 
-The [doctor reference](reference/saidran_doctor.md) explains its diagnostics.
-Saidran never runs the agent or executes commands from its log.
+The [doctor reference](reference/saidran_doctor.md) explains what it reports.
+Saidran never runs the agent and never executes commands from a log.
 
 ## Open the report
 
-A successful check saves reports under
-`<git dir>/saidran/<agent>-<full-session-id>/`. The HTML file is `report.html`;
-Markdown and JSON versions are saved as `report.md` and `report.json`. Get the absolute Git directory
-with `git rev-parse --absolute-git-dir`; linked worktrees have separate reports.
-The terminal prints the saved HTML path. Open that file in your browser, or run:
+Each check saves `report.html`, `report.md` and `report.json` under
+`<git dir>/saidran/<agent>-<full-session-id>/`. The Git directory is what
+`git rev-parse --absolute-git-dir` prints, and a linked worktree has its own.
+The terminal prints the path of the HTML file. Open it in your browser, or run:
 
 ```sh
 saidran --open
 ```
 
-Use the same explicit session flag again if you selected one earlier.
-JSON stdout does not include the HTML path. Use the report's `session.agent`
-and full `session.id` with the directory pattern above, and verify the file
-exists. [Output flags](commands.md#choose-the-output) let you choose another format or
-folder. They also support previews without saving files.
+If you selected the session with a flag, pass the same flag again. JSON output
+on stdout does not include the HTML path. Take `session.agent` and the full
+`session.id` from the report, build the path with the pattern above and check
+that the file exists. The [output flags](commands.md#choose-the-output) choose
+another format or folder, or print a report without saving it.
 
-[Verdicts](verdicts.md) explain coverage and later edits. The [FAQ](faq.md)
-explains missing claims and unknown results. Reports summarize editable logs;
-they cannot establish whether a bug is fixed.
+The [verdict guide](verdicts.md) explains coverage and later edits. The
+[FAQ](faq.md) explains missing claims and unknown results. A report summarizes
+a log that anyone could have edited, and it cannot tell you that a bug is
+fixed.

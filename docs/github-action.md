@@ -1,15 +1,23 @@
 # Reports in GitHub Actions
 
-The Saidran Action writes a report during a GitHub Actions job. It runs on
-Linux and macOS hosted runners. It verifies the release checksum and saves
-HTML, Markdown and JSON reports locally. The Markdown appears in the job
-summary; the HTML is uploaded as an artifact. It also creates or updates one
-`github-actions[bot]` PR comment marked `<!-- saidran -->`.
-The Action never invokes an agent or model. You can run the binary directly
-on Windows, but this Action and the Unix installer do not support Windows runners.
+Saidran is a free, open-source CLI for developers who use coding agents like
+Claude Code or Codex. It checks what the agent claimed about tests, builds,
+linters and type checks against the session log and the Git changes. The
+Saidran Action runs it in a GitHub Actions job: it writes the report, puts the
+Markdown into the job summary, uploads the HTML as an artifact and posts or
+updates one pull request comment. This page shows both ways to use it, from
+the diff alone and with an agent log.
 
-Both the Action and local `saidran ci` require at least one Git commit.
-An unborn branch exits 2 with guidance and writes no report.
+The Action runs on the hosted Linux and macOS runners. It verifies the
+checksum of the release binary and saves the HTML, Markdown and JSON reports in
+the job. The comment comes from `github-actions[bot]` and is marked
+`<!-- saidran -->`, so a later run updates it instead of adding another one.
+The Action never starts an agent and never calls a model. Windows runners are
+not supported by the Action or the Unix installer; on Windows you can run the
+binary directly.
+
+The Action and a local `saidran ci` both need at least one commit. On a branch
+without commits they exit 2 with a hint and write no report.
 
 ## Diff-only quickstart
 
@@ -34,45 +42,49 @@ jobs:
           fail-on: test_skipped,check_disabled,ci_ignores_failure
 ```
 
-Choose a published release, or pin the Saidran reference to its reviewed commit
-SHA. The binary version is embedded in that checkout's `action.yml`: this version
-installs **v0.1.0** from `download/v0.1.0/`, including its checksums. A SHA pin or
-local `uses: ./` uses that same embedded version; neither selects the latest
-release or builds the checkout's source. An unavailable pinned release fails
-installation without falling back. Development checkouts therefore need the
-embedded release to be available, or a matching `SAIDRAN_DOWNLOAD_BASE` mirror.
-The Action's upload dependency is pinned by SHA.
-No agent or model credentials are needed for this example.
+Use a published release, or pin the Saidran reference to a commit SHA you have
+reviewed. The version of the binary is embedded in the `action.yml` of that
+checkout: this version installs **v0.1.0** from `download/v0.1.0/`, together
+with its checksums. A SHA pin or a local `uses: ./` installs that same embedded
+version. Neither picks the latest release, and neither builds the source of the
+checkout. If the pinned release is not available, the install fails and there
+is no fallback. A development checkout therefore needs that release to exist,
+or a mirror in `SAIDRAN_DOWNLOAD_BASE`. The upload action that the Action uses
+is pinned by SHA. This example needs no agent or model credentials.
 
-The default `base` is the event's PR base SHA. Keep checkout's default merge-ref
-checkout and `fetch-depth: 0`: `--base` compares directly against that commit,
-without inferring a merge base. If you check out the head branch instead, choose
-the intended comparison commit explicitly. Saidran never fetches missing bases.
-For non-PR events supply an explicit locally available `base`; the Action skips
-comment calls and still saves the summary and artifact.
+The default `base` is the base SHA of the pull request event. Keep checkout's
+default merge ref and `fetch-depth: 0`. `--base` compares directly against
+that commit and does not look for a merge base. If you check out the head
+branch instead, set the comparison commit yourself. Saidran never fetches a
+missing base. For events other than a pull request, pass a `base` that exists
+locally. The Action then skips the comment and still saves the summary and the
+artifact.
 
-Inputs are `transcript` (optional CLI log), `base` (optional on PRs) and `fail-on`
-(optional comma-separated policy). A policy match returns exit 10 only after
-reports are written. The Action applies that status after summary, artifact and
-comment handling. A report error stops publication and cannot reuse old reports:
-every run gets a fresh output directory. Unexpected comment errors fail the Action
-after summary and artifact preservation. A forbidden comment write (HTTP 403)
-produces a warning; it does not erase a report or override a policy failure.
+The inputs are `transcript` (a CLI log, optional), `base` (optional on pull
+requests) and `fail-on` (an optional comma-separated policy). A policy match
+exits 10 only after the reports are written, and the Action applies that
+status after the summary, the artifact and the comment. If the report itself
+fails, nothing is published, and old reports are never reused because each run
+gets a fresh output folder. An unexpected error while commenting fails the
+Action after the summary and the artifact are saved. A forbidden comment
+(HTTP 403) only produces a warning. It does not remove the report and does not
+override a policy failure.
 
-The token needs `pull-requests: write` to publish the comment. Standard
-`pull_request` fork runs normally have read-only tokens; the report remains in the
-summary and artifact when GitHub forbids the comment. Do not use
-`pull_request_target` to execute fork code with a write token. Organization policy
-can further restrict permissions. Hosted Unix runners provide Bash, Python 3,
-Git, curl and GitHub CLI, which the Action uses.
+The token needs `pull-requests: write` for the comment. A normal
+`pull_request` run from a fork has a read-only token, and the report then stays
+in the summary and the artifact. Do not use `pull_request_target` to run fork
+code with a write token. Your organization's policy can restrict the
+permissions further. The Action uses Bash, Python 3, Git, curl and GitHub CLI,
+which the hosted Unix runners provide.
 
 ## Include a log from the same checkout
 
-A transcript must come from a supported agent CLI run earlier in the same job,
-inside this checkout. This example replaces the quickstart's steps. Install
-Claude CLI and set up its authentication before running it. Give it the
-permissions it needs for the task. `ANTHROPIC_API_KEY` below is a caller-managed repository
-secret; it is not needed by Saidran. Pick the model and effort explicitly.
+The transcript has to come from a supported agent CLI that ran earlier in the
+same job, inside this checkout. The example below replaces the steps of the
+quickstart. Install the Claude CLI and set up its authentication before this
+step, and give it the permissions the task needs. `ANTHROPIC_API_KEY` is a
+repository secret you manage; Saidran does not need it. Pick the model and the
+effort yourself.
 
 ```yaml
 name: Saidran with a CLI log
@@ -122,15 +134,16 @@ jobs:
           fail-on: contradicted,stale
 ```
 
-Saidran accepts Claude Code, Codex, OpenCode and Pi CLI recordings, not arbitrary
-agent output. The Claude Code GitHub Action's `execution_file` is a JSON array of
-SDK messages and is unsupported in this release; it is not the CLI JSONL log.
-Do not upload or pass a developer-machine transcript: recorded working directories
-must belong to this checkout, with existing symlinks resolved. A foreign transcript
-exits 5; broken or unsupported recordings fail instead of becoming diff-only reports.
-OpenCode takes `storage/session/<project>/<id>.json` and reads its sibling
-`storage/message/<session>/*.json` and `storage/part/<message>/*.json` trees.
-Preserve that complete layout when passing the session entry point.
+Saidran reads Claude Code, Codex, OpenCode and Pi CLI recordings, and nothing
+else. The `execution_file` of the Claude Code GitHub Action is a JSON array of
+SDK messages, not the CLI's JSONL log, and this release does not support it.
+Do not upload or pass a transcript from a developer machine: the recorded
+working directories have to belong to this checkout, with symlinks resolved. A
+transcript from another checkout exits 5. A broken or unsupported recording
+fails the run; it does not fall back to a diff-only report. For OpenCode, pass
+`storage/session/<project>/<id>.json`. Saidran reads the matching
+`storage/message/<session>/*.json` and `storage/part/<message>/*.json` next to
+it, so keep that layout intact.
 
 ## Run the command locally
 
@@ -140,13 +153,16 @@ saidran ci --base HEAD --out reports --fail-on test_skipped
 saidran ci --transcript /path/to/checkout-local-session.jsonl --json
 ```
 
-Without `--out`, both modes replace `report.html`, `report.md` and `report.json`
-under this worktree's absolute Git directory at `saidran/ci/`. Explicit `--out`
-writes directly into that directory. `--dry-run` creates no output paths. Use `--json` or `--format text|json|markdown|html` to choose what prints to stdout.
-Without a transcript no session discovery happens: JSON has `session: null` and
-empty claims. Human views say “Diff-only report” and explain the missing log.
-Changed files, findings, dismissals and evidence limits remain visible. No checks
-are verified by a diff-only report. Reports summarize editable local evidence;
-they do not certify correctness. Existing `--fail-on` values and dismissal rules
-apply. Exit codes match the [command guide](commands.md#choose-an-exit-policy). A successful report
-without a policy match exits 0. A policy match exits 10 after saving the reports.
+Without `--out`, both modes replace `report.html`, `report.md` and
+`report.json` under `saidran/ci/` in the absolute Git directory of this
+worktree. With `--out`, the files go straight into that folder. `--dry-run`
+writes nothing. `--json` or `--format text|json|markdown|html` picks what goes
+to stdout. Without a transcript, Saidran does not look for sessions: the JSON
+has `session: null` and no claims, and the text, Markdown and HTML say
+"Diff-only report" and explain that no log was given. Changed files, findings,
+dismissals and the evidence limits are still there. A diff-only report
+verifies no checks. A report summarizes local evidence that can be edited, and
+it does not certify that the code is correct. `--fail-on` values and
+dismissals work as usual. The exit codes match the
+[command guide](commands.md#choose-an-exit-policy): 0 without a policy match,
+and 10 after the reports are saved when a policy matched.

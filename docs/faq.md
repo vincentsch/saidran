@@ -1,45 +1,55 @@
 # Questions about the evidence
 
+Saidran is a free, open-source CLI for developers who use coding agents like
+Claude Code or Codex. It checks what the agent claimed about tests, builds,
+linters and type checks against the session log and your Git changes. These
+are the questions that come up when people read their first reports.
+
 ## Does Verified mean the bug is fixed?
 
-Verified means a matching recorded check passed with sufficient coverage and
-no later relevant edits. A test may miss the bug or assert the wrong behavior.
-Saidran does not judge test quality or confirm that a bug is fixed.
-See the [verdict guide](verdicts.md) for coverage rules and examples.
+No. Verified means a matching check passed with enough coverage, and no
+relevant file changed after it. The test can still miss the bug or assert the
+wrong behavior. Saidran does not judge test quality, and it does not confirm
+that a bug is fixed. The [verdict guide](verdicts.md) explains coverage with
+examples.
 
 ## Why are there no claims?
 
-The selected final response may contain no recognized claim about checks.
-A newer progress message can replace an earlier claim
-while the recorded commands stay the same. Read command results and later edits
-before deciding what needs a rerun. An empty claim list is not a clean result.
-A [diff-only CI report](github-action.md#run-the-command-locally) has no session
-or claims because no transcript was supplied.
+Saidran found no sentence about checks that it recognizes in the selected
+final response. A common reason is that the agent sent a newer progress message
+that replaced an earlier claim, while the recorded commands stayed the same.
+Read the command results and the later edits before you decide what to rerun.
+An empty claim list is not a clean result. A
+[diff-only CI report](github-action.md#run-the-command-locally) has no session
+and no claims because it was made without a transcript.
 
 ## Why is a result unknown or missing?
 
-An incomplete log may omit a command's result. Saidran may not recognize the
-test runner or know which files it covered. Edits during a check can also
-prevent Verified, as can a pipe with no reliable test summary.
-“Can't tell” means the evidence is uncertain. “No matching run”
-means no supporting run was found in that log; it does not prove none happened.
-Check the selected session using the [quickstart](quickstart.md#check-your-repository),
-then read the [verdicts](verdicts.md) and [agent format limits](agents.md).
+An incomplete log can lose a command's result. Saidran may not recognize the
+test runner, or it may not know which files the run covered. Edits during a
+check also prevent Verified, and so does a pipe that hides the test summary.
+"Can't tell" means the evidence is there but unreliable. "No matching run"
+means no supporting run was found in that log, which does not prove there was
+none. Check that you selected the right session with the
+[quickstart](quickstart.md#check-your-repository), then read the
+[verdicts](verdicts.md) and the [limits of each log format](agents.md).
 
 ## Can a report certify the logs?
 
-Local logs can be edited. Saidran compares the commands they record with
-claims and Git changes. It cannot tell whether someone changed the log. Findings describe
-patterns in the diff and may have intentional reasons. See [findings](findings.md)
-and [privacy](privacy.md) before sharing evidence.
+No. The logs are local files, and anyone can edit them. Saidran compares the
+commands they record with the claims and your Git changes. It cannot tell
+whether someone changed the log. Findings describe patterns in the diff, and a
+pattern can have a good reason. See [findings](findings.md) and
+[privacy](privacy.md) before you share evidence.
 
 ## Does Saidran send my code or session to a service?
 
-Local report generation makes no network or model calls. Reports contain
-recorded commands and their results. They keep the end of each command's output
-and shortened prompts. They never contain full transcripts.
-Installation downloads release files. [PR publication](pull-requests.md) uses
-GitHub CLI and requires confirmation after a preview; the [GitHub Action](github-action.md)
-can publish a report comment. Redaction can miss sensitive text and unusual
-credentials. Review saved reports and the exact PR preview before sharing.
-The [privacy guide](privacy.md) describes what reports contain and where they live.
+No. Making a report uses no network and no model. A report contains the
+recorded commands with the end of each command's output, plus shortened
+prompts. It never contains the full transcript. Installing downloads the
+release files. [Posting to a pull request](pull-requests.md) goes through
+GitHub CLI and asks you to confirm after a preview, and the
+[GitHub Action](github-action.md) can post a report comment. Redaction can miss
+unusual credentials and sensitive project text, so read a saved report and the
+PR preview before you share them. The [privacy guide](privacy.md) lists what
+reports contain and where they are saved.

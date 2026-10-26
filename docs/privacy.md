@@ -1,27 +1,34 @@
 # What stays local
 
-Saidran reads local logs and Git state to make a report. You do not need an
-account. Making a report uses no network or model calls. Installation downloads release assets;
-`saidran pr` uses GitHub CLI to read or update a pull request.
+Saidran is a free, open-source CLI for developers who use coding agents like
+Claude Code or Codex. It reads the agent's session log and your Git state on
+your machine and checks what the agent claimed about tests, builds, linters
+and type checks. This page says what a report contains, where it is saved and
+what leaves your machine.
 
-Reports show recorded checks and changed paths. They include the agent's
-claims and shortened prompts. Command output keeps the last 40 lines per command.
-Findings include short excerpts from the diff. Saidran redacts the excerpts before shortening them. Reports never include full transcripts or complete source files.
-Saidran redacts common token shapes and secret assignments in every format.
-It also redacts home directory paths. JSON retains complete
-timestamps and commit identities.
+You need no account. Making a report uses no network and no model. Installing
+downloads the release files, and `saidran pr` uses GitHub CLI to read and
+update a pull request.
 
-Redaction is not a secret scanner. Unusual credentials and sensitive project
-text can remain. Review the exact preview before posting it to GitHub and
-review saved reports before sharing. PR publication asks for confirmation;
-`--confirm` authorizes publication without that question.
+A report shows the recorded checks and the changed paths. It contains the
+agent's claims and shortened prompts. Of each command's output it keeps the
+last 40 lines. Findings come with short excerpts from the diff, and Saidran
+redacts an excerpt before it shortens it. A report never contains the full
+transcript or a complete source file. In every format, Saidran redacts common
+token shapes, secret assignments and home directory paths. The JSON keeps full
+timestamps and commit IDs.
 
-Reports and finding dismissals are saved under
-`<git dir>/saidran/`. Each worktree has its own folder. Claude project hooks use ignored local settings; their
-backups stay under the Git directory. User-scope settings backups stay beside
-the user settings file. Delete report folders and obsolete backups locally
-when you no longer need them.
+Redaction is not a secret scanner. An unusual credential or sensitive project
+text can get through. Read the preview before you post to GitHub, and read a
+saved report before you share it. `saidran pr` asks for confirmation before it
+publishes; `--confirm` skips that question.
 
-Local logs can be edited. A report summarizes recorded checks.
-It cannot tell whether someone changed a log or confirm that a bug is fixed.
-Unknown or missing evidence stays unknown.
+Reports and dismissed findings are saved under `<git dir>/saidran/`, and each
+worktree has its own folder. The Claude project hook lives in a local settings
+file that Git ignores, with its backups under the Git directory. The backup of
+the user settings sits next to the user settings file. Delete report folders
+and old backups when you no longer need them.
+
+The logs are local files, and anyone can edit them. A report summarizes what
+they record. It cannot tell whether someone changed a log, and it cannot
+confirm that a bug is fixed. Unknown or missing evidence stays unknown.
