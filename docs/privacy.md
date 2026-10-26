@@ -16,7 +16,7 @@ text can remain. Review the exact preview before posting it to GitHub and
 review saved reports before sharing. PR publication asks for confirmation;
 `--confirm` authorizes publication without that question.
 
-Reports and reasons you record for intentional findings are saved under
+Reports and finding dismissals are saved under
 `<git dir>/saidran/`. Each worktree has its own folder. Claude project hooks use ignored local settings; their
 backups stay under the Git directory. User-scope settings backups stay beside
 the user settings file. Delete report folders and obsolete backups locally

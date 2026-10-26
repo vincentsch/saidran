@@ -26,13 +26,13 @@ saidran ci --transcript session.jsonl --out reports --json
 
 ## Output
 
-Shows text you can read in your terminal.
+Prints text output by default.
 
-Use --json to get JSON for scripts and other programs.
+Use `--json` for JSON output.
 
 ## Preview changes
 
-This command makes changes. Use `--dry-run` to see what would change without changing anything.
+Use `--dry-run` to preview changes without applying them.
 
 ## Related commands
 

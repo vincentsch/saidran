@@ -8,10 +8,8 @@ summary; the HTML is uploaded as an artifact. It also creates or updates one
 The Action never invokes an agent or model. You can run the binary directly
 on Windows, but this Action and the Unix installer do not support Windows runners.
 
-Both the Action and local `saidran ci` need a repository with at least one
-commit. Immediately after `git init`, review and stage your files and make the
-first commit before running the check. An unborn branch exits 2 with guidance
-and writes no report.
+Both the Action and local `saidran ci` require at least one Git commit.
+An unborn branch exits 2 with guidance and writes no report.
 
 ## Diff-only quickstart
 

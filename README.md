@@ -5,12 +5,10 @@
   </picture>
 </p>
 
-Saidran is a free tool for people who write code with AI assistants like
-Claude Code or Codex. You run it in your terminal to compare the assistant's
-claims about tests with recorded results. Its report shows which checks need
-to run again after code changes.
+Saidran is a free, open-source CLI for developers using coding agents.
+It checks claims about tests and builds against session logs and later code changes.
 
-It also checks claims about builds and tools that look for code errors.
+It also checks lint and type-check claims.
 It flags skipped tests and disabled checks in the Git diff.
 
 [Website](https://www.saidran.com) · [Quickstart](docs/quickstart.md) · [FAQ](docs/faq.md) ·
@@ -59,9 +57,7 @@ stays in a temporary folder, which you can remove afterwards.
 
 ## Check your repository
 
-Run inside the repository your agent changed. The repository needs at least one
-commit; in a new project, review and stage your files and make the first commit
-before checking changes:
+Run in the Git repository your agent changed. It needs at least one commit:
 
 ```sh
 saidran

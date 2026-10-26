@@ -1,13 +1,11 @@
 # Install Saidran and check a session
 
-Saidran is a free tool for people who write code with AI assistants like
-Claude Code or Codex. You run it in your terminal to compare the assistant's
-claims about tests with recorded results. Its report shows which checks need
-to run again after code changes.
+Saidran is a free, open-source CLI for developers using coding agents.
+It checks test claims against session logs and later code changes.
 
-Release binaries need Git. They do not need Go or Node. You can read existing
-logs without installing the agent. Reports are made locally without network or
-model calls. Installation downloads release files.
+Release binaries require Git, but no Go or Node runtime. Reading existing logs
+does not require the agent to be installed. Reports use no network or model calls.
+Installation downloads release files.
 
 ## Install
 
@@ -19,10 +17,10 @@ bash /tmp/saidran-install.sh
 ```
 
 The installer verifies SHA-256 checksums and defaults to `~/.local/bin`.
-It prints `Installed: /absolute/path/to/saidran`. Keep that path: if the
-folder is not on PATH, use the absolute binary path for the commands below.
+It prints `Installed: /absolute/path/to/saidran`. Use that absolute path if
+the install directory is not on PATH.
 
-You can change the install settings with environment variables:
+Installer environment variables:
 
 | Variable | What it changes |
 | --- | --- |
@@ -55,16 +53,14 @@ its absolute path. Git must also be available on PATH.
 
 ### Install with Go
 
-With a Go toolchain, you can install from source:
+Install from source with Go:
 
 ```sh
 go install github.com/vincentsch/saidran/cmd/saidran@latest
 ```
 
 The binary goes into `go env GOBIN`, or `$(go env GOPATH)/bin` when GOBIN is
-empty. Go installation does not print the shell installer's `Installed:` line.
-Run `go env GOBIN GOPATH` to find the directory, then use the binary's absolute
-path if that directory is not on PATH.
+empty. Use its absolute path if that directory is not on PATH.
 
 ## Try the bundled demo
 
@@ -75,15 +71,13 @@ saidran demo
 The demo needs no agent history. It extracts a sanitised Claude Code recording
 and repository into a temporary folder. Its test passed before a later edit,
 which gives the claim a Stale verdict. The terminal prints the HTML report path
-and the temporary folder. You can delete that folder after viewing the report.
+and the temporary folder, which remains until you delete it.
 The [README screenshots](../README.md#install-and-try-the-demo) show this example.
 
 ## Check your repository
 
-Run inside the Git repository your agent changed. It must have at least one
-commit. For a new project, review and stage your files, then make the first
-commit with `git commit` before running Saidran. The tool compares against
-committed history and does not create that commit for you:
+Run in the Git repository your agent changed. Saidran compares against Git
+history, so the repository needs at least one commit:
 
 ```sh
 saidran
@@ -103,8 +97,8 @@ saidran --session claude:session-id
 saidran --transcript /absolute/path/to/session.jsonl
 ```
 
-Replace the example ID or path with your recording. Session references accept
-full IDs or unique prefixes; explicit transcripts bypass the seven-day limit.
+Session references accept full IDs or unique prefixes. Explicit transcripts
+bypass the seven-day limit.
 Do not combine `--session` and `--transcript`. See [supported log locations](agents.md)
 and the [selection flags](reference/saidran_check.md).
 If logs are missing or unsupported, run:
